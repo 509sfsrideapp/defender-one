@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,6 +13,7 @@ type Ride = {
   riderName?: string;
   riderPhone?: string;
   riderEmail?: string;
+  riderPhotoUrl?: string;
   pickup?: string;
   destination?: string;
   status?: string;
@@ -352,6 +354,14 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const riderPhone = ride?.riderPhone ?? null;
   const riderCallHref = riderPhone ? `tel:${riderPhone}` : null;
   const riderTextHref = riderPhone ? `sms:${riderPhone}` : null;
+  const statusActionLabel =
+    ride.status === "arrived" ? "Picked Up" : ride.status === "accepted" ? "I'm Here" : null;
+  const handleStatusAction =
+    ride.status === "arrived"
+      ? () => updateRideStage("picked_up")
+      : ride.status === "accepted"
+        ? () => updateRideStage("arrived")
+        : null;
 
   if (loading) {
     return (
@@ -411,55 +421,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
   return (
     <main style={{ padding: 20 }}>
-      <button
-        onClick={relaunchMaps}
-        style={{
-          padding: "8px 14px",
-          backgroundColor: "#0f766e",
-          color: "white",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-        }}
-      >
-        Open Maps
-      </button>
-
-      {riderCallHref ? (
-        <a
-          href={riderCallHref}
-          style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "8px 14px",
-            backgroundColor: "#1d4ed8",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 8,
-          }}
-        >
-          Call Rider
-        </a>
-      ) : null}
-
-      {riderTextHref ? (
-        <a
-          href={riderTextHref}
-          style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "8px 14px",
-            backgroundColor: "#0f766e",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 8,
-          }}
-        >
-          Text Rider
-        </a>
-      ) : null}
-
-      <h1 style={{ marginTop: 20 }}>Active Ride</h1>
+      <h1 style={{ marginTop: 20, textAlign: "center" }}>Active Ride</h1>
 
       <div
         style={{
@@ -468,33 +430,73 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           borderRadius: 12,
           backgroundColor: "rgba(9, 15, 25, 0.88)",
           color: "#e5edf7",
-          maxWidth: 560,
+          maxWidth: 640,
+          margin: "0 auto",
           boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
         }}
       >
-        <p>
-          <strong>Rider:</strong> {ride.riderName || "N/A"}
-        </p>
-        <p>
-          <strong>Phone:</strong> {ride.riderPhone || "N/A"}
-        </p>
-        <p>
-          <strong>Email:</strong> {ride.riderEmail || "N/A"}
-        </p>
-        <p>
-          <strong>Stage:</strong> {ride.status}
-        </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            marginBottom: 18,
+            flexWrap: "wrap",
+          }}
+        >
+          {ride.riderPhotoUrl ? (
+            <Image
+              src={ride.riderPhotoUrl}
+              alt={`${ride.riderName || "Rider"} profile`}
+              width={88}
+              height={88}
+              unoptimized
+              style={{
+                width: 88,
+                height: 88,
+                objectFit: "cover",
+                borderRadius: 999,
+                border: "1px solid rgba(96, 165, 250, 0.22)",
+                background: "linear-gradient(180deg, rgba(24,39,66,0.95) 0%, rgba(12,20,35,0.98) 100%)",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 88,
+                height: 88,
+                borderRadius: 999,
+                display: "grid",
+                placeItems: "center",
+                background: "linear-gradient(180deg, rgba(24,39,66,0.95) 0%, rgba(12,20,35,0.98) 100%)",
+                border: "1px solid rgba(96, 165, 250, 0.22)",
+                color: "#dbeafe",
+                fontSize: "1.8rem",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              {ride.riderName ? ride.riderName.charAt(0).toUpperCase() : "?"}
+            </div>
+          )}
+
+          <div style={{ flex: "1 1 240px" }}>
+            <p style={{ margin: 0, color: "#8ea1b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Rider
+            </p>
+            <p style={{ margin: "4px 0 0", fontSize: "2rem", lineHeight: 1.05, fontFamily: "var(--font-display)", color: "#f8fbff" }}>
+              {ride.riderName || "N/A"}
+            </p>
+            <p style={{ margin: "8px 0 0", color: "#cbd5e1" }}>
+              {ride.riderPhone || "No rider phone on file"}
+            </p>
+          </div>
+        </div>
+
         <p>
           <strong>Pickup:</strong> {ride.pickup || "N/A"}
         </p>
         <p>
           <strong>Destination:</strong> {ride.destination || "N/A"}
-        </p>
-        <p>
-          <strong>GPS:</strong>{" "}
-          {ride.riderLocation?.latitude != null && ride.riderLocation?.longitude != null
-            ? `${ride.riderLocation.latitude.toFixed(6)}, ${ride.riderLocation.longitude.toFixed(6)}`
-            : "Not shared"}
         </p>
         <p>
           <strong>Navigation:</strong>{" "}
@@ -512,57 +514,111 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <strong>Driver Location:</strong>{" "}
           {geolocationAvailable ? driverLocationStatus : "This browser cannot share live driver location."}
         </p>
-        {driverCoordinates ? (
-          <p>
-            <strong>Your GPS:</strong> {driverCoordinates.latitude.toFixed(6)},{" "}
-            {driverCoordinates.longitude.toFixed(6)}
-          </p>
-        ) : null}
       </div>
 
-      <div style={{ marginTop: 20 }}>
-        {ride.status === "accepted" ? (
-          <button
-            onClick={() => updateRideStage("arrived")}
-            style={{
-              padding: "10px 16px",
-              backgroundColor: "#b45309",
-              color: "white",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              marginRight: 12,
-            }}
-          >
-            I&apos;m Here
-          </button>
-        ) : null}
+      <div style={{ marginTop: 20, maxWidth: 640, marginInline: "auto" }}>
+        <button
+          onClick={relaunchMaps}
+          style={{
+            width: "100%",
+            padding: "16px 18px",
+            backgroundColor: "#0f766e",
+            color: "white",
+            border: "none",
+            borderRadius: 12,
+            cursor: "pointer",
+            fontSize: "1rem",
+          }}
+        >
+          Open Maps
+        </button>
+      </div>
 
-        {ride.status === "arrived" ? (
-          <button
-            onClick={() => updateRideStage("picked_up")}
+      <div
+        style={{
+          marginTop: 14,
+          maxWidth: 640,
+          marginInline: "auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: 12,
+        }}
+      >
+        {riderCallHref ? (
+          <a
+            href={riderCallHref}
             style={{
-              padding: "10px 16px",
+              display: "inline-block",
+              padding: "14px 16px",
               backgroundColor: "#1d4ed8",
               color: "white",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              marginRight: 12,
+              textDecoration: "none",
+              borderRadius: 10,
+              textAlign: "center",
             }}
           >
-            Picked Up
+            Call Rider
+          </a>
+        ) : (
+          <div />
+        )}
+
+        {riderTextHref ? (
+          <a
+            href={riderTextHref}
+            style={{
+              display: "inline-block",
+              padding: "14px 16px",
+              backgroundColor: "#0f766e",
+              color: "white",
+              textDecoration: "none",
+              borderRadius: 10,
+              textAlign: "center",
+            }}
+          >
+            Text Rider
+          </a>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      <div
+        style={{
+          marginTop: 14,
+          maxWidth: 640,
+          marginInline: "auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: 12,
+        }}
+      >
+        {statusActionLabel && handleStatusAction ? (
+          <button
+            onClick={handleStatusAction}
+            style={{
+              padding: "14px 16px",
+              backgroundColor: ride.status === "arrived" ? "#1d4ed8" : "#b45309",
+              color: "white",
+              border: "none",
+              borderRadius: 10,
+              cursor: "pointer",
+            }}
+          >
+            {statusActionLabel}
           </button>
-        ) : null}
+        ) : (
+          <div />
+        )}
 
         <button
           onClick={completeRide}
           style={{
-            padding: "10px 16px",
+            padding: "14px 16px",
             backgroundColor: "#7f1d1d",
             color: "white",
             border: "none",
-            borderRadius: 8,
+            borderRadius: 10,
             cursor: "pointer",
           }}
         >

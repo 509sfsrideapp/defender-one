@@ -20,6 +20,7 @@ type UserProfile = {
   email: string;
   homeAddress?: string;
   available: boolean;
+  driverPhotoUrl?: string;
 };
 
 export default function RequestPage() {
@@ -157,6 +158,7 @@ export default function RequestPage() {
         riderName: profile.name,
         riderPhone: profile.phone,
         riderEmail: profile.email,
+        riderPhotoUrl: profile.driverPhotoUrl || null,
         pickup: resolvedPickup,
         destination: resolvedDestination,
         riderLocation: coordinates,
