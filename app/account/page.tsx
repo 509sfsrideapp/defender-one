@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import { auth, db } from "../../lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, writeBatch } from "firebase/firestore";
+import { isValidUsername, normalizeUsername } from "../../lib/username";
 
 type UserProfile = {
   name?: string;
+  username?: string;
   phone?: string;
   email?: string;
   available?: boolean;
@@ -26,8 +28,10 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [originalUsername, setOriginalUsername] = useState("");
   const [form, setForm] = useState({
     name: "",
+    username: "",
     phone: "",
     email: "",
     rankOrRole: "",
@@ -53,6 +57,7 @@ export default function AccountPage() {
 
         setForm({
           name: data?.name || "",
+          username: data?.username || "",
           phone: data?.phone || "",
           email: data?.email || currentUser.email || "",
           rankOrRole: data?.rankOrRole || "",
@@ -62,6 +67,7 @@ export default function AccountPage() {
           carPlate: data?.carPlate || "",
           driverPhotoUrl: data?.driverPhotoUrl || "",
         });
+        setOriginalUsername(data?.username || "");
       } catch (error) {
         console.error(error);
         setStatusMessage("We could not load your account details.");
@@ -183,10 +189,33 @@ export default function AccountPage() {
       setSaving(true);
       setStatusMessage("Saving account details...");
 
-      await setDoc(
+      const normalizedUsername = normalizeUsername(form.username);
+      const previousUsername = normalizeUsername(originalUsername);
+
+      if (normalizedUsername && !isValidUsername(normalizedUsername)) {
+        setStatusMessage("Usernames must be 3-24 characters using letters, numbers, dots, dashes, or underscores.");
+        return;
+      }
+
+      if (normalizedUsername && normalizedUsername !== previousUsername) {
+        const usernameSnap = await getDoc(doc(db, "usernames", normalizedUsername));
+
+        if (usernameSnap.exists()) {
+          const usernameData = usernameSnap.data() as { uid?: string };
+
+          if (usernameData.uid !== user.uid) {
+            setStatusMessage("That username is already taken.");
+            return;
+          }
+        }
+      }
+
+      const batch = writeBatch(db);
+      batch.set(
         doc(db, "users", user.uid),
         {
           name: form.name.trim(),
+          username: normalizedUsername,
           phone: form.phone.trim(),
           email: form.email.trim(),
           rankOrRole: form.rankOrRole.trim(),
@@ -201,6 +230,22 @@ export default function AccountPage() {
         { merge: true }
       );
 
+      if (normalizedUsername) {
+        batch.set(doc(db, "usernames", normalizedUsername), {
+          uid: user.uid,
+          username: normalizedUsername,
+          email: user.email || form.email.trim(),
+          updatedAt: new Date(),
+        });
+      }
+
+      if (previousUsername && previousUsername !== normalizedUsername) {
+        batch.delete(doc(db, "usernames", previousUsername));
+      }
+
+      await batch.commit();
+
+      setOriginalUsername(normalizedUsername);
       setStatusMessage("Account details saved.");
     } catch (error) {
       console.error(error);
@@ -274,6 +319,7 @@ export default function AccountPage() {
       >
         <h2 style={{ marginTop: 0 }}>Basic Info</h2>
         <input value={form.name} onChange={(e) => handleChange("name", e.target.value)} placeholder="Full Name" style={{ marginBottom: 10 }} />
+        <input value={form.username} onChange={(e) => handleChange("username", e.target.value)} placeholder="Username" style={{ marginBottom: 10 }} />
         <input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="Phone Number" style={{ marginBottom: 10 }} />
         <input value={form.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Email" style={{ marginBottom: 10 }} />
         <input value={form.rankOrRole} onChange={(e) => handleChange("rankOrRole", e.target.value)} placeholder="Rank or role (optional)" style={{ marginBottom: 10 }} />

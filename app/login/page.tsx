@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { auth } from "../../lib/firebase";
+import { auth, db } from "../../lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { looksLikeEmail, normalizeUsername } from "../../lib/username";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [ready, setReady] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("Enter your email and password.");
+  const [statusMessage, setStatusMessage] = useState("Enter your username or email and password.");
 
   useEffect(() => {
     setReady(true);
-    setStatusMessage("Enter your email and password.");
+    setStatusMessage("Enter your username or email and password.");
   }, []);
 
   const handleLogin = async () => {
@@ -23,15 +25,35 @@ export default function LoginPage() {
       return;
     }
 
-    if (!email.trim() || !password.trim()) {
-      setStatusMessage("Enter email and password.");
+    if (!identifier.trim() || !password.trim()) {
+      setStatusMessage("Enter your username or email and password.");
       return;
     }
 
     try {
       setSubmitting(true);
       setStatusMessage("Signing in...");
-      await signInWithEmailAndPassword(auth, email, password);
+      let loginEmail = identifier.trim();
+
+      if (!looksLikeEmail(loginEmail)) {
+        const usernameSnap = await getDoc(doc(db, "usernames", normalizeUsername(loginEmail)));
+
+        if (!usernameSnap.exists()) {
+          setStatusMessage("No account was found for that username.");
+          return;
+        }
+
+        const usernameData = usernameSnap.data() as { email?: string };
+
+        if (!usernameData.email) {
+          setStatusMessage("That username is not set up correctly yet.");
+          return;
+        }
+
+        loginEmail = usernameData.email;
+      }
+
+      await signInWithEmailAndPassword(auth, loginEmail, password);
       setStatusMessage("Login successful. Redirecting...");
       window.location.href = "/";
     } catch (error) {
@@ -78,9 +100,9 @@ export default function LoginPage() {
         ) : null}
 
         <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+          placeholder="Username or Email"
           style={{ display: "block", marginBottom: 10, padding: 8, width: "100%" }}
         />
 
