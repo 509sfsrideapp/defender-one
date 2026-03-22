@@ -18,6 +18,7 @@ type UserProfile = {
   homeAddress?: string;
   available?: boolean;
   rankOrRole?: string;
+  riderPhotoUrl?: string;
   carYear?: string;
   carMake?: string;
   carModel?: string;
@@ -42,6 +43,7 @@ export default function AccountPage() {
     email: "",
     homeAddress: "",
     rankOrRole: "",
+    riderPhotoUrl: "",
     carYear: "",
     carMake: "",
     carModel: "",
@@ -70,6 +72,7 @@ export default function AccountPage() {
           email: data?.email || currentUser.email || "",
           homeAddress: data?.homeAddress || "",
           rankOrRole: data?.rankOrRole || "",
+          riderPhotoUrl: data?.riderPhotoUrl || data?.driverPhotoUrl || "",
           carYear: data?.carYear || "",
           carMake: data?.carMake || "",
           carModel: data?.carModel || "",
@@ -165,7 +168,8 @@ export default function AccountPage() {
     return compressed;
   };
 
-  const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload =
+    (field: "riderPhotoUrl" | "driverPhotoUrl") => async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -186,7 +190,7 @@ export default function AccountPage() {
 
       const compressedPhoto = await shrinkImage(file);
 
-      setForm((prev) => ({ ...prev, driverPhotoUrl: compressedPhoto }));
+      setForm((prev) => ({ ...prev, [field]: compressedPhoto }));
       setStatusMessage("Profile photo is ready. Save account details to keep it.");
     } catch (error) {
       console.error(error);
@@ -243,6 +247,7 @@ export default function AccountPage() {
           email: form.email.trim(),
           homeAddress: form.homeAddress.trim(),
           rankOrRole: form.rankOrRole.trim(),
+          riderPhotoUrl: form.riderPhotoUrl.trim(),
           carYear: form.carYear.trim(),
           carMake: form.carMake.trim(),
           carModel: form.carModel.trim(),
@@ -329,8 +334,8 @@ export default function AccountPage() {
 
       <h1>Account Details</h1>
       <p style={{ maxWidth: 640 }}>
-        Update your rider details here. Driver-facing profile fields are included too, so later we can show your
-        photo and car information to riders automatically.
+        Update your basic info here, then keep your rider and driver profiles separate so the app shows the right
+        photo and vehicle details in the right places.
       </p>
 
       {statusMessage ? <p style={{ marginTop: 12 }}>{statusMessage}</p> : null}
@@ -354,16 +359,16 @@ export default function AccountPage() {
         <input value={form.homeAddress} onChange={(e) => handleChange("homeAddress", e.target.value)} placeholder="Home Address" style={{ marginBottom: 10 }} />
         <input value={form.rankOrRole} onChange={(e) => handleChange("rankOrRole", e.target.value)} placeholder="Rank or role (optional)" style={{ marginBottom: 10 }} />
 
-        <h2 style={{ marginTop: 24 }}>Driver Profile</h2>
+        <h2 style={{ marginTop: 24 }}>Rider Profile</h2>
         <div style={{ marginBottom: 14 }}>
           <p style={{ marginBottom: 10 }}>
-            <strong>Profile Photo</strong>
+            <strong>Rider Photo</strong>
           </p>
 
-          {form.driverPhotoUrl ? (
+          {form.riderPhotoUrl ? (
             <Image
-              src={form.driverPhotoUrl}
-              alt="Profile preview"
+              src={form.riderPhotoUrl}
+              alt="Rider profile preview"
               width={104}
               height={104}
               unoptimized
@@ -398,7 +403,64 @@ export default function AccountPage() {
           <input
             type="file"
             accept="image/*"
-            onChange={handlePhotoUpload}
+            onChange={handlePhotoUpload("riderPhotoUrl")}
+            disabled={uploadingPhoto}
+            style={{ marginBottom: 10 }}
+          />
+        </div>
+
+        <input
+          value={form.riderPhotoUrl}
+          onChange={(e) => handleChange("riderPhotoUrl", e.target.value)}
+          placeholder="Rider photo URL or leave your uploaded photo"
+          style={{ marginBottom: 10 }}
+        />
+
+        <h2 style={{ marginTop: 24 }}>Driver Profile</h2>
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ marginBottom: 10 }}>
+            <strong>Driver Photo</strong>
+          </p>
+
+          {form.driverPhotoUrl ? (
+            <Image
+              src={form.driverPhotoUrl}
+              alt="Driver profile preview"
+              width={104}
+              height={104}
+              unoptimized
+              style={{
+                objectFit: "cover",
+                borderRadius: 999,
+                border: "1px solid rgba(148, 163, 184, 0.22)",
+                display: "block",
+                marginBottom: 12,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 104,
+                height: 104,
+                borderRadius: 999,
+                display: "grid",
+                placeItems: "center",
+                marginBottom: 12,
+                backgroundColor: "rgba(18, 37, 63, 0.72)",
+                color: "#dbeafe",
+                border: "1px solid rgba(96, 165, 250, 0.2)",
+                fontFamily: "var(--font-display)",
+                fontSize: "1.5rem",
+              }}
+            >
+              {form.name ? form.name.charAt(0).toUpperCase() : "?"}
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload("driverPhotoUrl")}
             disabled={uploadingPhoto}
             style={{ marginBottom: 10 }}
           />

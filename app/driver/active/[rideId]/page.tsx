@@ -51,6 +51,7 @@ type DriverProfile = {
 };
 
 type RiderProfile = {
+  riderPhotoUrl?: string;
   driverPhotoUrl?: string;
 };
 
@@ -215,10 +216,12 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
         const riderProfile = riderSnap.data() as RiderProfile;
 
-        if (!riderProfile.driverPhotoUrl) return;
+        const riderPhotoUrl = riderProfile.riderPhotoUrl || riderProfile.driverPhotoUrl;
+
+        if (!riderPhotoUrl) return;
 
         await updateDoc(doc(db, "rides", ride.id), {
-          riderPhotoUrl: riderProfile.driverPhotoUrl,
+          riderPhotoUrl,
         });
       } catch (error) {
         console.error(error);
