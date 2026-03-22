@@ -160,6 +160,7 @@ export default function RequestPage() {
       return;
     }
 
+    const resolvedPickup = pickup.trim() || (coordinates ? "Current GPS location" : "");
     const resolvedDestination = destination.trim() || profile.homeAddress?.trim() || "";
 
     if (!resolvedPickup) {
@@ -175,7 +176,7 @@ export default function RequestPage() {
     try {
       setSubmitting(true);
       const geocodedPickup = coordinates ? await resolvePickupLocation(coordinates).catch(() => null) : null;
-      const resolvedPickup =
+      const resolvedPickupLabel =
         pickup.trim() ||
         geocodedPickup?.placeName ||
         geocodedPickup?.address ||
@@ -188,7 +189,7 @@ export default function RequestPage() {
         riderPhone: profile.phone,
         riderEmail: profile.email,
         riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
-        pickup: resolvedPickup,
+        pickup: resolvedPickupLabel,
         pickupLocationName: geocodedPickup?.placeName || null,
         pickupLocationAddress: geocodedPickup?.address || geocodedPickup?.display || null,
         destination: resolvedDestination,
