@@ -27,7 +27,17 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <NotificationNavigationBridge />
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer
+          style={{
+            padding: "10px 16px 14px",
+            fontSize: 12,
+            color: "#94a3b8",
+            textAlign: "center",
+          }}
+        >
+          Version 32
+        </footer>
       </body>
     </html>
   );

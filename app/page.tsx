@@ -151,7 +151,7 @@ export default function HomePage() {
 
   return (
     <main style={{ padding: 20 }}>
-      <h1>Squadron Ride App</h1>
+      <h1>Defender Drivers</h1>
       {checkingAuth ? <p>Checking sign-in status...</p> : null}
       {authWarning ? (
         <p style={{ color: "#b45309", maxWidth: 560 }}>{authWarning}</p>

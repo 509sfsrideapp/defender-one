@@ -143,7 +143,7 @@ export async function attachForegroundNotificationListener(onForegroundNotificat
   }
 
   return onMessage(messaging, (payload) => {
-    const title = payload.notification?.title || "Squadron Rides";
+    const title = payload.notification?.title || "Defender Drivers";
     const body = payload.notification?.body || "You have a new update.";
 
     if (document.visibilityState === "visible" && Notification.permission === "granted") {
