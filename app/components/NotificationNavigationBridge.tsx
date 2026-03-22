@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 type ServiceWorkerMessage = {
@@ -26,15 +26,20 @@ function normalizeTarget(target: string | null) {
 export default function NotificationNavigationBridge() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const requestedTarget = normalizeTarget(searchParams.get("notificationTarget"));
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const requestedTarget = normalizeTarget(
+      new URLSearchParams(window.location.search).get("notificationTarget")
+    );
 
     if (requestedTarget && requestedTarget !== pathname) {
       router.replace(requestedTarget);
     }
-  }, [pathname, router, searchParams]);
+  }, [pathname, router]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) {
