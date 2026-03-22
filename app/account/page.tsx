@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { auth, db } from "../../lib/firebase";
+import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { isValidUsername, normalizeUsername } from "../../lib/username";
@@ -24,12 +26,14 @@ type UserProfile = {
 };
 
 export default function AccountPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [originalUsername, setOriginalUsername] = useState("");
+  const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -81,6 +85,19 @@ export default function AccountPage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user || activeRideLoading) return;
+
+    if (driverActiveRide) {
+      router.replace(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
+    }
+  }, [activeRideLoading, driverActiveRide, riderActiveRide, router, user]);
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -283,6 +300,10 @@ export default function AccountPage() {
         <p>You need to log in first.</p>
       </main>
     );
+  }
+
+  if (driverActiveRide || riderActiveRide) {
+    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
   }
 
   return (

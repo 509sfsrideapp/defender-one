@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
 import { isAdminEmail } from "../lib/admin";
+import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 
@@ -17,12 +19,13 @@ type UserProfile = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authWarning, setAuthWarning] = useState("");
-  const [hasActiveRide, setHasActiveRide] = useState(false);
   const [hasRideHistory, setHasRideHistory] = useState(false);
+  const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -45,7 +48,6 @@ export default function HomePage() {
           }
         } else {
           setProfile(null);
-          setHasActiveRide(false);
         }
       } catch (error) {
         console.error(error);
@@ -67,15 +69,26 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (!user || activeRideLoading) return;
+
+    if (driverActiveRide) {
+      router.replace(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
+    }
+  }, [activeRideLoading, driverActiveRide, riderActiveRide, router, user]);
+
+  useEffect(() => {
     if (!user) return;
 
     const activeRideQuery = query(collection(db, "rides"), where("riderId", "==", user.uid));
     const unsubscribe = onSnapshot(activeRideQuery, (snapshot) => {
       const statuses = snapshot.docs.map((docSnap) => docSnap.data().status);
-      const hasRide = statuses.some((status) => status === "open" || status === "accepted" || status === "arrived" || status === "picked_up");
       const hasHistory = statuses.some((status) => status === "completed" || status === "canceled");
 
-      setHasActiveRide(hasRide);
       setHasRideHistory(hasHistory);
     });
 
@@ -85,6 +98,16 @@ export default function HomePage() {
   const handleClockIn = async () => {
     if (!user) {
       alert("Log in first");
+      return;
+    }
+
+    if (driverActiveRide) {
+      router.replace(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
       return;
     }
 
@@ -186,11 +209,21 @@ export default function HomePage() {
         </div>
       ) : (
         <div style={{ marginTop: 20 }}>
+          {activeRideLoading ? <p>Checking for active rides...</p> : null}
           <p><strong>Logged in as:</strong> {profile?.name || user.email}</p>
           <p><strong>Phone:</strong> {profile?.phone || "N/A"}</p>
           <p><strong>Status:</strong> {profile?.available ? "Clocked In" : "Clocked Out"}</p>
 
-          <div style={{ marginTop: 20 }}>
+          {driverActiveRide ? (
+            <p style={{ maxWidth: 560 }}>You already accepted an active ride. Redirecting to the driver active ride page.</p>
+          ) : null}
+
+          {!driverActiveRide && riderActiveRide ? (
+            <p style={{ maxWidth: 560 }}>You already have an active ride request. Redirecting to ride status.</p>
+          ) : null}
+
+          {!driverActiveRide && !riderActiveRide ? (
+            <div style={{ marginTop: 20 }}>
             <Link
               href="/account"
               style={{
@@ -204,9 +237,11 @@ export default function HomePage() {
             >
               Account Details
             </Link>
-          </div>
+            </div>
+          ) : null}
 
-          <div style={{ marginTop: 20 }}>
+          {!driverActiveRide && !riderActiveRide ? (
+            <div style={{ marginTop: 20 }}>
             <Link
               href="/request"
               style={{
@@ -220,9 +255,10 @@ export default function HomePage() {
             >
               Request Ride
             </Link>
-          </div>
+            </div>
+          ) : null}
 
-          {hasActiveRide ? (
+          {riderActiveRide ? (
             <div style={{ marginTop: 20 }}>
               <Link
                 href="/ride-status"
@@ -258,7 +294,8 @@ export default function HomePage() {
             </div>
           ) : null}
 
-          <div style={{ marginTop: 20 }}>
+          {!driverActiveRide && !riderActiveRide ? (
+            <div style={{ marginTop: 20 }}>
             {!profile?.available ? (
               <button
                 onClick={handleClockIn}
@@ -305,9 +342,11 @@ export default function HomePage() {
                 </button>
               </>
             )}
-          </div>
+            </div>
+          ) : null}
 
-          <div style={{ marginTop: 20 }}>
+          {!driverActiveRide && !riderActiveRide ? (
+            <div style={{ marginTop: 20 }}>
             <button
               onClick={handleLogout}
               style={{
@@ -321,9 +360,10 @@ export default function HomePage() {
             >
               Logout
             </button>
-          </div>
+            </div>
+          ) : null}
 
-          {isAdminEmail(user.email) ? (
+          {isAdminEmail(user.email) && !driverActiveRide && !riderActiveRide ? (
             <div style={{ marginTop: 20 }}>
               <Link
                 href="/admin"

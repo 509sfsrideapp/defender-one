@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { auth, db } from "../../../lib/firebase";
+import { useActiveRides } from "../../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 
@@ -16,9 +18,11 @@ type Ride = {
 };
 
 export default function DriverHistoryPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
+  const { driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -30,6 +34,12 @@ export default function DriverHistoryPage() {
 
     return () => unsubscribeAuth();
   }, []);
+
+  useEffect(() => {
+    if (!user || activeRideLoading || !driverActiveRide) return;
+
+    router.replace(`/driver/active/${driverActiveRide.id}`);
+  }, [activeRideLoading, driverActiveRide, router, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -53,6 +63,10 @@ export default function DriverHistoryPage() {
 
   if (loading) {
     return <main style={{ padding: 20 }}><p>Loading driver history...</p></main>;
+  }
+
+  if (driverActiveRide) {
+    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
   }
 
   return (

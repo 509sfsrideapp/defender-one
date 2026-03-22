@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { auth, db } from "../../lib/firebase";
+import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 
@@ -16,9 +18,11 @@ type Ride = {
 };
 
 export default function RiderHistoryPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
+  const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -30,6 +34,19 @@ export default function RiderHistoryPage() {
 
     return () => unsubscribeAuth();
   }, []);
+
+  useEffect(() => {
+    if (!user || activeRideLoading) return;
+
+    if (driverActiveRide) {
+      router.replace(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
+    }
+  }, [activeRideLoading, driverActiveRide, riderActiveRide, router, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -53,6 +70,10 @@ export default function RiderHistoryPage() {
 
   if (loading) {
     return <main style={{ padding: 20 }}><p>Loading ride history...</p></main>;
+  }
+
+  if (driverActiveRide || riderActiveRide) {
+    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
   }
 
   return (

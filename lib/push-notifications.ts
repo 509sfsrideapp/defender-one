@@ -112,7 +112,10 @@ export async function enablePushNotifications() {
     throw new Error("Notification permission was not granted.");
   }
 
-  const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+    updateViaCache: "none",
+  });
+  await registration.update();
   const messaging = await getMessagingInstance();
 
   if (!messaging) {

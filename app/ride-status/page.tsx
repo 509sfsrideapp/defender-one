@@ -190,21 +190,23 @@ export default function RideStatusPage() {
 
   return (
     <main style={{ padding: 20 }}>
-      <Link
-        href="/"
-        style={{
-          display: "inline-block",
-          marginBottom: 20,
-          padding: "8px 14px",
-          backgroundColor: "#1f2937",
-          color: "white",
-          textDecoration: "none",
-          borderRadius: 8,
-          marginRight: 12,
-        }}
-      >
-        Home
-      </Link>
+      {!activeRide ? (
+        <Link
+          href="/"
+          style={{
+            display: "inline-block",
+            marginBottom: 20,
+            padding: "8px 14px",
+            backgroundColor: "#1f2937",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+            marginRight: 12,
+          }}
+        >
+          Home
+        </Link>
+      ) : null}
 
       <h1>Ride Status</h1>
 
@@ -408,22 +410,6 @@ export default function RideStatusPage() {
           </div>
 
           <LiveRideMap riderLocation={riderLocation} driverLocation={driverLocation} />
-
-          <div style={{ marginTop: 20 }}>
-            <Link
-              href="/history"
-              style={{
-                display: "inline-block",
-                padding: "10px 16px",
-                backgroundColor: "#111827",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: 8,
-              }}
-            >
-              View Ride History
-            </Link>
-          </div>
         </>
       )}
     </main>

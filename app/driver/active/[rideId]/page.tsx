@@ -408,22 +408,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
   return (
     <main style={{ padding: 20 }}>
-      <Link
-        href="/driver"
-        style={{
-          display: "inline-block",
-          marginBottom: 20,
-          padding: "8px 14px",
-          backgroundColor: "#1f2937",
-          color: "white",
-          textDecoration: "none",
-          borderRadius: 8,
-          marginRight: 12,
-        }}
-      >
-        Back to Driver Dashboard
-      </Link>
-
       <button
         onClick={relaunchMaps}
         style={{

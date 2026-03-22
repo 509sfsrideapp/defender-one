@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../lib/firebase";
+import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, addDoc, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 
 type Coordinates = {
   latitude: number;
@@ -21,28 +22,17 @@ type UserProfile = {
   available: boolean;
 };
 
-type ActiveRide = {
-  id: string;
-  status?: string;
-  createdAt?: {
-    seconds?: number;
-    nanoseconds?: number;
-  };
-};
-
-const ACTIVE_RIDE_STATUSES = ["open", "accepted", "arrived", "picked_up"] as const;
-
 export default function RequestPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [activeRide, setActiveRide] = useState<ActiveRide | null>(null);
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [locationStatus, setLocationStatus] = useState("Detecting your current location...");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -64,28 +54,17 @@ export default function RequestPage() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || activeRideLoading) return;
 
-    const ridesQuery = query(collection(db, "rides"), where("riderId", "==", user.uid));
-    const unsubscribe = onSnapshot(ridesQuery, (snapshot) => {
-      const currentRide =
-        snapshot.docs
-          .map((docSnap) => ({
-            id: docSnap.id,
-            ...(docSnap.data() as Omit<ActiveRide, "id">),
-          }))
-          .filter((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]))
-          .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))[0] ?? null;
+    if (driverActiveRide) {
+      router.replace(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
 
-      setActiveRide(currentRide);
-
-      if (currentRide) {
-        router.replace(`/ride-status?rideId=${currentRide.id}`);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router, user]);
+    if (riderActiveRide) {
+      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
+    }
+  }, [activeRideLoading, driverActiveRide, riderActiveRide, router, user]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("geolocation" in navigator)) {
@@ -147,8 +126,13 @@ export default function RequestPage() {
       return;
     }
 
-    if (activeRide) {
-      router.push(`/ride-status?rideId=${activeRide.id}`);
+    if (driverActiveRide) {
+      router.push(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.push(`/ride-status?rideId=${riderActiveRide.id}`);
       return;
     }
 
@@ -246,7 +230,9 @@ export default function RequestPage() {
 
       {!user || !profile ? (
         <p>You need to log in first.</p>
-      ) : activeRide ? (
+      ) : driverActiveRide ? (
+        <p>You already accepted a driver ride. Redirecting to the active driver screen...</p>
+      ) : riderActiveRide ? (
         <p>You already have an active ride. Redirecting to ride status...</p>
       ) : (
         <>

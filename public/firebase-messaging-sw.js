@@ -25,21 +25,41 @@ messaging.onBackgroundMessage((payload) => {
   });
 });
 
+function buildNotificationLaunchUrl(target) {
+  const launchUrl = new URL("/", self.location.origin);
+  launchUrl.searchParams.set("notificationTarget", target);
+  return launchUrl.toString();
+}
+
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const target = new URL(event.notification.data?.link || "/", self.location.origin).toString();
+  const launchUrl = buildNotificationLaunchUrl(target);
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
+        client.postMessage({
+          type: "OPEN_NOTIFICATION_TARGET",
+          target,
+        });
+
         if ("focus" in client) {
-          client.navigate(target);
+          client.navigate(launchUrl);
           return client.focus();
         }
       }
 
       if (clients.openWindow) {
-        return clients.openWindow(target);
+        return clients.openWindow(launchUrl);
       }
 
       return undefined;
