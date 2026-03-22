@@ -5,6 +5,7 @@ import Link from "next/link";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../../../lib/firebase";
+import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 
@@ -36,6 +37,30 @@ type Ride = {
   } | null;
   driverPhone?: string;
   riderId?: string;
+  createdAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  acceptedAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  arrivedAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  pickedUpAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  completedAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  canceledAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
 };
 
 type DriverProfile = {
@@ -216,7 +241,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
         const riderProfile = riderSnap.data() as RiderProfile;
 
-        const riderPhotoUrl = riderProfile.riderPhotoUrl || riderProfile.driverPhotoUrl;
+        const riderPhotoUrl = riderProfile.driverPhotoUrl || riderProfile.riderPhotoUrl;
 
         if (!riderPhotoUrl) return;
 
@@ -232,6 +257,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   }, [ride, user]);
 
   const mapsUrl = useMemo(() => (ride ? buildMapsUrl(ride, userAgent) : null), [ride, userAgent]);
+  const lifecycleSteps = useMemo(() => (ride ? getRideLifecycleSteps(ride) : []), [ride]);
 
   useEffect(() => {
     if (!ride || !mapsUrl || !isMobileDevice) return;
@@ -525,6 +551,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
         </div>
 
         <p>
+          <strong>Status:</strong> {getRideStatusLabel(ride.status)}
+        </p>
+        <p>
           <strong>Pickup:</strong> {ride.pickup || "N/A"}
         </p>
         <p>
@@ -546,6 +575,42 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <strong>Driver Location:</strong>{" "}
           {geolocationAvailable ? driverLocationStatus : "This browser cannot share live driver location."}
         </p>
+
+        <div
+          style={{
+            marginTop: 18,
+            padding: 16,
+            borderRadius: 14,
+            backgroundColor: "rgba(18, 37, 63, 0.4)",
+            border: "1px solid rgba(96, 165, 250, 0.12)",
+          }}
+        >
+          <p style={{ margin: 0, fontSize: "0.95rem", color: "#93c5fd", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Ride Timeline
+          </p>
+          <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+            {lifecycleSteps
+              .filter((step) => step.complete || step.current)
+              .map((step) => (
+                <div
+                  key={step.key}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(15, 23, 42, 0.68)",
+                    border: step.current
+                      ? "1px solid rgba(45, 212, 191, 0.3)"
+                      : "1px solid rgba(148, 163, 184, 0.14)",
+                  }}
+                >
+                  <strong>{step.label}</strong>
+                  <span style={{ marginLeft: 8, color: "#cbd5e1" }}>
+                    {step.at ? formatRideTimestamp(step.at) : "In progress"}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
 
       <div style={{ marginTop: 20, maxWidth: 640, marginInline: "auto" }}>

@@ -159,7 +159,7 @@ export default function RequestPage() {
         riderName: profile.name,
         riderPhone: profile.phone,
         riderEmail: profile.email,
-        riderPhotoUrl: profile.riderPhotoUrl || profile.driverPhotoUrl || null,
+        riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
         pickup: resolvedPickup,
         destination: resolvedDestination,
         riderLocation: coordinates,
