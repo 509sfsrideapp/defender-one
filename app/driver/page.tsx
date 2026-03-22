@@ -34,6 +34,8 @@ type Ride = {
   } | null;
 };
 
+const ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
+
 type UserProfile = {
   name: string;
   phone: string;
@@ -84,17 +86,15 @@ export default function DriverPage() {
   useEffect(() => {
     if (!user) return;
 
-    const q = query(
-      collection(db, "rides"),
-      where("status", "==", "accepted"),
-      where("acceptedBy", "==", user.uid)
-    );
+    const q = query(collection(db, "rides"), where("acceptedBy", "==", user.uid));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const rideList: Ride[] = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<Ride, "id">),
-      }));
+      const rideList: Ride[] = snapshot.docs
+        .map((docSnap) => ({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<Ride, "id">),
+        }))
+        .filter((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]));
       setAcceptedRides(rideList);
     });
 
@@ -246,6 +246,9 @@ export default function DriverPage() {
               </p>
               <p>
                 <strong>Phone:</strong> {ride.riderPhone || "N/A"}
+              </p>
+              <p>
+                <strong>Stage:</strong> {ride.status}
               </p>
               <p>
                 <strong>Pickup:</strong> {ride.pickup}

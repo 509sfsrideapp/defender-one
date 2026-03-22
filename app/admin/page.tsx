@@ -141,6 +141,8 @@ export default function AdminPage() {
 
   const openRides = rides.filter((ride) => ride.status === "open");
   const acceptedRides = rides.filter((ride) => ride.status === "accepted");
+  const arrivedRides = rides.filter((ride) => ride.status === "arrived");
+  const pickedUpRides = rides.filter((ride) => ride.status === "picked_up");
   const completedRides = rides.filter((ride) => ride.status === "completed");
   const availableDrivers = users.filter((appUser) => appUser.available);
 
@@ -194,6 +196,12 @@ export default function AdminPage() {
         </div>
         <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#ede9fe", color: "#4c1d95" }}>
           <strong>Accepted Rides:</strong> {acceptedRides.length}
+        </div>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#ffedd5", color: "#9a3412" }}>
+          <strong>Arrived:</strong> {arrivedRides.length}
+        </div>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#dbeafe", color: "#1d4ed8" }}>
+          <strong>Picked Up:</strong> {pickedUpRides.length}
         </div>
         <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#f3f4f6", color: "#111827" }}>
           <strong>Completed Rides:</strong> {completedRides.length}

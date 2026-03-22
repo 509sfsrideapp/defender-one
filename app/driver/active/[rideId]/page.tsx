@@ -31,6 +31,8 @@ type Coordinates = {
   longitude: number;
 };
 
+const ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
+
 function buildMapsUrl(ride: Ride, userAgent: string) {
   const latitude = ride.riderLocation?.latitude;
   const longitude = ride.riderLocation?.longitude;
@@ -140,7 +142,12 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   }, [isMobileDevice, mapsUrl, ride]);
 
   useEffect(() => {
-    if (!user || !ride || ride.status !== "accepted" || ride.acceptedBy !== user.uid) {
+    if (
+      !user ||
+      !ride ||
+      !ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]) ||
+      ride.acceptedBy !== user.uid
+    ) {
       return;
     }
 
@@ -198,6 +205,28 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
     };
   }, [geolocationAvailable, ride, user]);
 
+  const updateRideStage = async (status: "arrived" | "picked_up") => {
+    if (!ride) return;
+
+    const updates =
+      status === "arrived"
+        ? {
+            status,
+            arrivedAt: new Date(),
+          }
+        : {
+            status,
+            pickedUpAt: new Date(),
+          };
+
+    try {
+      await updateDoc(doc(db, "rides", ride.id), updates);
+    } catch (error) {
+      console.error(error);
+      alert(`Error updating ride to ${status}.`);
+    }
+  };
+
   const completeRide = async () => {
     if (!ride) return;
 
@@ -254,7 +283,11 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
     );
   }
 
-  if (!ride || ride.status !== "accepted" || ride.acceptedBy !== user.uid) {
+  if (
+    !ride ||
+    !ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]) ||
+    ride.acceptedBy !== user.uid
+  ) {
     return (
       <main style={{ padding: 20 }}>
         <Link
@@ -330,6 +363,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <strong>Email:</strong> {ride.riderEmail || "N/A"}
         </p>
         <p>
+          <strong>Stage:</strong> {ride.status}
+        </p>
+        <p>
           <strong>Pickup:</strong> {ride.pickup || "N/A"}
         </p>
         <p>
@@ -362,6 +398,40 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
       </div>
 
       <div style={{ marginTop: 20 }}>
+        {ride.status === "accepted" ? (
+          <button
+            onClick={() => updateRideStage("arrived")}
+            style={{
+              padding: "10px 16px",
+              backgroundColor: "#b45309",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+              marginRight: 12,
+            }}
+          >
+            I&apos;m Here
+          </button>
+        ) : null}
+
+        {ride.status === "arrived" ? (
+          <button
+            onClick={() => updateRideStage("picked_up")}
+            style={{
+              padding: "10px 16px",
+              backgroundColor: "#1d4ed8",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+              marginRight: 12,
+            }}
+          >
+            Picked Up
+          </button>
+        ) : null}
+
         <button
           onClick={completeRide}
           style={{
