@@ -3,12 +3,17 @@ import NotificationNavigationBridge from "./components/NotificationNavigationBri
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "509 SFS Rides",
-  description: "Request and manage squadron rides from any device.",
+  title: "Defender Drivers",
+  description: "Request and manage squadron rides with Defender Drivers.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   appleWebApp: {
     capable: true,
-    title: "509 SFS Rides",
+    title: "Defender Drivers",
     statusBarStyle: "black-translucent",
   },
 };
