@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { auth, db } from "../../lib/firebase";
+import { ChangeEvent, useEffect, useState } from "react";
+import { auth, db, storage } from "../../lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 type UserProfile = {
   name?: string;
@@ -23,6 +25,7 @@ export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [form, setForm] = useState({
     name: "",
@@ -73,6 +76,43 @@ export default function AccountPage() {
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!user) {
+      setStatusMessage("You need to log in first.");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setStatusMessage("Please choose an image file.");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      setStatusMessage("Uploading profile photo...");
+
+      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+      const fileRef = ref(storage, `profile-photos/${user.uid}/profile.${extension}`);
+      await uploadBytes(fileRef, file, {
+        contentType: file.type,
+      });
+      const downloadUrl = await getDownloadURL(fileRef);
+
+      setForm((prev) => ({ ...prev, driverPhotoUrl: downloadUrl }));
+      setStatusMessage("Profile photo uploaded. Save account details to keep it.");
+    } catch (error) {
+      console.error(error);
+      setStatusMessage("Could not upload the profile photo.");
+    } finally {
+      setUploadingPhoto(false);
+      event.target.value = "";
+    }
   };
 
   const handleSave = async () => {
@@ -186,13 +226,62 @@ export default function AccountPage() {
         <input value={form.rankOrRole} onChange={(e) => handleChange("rankOrRole", e.target.value)} placeholder="Rank or role (optional)" style={{ marginBottom: 10 }} />
 
         <h2 style={{ marginTop: 24 }}>Driver Profile</h2>
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ marginBottom: 10 }}>
+            <strong>Profile Photo</strong>
+          </p>
+
+          {form.driverPhotoUrl ? (
+            <Image
+              src={form.driverPhotoUrl}
+              alt="Profile preview"
+              width={104}
+              height={104}
+              unoptimized
+              style={{
+                objectFit: "cover",
+                borderRadius: 999,
+                border: "1px solid rgba(148, 163, 184, 0.22)",
+                display: "block",
+                marginBottom: 12,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 104,
+                height: 104,
+                borderRadius: 999,
+                display: "grid",
+                placeItems: "center",
+                marginBottom: 12,
+                backgroundColor: "rgba(18, 37, 63, 0.72)",
+                color: "#dbeafe",
+                border: "1px solid rgba(96, 165, 250, 0.2)",
+                fontFamily: "var(--font-display)",
+                fontSize: "1.5rem",
+              }}
+            >
+              {form.name ? form.name.charAt(0).toUpperCase() : "?"}
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            disabled={uploadingPhoto}
+            style={{ marginBottom: 10 }}
+          />
+        </div>
+
         <input value={form.carMake} onChange={(e) => handleChange("carMake", e.target.value)} placeholder="Car make (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.driverPhotoUrl} onChange={(e) => handleChange("driverPhotoUrl", e.target.value)} placeholder="Driver photo URL (optional for now)" style={{ marginBottom: 10 }} />
+        <input value={form.driverPhotoUrl} onChange={(e) => handleChange("driverPhotoUrl", e.target.value)} placeholder="Driver photo URL" style={{ marginBottom: 10 }} />
 
-        <button type="button" onClick={handleSave} disabled={saving}>
+        <button type="button" onClick={handleSave} disabled={saving || uploadingPhoto}>
           Save Account Details
         </button>
       </div>
