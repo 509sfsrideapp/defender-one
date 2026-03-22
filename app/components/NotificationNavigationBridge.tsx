@@ -46,7 +46,7 @@ export default function NotificationNavigationBridge() {
         return;
       }
 
-      const target = normalizeTarget(event.data.target);
+      const target = normalizeTarget(event.data.target ?? null);
 
       if (target && target !== pathname) {
         router.replace(target);
