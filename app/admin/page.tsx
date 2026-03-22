@@ -223,25 +223,25 @@ export default function AdminPage() {
       </p>
 
       <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#e0f2fe", color: "#0f172a" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(18, 37, 63, 0.86)", color: "#dbeafe", border: "1px solid rgba(96, 165, 250, 0.2)" }}>
           <strong>Total Users:</strong> {users.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#dcfce7", color: "#14532d" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(10, 51, 44, 0.88)", color: "#ccfbf1", border: "1px solid rgba(45, 212, 191, 0.2)" }}>
           <strong>Available Drivers:</strong> {availableDrivers.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#fef3c7", color: "#78350f" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(77, 53, 15, 0.88)", color: "#fef3c7", border: "1px solid rgba(250, 204, 21, 0.2)" }}>
           <strong>Open Rides:</strong> {openRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#ede9fe", color: "#4c1d95" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(49, 27, 76, 0.88)", color: "#ede9fe", border: "1px solid rgba(167, 139, 250, 0.2)" }}>
           <strong>Accepted Rides:</strong> {acceptedRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#ffedd5", color: "#9a3412" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(86, 42, 19, 0.88)", color: "#ffedd5", border: "1px solid rgba(251, 146, 60, 0.2)" }}>
           <strong>Arrived:</strong> {arrivedRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#dbeafe", color: "#1d4ed8" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(16, 44, 84, 0.88)", color: "#dbeafe", border: "1px solid rgba(96, 165, 250, 0.2)" }}>
           <strong>Picked Up:</strong> {pickedUpRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "#f3f4f6", color: "#111827" }}>
+        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(31, 41, 55, 0.88)", color: "#e5e7eb", border: "1px solid rgba(148, 163, 184, 0.2)" }}>
           <strong>Completed Rides:</strong> {completedRides.length}
         </div>
       </div>
@@ -255,12 +255,13 @@ export default function AdminPage() {
             <div
               key={driver.id}
               style={{
-                border: "1px solid #bfdbfe",
-                backgroundColor: "#eff6ff",
-                color: "#0f172a",
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 10,
+                border: "1px solid rgba(96, 165, 250, 0.2)",
+                backgroundColor: "rgba(10, 16, 27, 0.86)",
+                color: "#e5edf7",
+                borderRadius: 12,
+                padding: 14,
+                marginBottom: 12,
+                boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
               }}
             >
               <p>
@@ -286,12 +287,13 @@ export default function AdminPage() {
             <div
               key={ride.id}
               style={{
-                border: "1px solid #d1d5db",
-                backgroundColor: "#ffffff",
-                color: "#111827",
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 10,
+                border: "1px solid rgba(148, 163, 184, 0.18)",
+                backgroundColor: "rgba(9, 15, 25, 0.88)",
+                color: "#e5edf7",
+                borderRadius: 12,
+                padding: 14,
+                marginBottom: 14,
+                boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
               }}
             >
               <p>
