@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 
 type Coordinates = {
   latitude: number;
@@ -14,15 +14,29 @@ type Coordinates = {
 
 type UserProfile = {
   name: string;
+  username?: string;
   phone: string;
   email: string;
+  homeAddress?: string;
   available: boolean;
 };
+
+type ActiveRide = {
+  id: string;
+  status?: string;
+  createdAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+};
+
+const ACTIVE_RIDE_STATUSES = ["open", "accepted", "arrived", "picked_up"] as const;
 
 export default function RequestPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [activeRide, setActiveRide] = useState<ActiveRide | null>(null);
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
@@ -37,7 +51,9 @@ export default function RequestPage() {
       if (currentUser) {
         const userSnap = await getDoc(doc(db, "users", currentUser.uid));
         if (userSnap.exists()) {
-          setProfile(userSnap.data() as UserProfile);
+          const profileData = userSnap.data() as UserProfile;
+          setProfile(profileData);
+          setDestination(profileData.homeAddress || "");
         }
       }
 
@@ -46,6 +62,30 @@ export default function RequestPage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const ridesQuery = query(collection(db, "rides"), where("riderId", "==", user.uid));
+    const unsubscribe = onSnapshot(ridesQuery, (snapshot) => {
+      const currentRide =
+        snapshot.docs
+          .map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() as Omit<ActiveRide, "id">),
+          }))
+          .filter((ride) => ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]))
+          .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))[0] ?? null;
+
+      setActiveRide(currentRide);
+
+      if (currentRide) {
+        router.replace(`/ride-status?rideId=${currentRide.id}`);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router, user]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("geolocation" in navigator)) {
@@ -107,10 +147,21 @@ export default function RequestPage() {
       return;
     }
 
+    if (activeRide) {
+      router.push(`/ride-status?rideId=${activeRide.id}`);
+      return;
+    }
+
     const resolvedPickup = pickup.trim() || (coordinates ? "Current GPS location" : "");
+    const resolvedDestination = destination.trim() || profile.homeAddress?.trim() || "";
 
     if (!resolvedPickup) {
       alert("Allow location access or enter pickup details");
+      return;
+    }
+
+    if (!resolvedDestination) {
+      alert("Add a home address in Account Details or enter a destination.");
       return;
     }
 
@@ -123,7 +174,7 @@ export default function RequestPage() {
         riderPhone: profile.phone,
         riderEmail: profile.email,
         pickup: resolvedPickup,
-        destination,
+        destination: resolvedDestination,
         riderLocation: coordinates,
         status: "open",
         createdAt: new Date(),
@@ -131,7 +182,7 @@ export default function RequestPage() {
 
       alert("Ride requested!");
       setPickup("");
-      setDestination("");
+      setDestination(profile.homeAddress || "");
       setLocationStatus(
         coordinates
           ? "Ride submitted with your current GPS location."
@@ -171,6 +222,8 @@ export default function RequestPage() {
 
       {!user || !profile ? (
         <p>You need to log in first.</p>
+      ) : activeRide ? (
+        <p>You already have an active ride. Redirecting to ride status...</p>
       ) : (
         <>
           <p><strong>Name:</strong> {profile.name}</p>
@@ -201,7 +254,7 @@ export default function RequestPage() {
             <input
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              placeholder="Destination"
+              placeholder="Destination (defaults to your saved home address)"
               style={{ display: "block", marginBottom: 10, maxWidth: 420 }}
             />
 

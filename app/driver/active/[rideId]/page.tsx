@@ -104,7 +104,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const [loading, setLoading] = useState(true);
   const [driverLocationStatus, setDriverLocationStatus] = useState("Waiting to start driver location sharing...");
   const [driverCoordinates, setDriverCoordinates] = useState<Coordinates | null>(null);
-  const launchedRideIdRef = useRef<string | null>(null);
+  const launchedNavigationKeyRef = useRef<string | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const lastSentRef = useRef<{ latitude: number; longitude: number; sentAt: number } | null>(null);
 
@@ -198,9 +198,10 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
   useEffect(() => {
     if (!ride || !mapsUrl || !isMobileDevice) return;
-    if (launchedRideIdRef.current === ride.id) return;
+    const navigationKey = `${ride.id}:${ride.status}:${mapsUrl}`;
+    if (launchedNavigationKeyRef.current === navigationKey) return;
 
-    launchedRideIdRef.current = ride.id;
+    launchedNavigationKeyRef.current = navigationKey;
     const timeoutId = window.setTimeout(() => {
       window.location.href = mapsUrl;
     }, 700);

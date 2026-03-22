@@ -13,6 +13,7 @@ type UserProfile = {
   username?: string;
   phone?: string;
   email?: string;
+  homeAddress?: string;
   available?: boolean;
   rankOrRole?: string;
   carMake?: string;
@@ -34,6 +35,7 @@ export default function AccountPage() {
     username: "",
     phone: "",
     email: "",
+    homeAddress: "",
     rankOrRole: "",
     carMake: "",
     carModel: "",
@@ -60,6 +62,7 @@ export default function AccountPage() {
           username: data?.username || "",
           phone: data?.phone || "",
           email: data?.email || currentUser.email || "",
+          homeAddress: data?.homeAddress || "",
           rankOrRole: data?.rankOrRole || "",
           carMake: data?.carMake || "",
           carModel: data?.carModel || "",
@@ -218,6 +221,7 @@ export default function AccountPage() {
           username: normalizedUsername,
           phone: form.phone.trim(),
           email: form.email.trim(),
+          homeAddress: form.homeAddress.trim(),
           rankOrRole: form.rankOrRole.trim(),
           carMake: form.carMake.trim(),
           carModel: form.carModel.trim(),
@@ -322,6 +326,7 @@ export default function AccountPage() {
         <input value={form.username} onChange={(e) => handleChange("username", e.target.value)} placeholder="Username" style={{ marginBottom: 10 }} />
         <input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="Phone Number" style={{ marginBottom: 10 }} />
         <input value={form.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Email" style={{ marginBottom: 10 }} />
+        <input value={form.homeAddress} onChange={(e) => handleChange("homeAddress", e.target.value)} placeholder="Home Address" style={{ marginBottom: 10 }} />
         <input value={form.rankOrRole} onChange={(e) => handleChange("rankOrRole", e.target.value)} placeholder="Rank or role (optional)" style={{ marginBottom: 10 }} />
 
         <h2 style={{ marginTop: 24 }}>Driver Profile</h2>

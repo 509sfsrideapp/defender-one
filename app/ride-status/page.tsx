@@ -183,21 +183,6 @@ export default function RideStatusPage() {
         Home
       </Link>
 
-      <Link
-        href="/request"
-        style={{
-          display: "inline-block",
-          marginBottom: 20,
-          padding: "8px 14px",
-          backgroundColor: "#0f766e",
-          color: "white",
-          textDecoration: "none",
-          borderRadius: 8,
-        }}
-      >
-        Request Another Ride
-      </Link>
-
       <h1>Ride Status</h1>
 
       {!activeRide ? (
