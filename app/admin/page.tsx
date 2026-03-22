@@ -33,6 +33,12 @@ type AppUser = {
   email?: string;
   phone?: string;
   available?: boolean;
+  carYear?: string;
+  carMake?: string;
+  carModel?: string;
+  carColor?: string;
+  carPlate?: string;
+  driverPhotoUrl?: string;
 };
 
 export default function AdminPage() {
@@ -41,6 +47,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [rides, setRides] = useState<Ride[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [selectedDriversByRide, setSelectedDriversByRide] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -126,6 +133,44 @@ export default function AdminPage() {
     } catch (error) {
       console.error(error);
       alert("Could not reassign the ride.");
+    }
+  };
+
+  const assignRideToDriver = async (rideId: string) => {
+    const driverId = selectedDriversByRide[rideId];
+
+    if (!driverId) {
+      alert("Select a driver first.");
+      return;
+    }
+
+    const driver = users.find((appUser) => appUser.id === driverId);
+
+    if (!driver) {
+      alert("That driver is no longer available.");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "rides", rideId), {
+        status: "accepted",
+        acceptedBy: driver.id,
+        driverName: driver.name || null,
+        driverPhone: driver.phone || null,
+        driverEmail: driver.email || null,
+        driverPhotoUrl: driver.driverPhotoUrl || null,
+        carYear: driver.carYear || null,
+        carMake: driver.carMake || null,
+        carModel: driver.carModel || null,
+        carColor: driver.carColor || null,
+        carPlate: driver.carPlate || null,
+        acceptedAt: new Date(),
+        assignedByAdminAt: new Date(),
+        assignedByAdminUid: user?.uid ?? "admin",
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Could not assign that ride.");
     }
   };
 
@@ -278,6 +323,13 @@ export default function AdminPage() {
               <p>
                 <strong>Phone:</strong> {driver.phone || "N/A"}
               </p>
+              <p>
+                <strong>Vehicle:</strong>{" "}
+                {[driver.carColor, driver.carYear, driver.carMake, driver.carModel].filter(Boolean).join(" ").trim() || "N/A"}
+              </p>
+              <p>
+                <strong>Plate:</strong> {driver.carPlate || "N/A"}
+              </p>
             </div>
           ))
         )}
@@ -334,6 +386,51 @@ export default function AdminPage() {
 
               {(ride.status === "open" || ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
                 <div style={{ marginTop: 12 }}>
+                  {ride.status === "open" ? (
+                    <div style={{ marginBottom: 12, maxWidth: 360 }}>
+                      <label style={{ display: "block", marginBottom: 8 }}>
+                        <strong>Assign Driver:</strong>
+                      </label>
+                      <select
+                        value={selectedDriversByRide[ride.id] || ""}
+                        onChange={(event) =>
+                          setSelectedDriversByRide((current) => ({
+                            ...current,
+                            [ride.id]: event.target.value,
+                          }))
+                        }
+                        style={{ marginBottom: 10 }}
+                      >
+                        <option value="">Select a clocked-in driver</option>
+                        {availableDrivers.map((driver) => (
+                          <option key={driver.id} value={driver.id}>
+                            {driver.name || driver.email || driver.id}
+                            {[driver.carColor, driver.carYear, driver.carMake, driver.carModel]
+                              .filter(Boolean)
+                              .join(" ")
+                              .trim()
+                              ? ` - ${[driver.carColor, driver.carYear, driver.carMake, driver.carModel].filter(Boolean).join(" ").trim()}`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        onClick={() => assignRideToDriver(ride.id)}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#0f766e",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 8,
+                          marginRight: 10,
+                        }}
+                      >
+                        Assign Ride
+                      </button>
+                    </div>
+                  ) : null}
+
                   <button
                     onClick={() => cancelRide(ride.id)}
                     style={{
