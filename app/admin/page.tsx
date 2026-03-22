@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { auth, db } from "../../lib/firebase";
 import { ADMIN_EMAIL, isAdminEmail } from "../../lib/admin";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -286,6 +287,31 @@ export default function AdminPage() {
                   ? `${ride.driverLocation.latitude.toFixed(6)}, ${ride.driverLocation.longitude.toFixed(6)}`
                   : "Not shared"}
               </p>
+
+              {(ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
+                <LiveRideMap
+                  riderLocation={
+                    ride.riderLocation?.latitude != null && ride.riderLocation?.longitude != null
+                      ? ({
+                          latitude: ride.riderLocation.latitude,
+                          longitude: ride.riderLocation.longitude,
+                        } satisfies MapPoint)
+                      : null
+                  }
+                  driverLocation={
+                    ride.driverLocation?.latitude != null && ride.driverLocation?.longitude != null
+                      ? ({
+                          latitude: ride.driverLocation.latitude,
+                          longitude: ride.driverLocation.longitude,
+                        } satisfies MapPoint)
+                      : null
+                  }
+                  title="Dispatch Map"
+                  emptyLabel="No rider coordinates have been shared for this active ride yet."
+                  footerLabel="Blue is the driver. Orange is the pickup spot."
+                  maxWidth={700}
+                />
+              ) : null}
             </div>
           ))
         )}

@@ -34,34 +34,40 @@ type Coordinates = {
 const ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
 
 function buildMapsUrl(ride: Ride, userAgent: string) {
-  const latitude = ride.riderLocation?.latitude;
-  const longitude = ride.riderLocation?.longitude;
   const isIPhone = /iPhone|iPad|iPod/i.test(userAgent);
   const isAndroid = /Android/i.test(userAgent);
-  const pickupLabel = ride.pickup ? encodeURIComponent(ride.pickup) : "Pickup";
+  const navigatingToDestination = ride.status === "picked_up";
+  const targetLabel = navigatingToDestination
+    ? ride.destination?.trim() || "Destination"
+    : ride.pickup?.trim() || "Pickup";
+  const targetLatitude = navigatingToDestination ? undefined : ride.riderLocation?.latitude;
+  const targetLongitude = navigatingToDestination ? undefined : ride.riderLocation?.longitude;
+  const encodedLabel = encodeURIComponent(targetLabel);
 
-  if (latitude != null && longitude != null) {
+  if (targetLatitude != null && targetLongitude != null) {
     if (isIPhone) {
-      return `maps://?daddr=${latitude},${longitude}&q=${pickupLabel}`;
+      return `maps://?daddr=${targetLatitude},${targetLongitude}&q=${encodedLabel}`;
     }
 
     if (isAndroid) {
-      return `geo:${latitude},${longitude}?q=${latitude},${longitude}(${pickupLabel})`;
+      return `geo:${targetLatitude},${targetLongitude}?q=${targetLatitude},${targetLongitude}(${encodedLabel})`;
     }
 
-    return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+    return `https://www.google.com/maps/dir/?api=1&destination=${targetLatitude},${targetLongitude}`;
   }
 
-  if (ride.pickup) {
+  if (targetLabel) {
     if (isIPhone) {
-      return `maps://?q=${encodeURIComponent(ride.pickup)}`;
+      return `maps://?q=${encodedLabel}`;
     }
 
     if (isAndroid) {
-      return `geo:0,0?q=${encodeURIComponent(ride.pickup)}`;
+      return `geo:0,0?q=${encodedLabel}`;
     }
 
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.pickup)}`;
+    return navigatingToDestination
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodedLabel}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodedLabel}`;
   }
 
   return null;
@@ -381,9 +387,13 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <strong>Navigation:</strong>{" "}
           {mapsUrl
             ? isMobileDevice
-              ? "Your phone will prompt to open its maps app with the rider location ready."
-              : "Use the button above to open turn-by-turn directions."
-            : "No GPS coordinates available. Use the pickup details above."}
+              ? ride.status === "picked_up"
+                ? "Your phone will prompt to open its maps app with the destination ready."
+                : "Your phone will prompt to open its maps app with the rider location ready."
+              : ride.status === "picked_up"
+                ? "Use the button above to open directions to the destination."
+                : "Use the button above to open turn-by-turn directions to pickup."
+            : "No map destination is available. Use the ride details above."}
         </p>
         <p>
           <strong>Driver Location:</strong>{" "}
