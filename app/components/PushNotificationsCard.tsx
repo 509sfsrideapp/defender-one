@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { auth } from "../../lib/firebase";
-import { attachForegroundNotificationListener, enablePushNotifications } from "../../lib/push-notifications";
+import { enablePushNotifications } from "../../lib/push-notifications";
 
 export default function PushNotificationsCard() {
   const [statusMessage, setStatusMessage] = useState("Enable notifications to get ride updates even when you switch apps.");
   const [enabling, setEnabling] = useState(false);
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    void attachForegroundNotificationListener(({ title, body }) => {
-      setStatusMessage(`${title}: ${body}`);
-    }).then((detach) => {
-      unsubscribe = detach;
-    });
-
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
       setStatusMessage("Checking push notification setup on this device...");
 
@@ -54,10 +46,6 @@ export default function PushNotificationsCard() {
           console.error("Notification debug lookup failed", error);
         });
     }
-
-    return () => {
-      unsubscribe?.();
-    };
   }, []);
 
   const handleEnable = async () => {
