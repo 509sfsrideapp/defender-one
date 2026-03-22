@@ -6,7 +6,7 @@ import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { auth, db } from "../../lib/firebase";
 import { ADMIN_EMAIL, isAdminEmail } from "../../lib/admin";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -24,6 +24,7 @@ type Ride = {
     latitude?: number;
     longitude?: number;
   } | null;
+  acceptedBy?: string;
 };
 
 type AppUser = {
@@ -84,6 +85,42 @@ export default function AdminPage() {
     } catch (error) {
       console.error(error);
       alert("Logout failed");
+    }
+  };
+
+  const cancelRide = async (rideId: string) => {
+    const confirmed = window.confirm("Cancel this ride?");
+    if (!confirmed) return;
+
+    try {
+      await updateDoc(doc(db, "rides", rideId), {
+        status: "canceled",
+        canceledAt: new Date(),
+        canceledBy: user?.uid ?? "admin",
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Could not cancel the ride.");
+    }
+  };
+
+  const reassignRide = async (rideId: string) => {
+    const confirmed = window.confirm("Return this ride to the open queue so another driver can accept it?");
+    if (!confirmed) return;
+
+    try {
+      await updateDoc(doc(db, "rides", rideId), {
+        status: "open",
+        acceptedBy: null,
+        driverName: null,
+        driverPhone: null,
+        driverEmail: null,
+        driverLocation: null,
+        reassignedAt: new Date(),
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Could not reassign the ride.");
     }
   };
 
@@ -287,6 +324,39 @@ export default function AdminPage() {
                   ? `${ride.driverLocation.latitude.toFixed(6)}, ${ride.driverLocation.longitude.toFixed(6)}`
                   : "Not shared"}
               </p>
+
+              {(ride.status === "open" || ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    onClick={() => cancelRide(ride.id)}
+                    style={{
+                      padding: "8px 12px",
+                      backgroundColor: "#b91c1c",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 8,
+                      marginRight: 10,
+                    }}
+                  >
+                    Cancel Ride
+                  </button>
+
+                  {ride.status !== "open" ? (
+                    <button
+                      onClick={() => reassignRide(ride.id)}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#92400e",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 8,
+                      }}
+                    >
+                      Reassign Ride
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
 
               {(ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
                 <LiveRideMap

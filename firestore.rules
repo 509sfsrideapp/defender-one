@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function currentUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        currentUserDoc().exists() &&
+        currentUserDoc().data.email == "509sfsrideapp@gmail.com";
+    }
+
+    function activeRideStatus(status) {
+      return status in ["open", "accepted", "arrived", "picked_up"];
+    }
+
+    match /users/{userId} {
+      allow create: if isOwner(userId) &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.available == false;
+
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow update: if isOwner(userId) || isAdmin();
+    }
+
+    match /rides/{rideId} {
+      allow create: if signedIn() &&
+        request.resource.data.riderId == request.auth.uid &&
+        request.resource.data.status == "open";
+
+      allow read: if signedIn() && (
+        resource.data.riderId == request.auth.uid ||
+        resource.data.acceptedBy == request.auth.uid ||
+        isAdmin()
+      );
+
+      allow update: if signedIn() && (
+        isAdmin() ||
+        (
+          resource.data.riderId == request.auth.uid &&
+          request.resource.data.riderId == resource.data.riderId
+        ) ||
+        (
+          resource.data.status == "open" &&
+          request.resource.data.status == "accepted" &&
+          request.resource.data.acceptedBy == request.auth.uid
+        ) ||
+        (
+          resource.data.acceptedBy == request.auth.uid &&
+          request.resource.data.acceptedBy == resource.data.acceptedBy &&
+          (
+            activeRideStatus(request.resource.data.status) ||
+            request.resource.data.status == "completed"
+          )
+        )
+      );
+    }
+  }
+}

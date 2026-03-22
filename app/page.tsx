@@ -20,6 +20,7 @@ export default function HomePage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authWarning, setAuthWarning] = useState("");
   const [hasActiveRide, setHasActiveRide] = useState(false);
+  const [hasRideHistory, setHasRideHistory] = useState(false);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -68,12 +69,12 @@ export default function HomePage() {
 
     const activeRideQuery = query(collection(db, "rides"), where("riderId", "==", user.uid));
     const unsubscribe = onSnapshot(activeRideQuery, (snapshot) => {
-      const hasRide = snapshot.docs.some((docSnap) => {
-        const status = docSnap.data().status;
-        return status === "open" || status === "accepted" || status === "arrived" || status === "picked_up";
-      });
+      const statuses = snapshot.docs.map((docSnap) => docSnap.data().status);
+      const hasRide = statuses.some((status) => status === "open" || status === "accepted" || status === "arrived" || status === "picked_up");
+      const hasHistory = statuses.some((status) => status === "completed" || status === "canceled");
 
       setHasActiveRide(hasRide);
+      setHasRideHistory(hasHistory);
     });
 
     return () => unsubscribe();
@@ -217,6 +218,24 @@ export default function HomePage() {
                 }}
               >
                 Current Ride Status
+              </Link>
+            </div>
+          ) : null}
+
+          {hasRideHistory ? (
+            <div style={{ marginTop: 20 }}>
+              <Link
+                href="/history"
+                style={{
+                  display: "inline-block",
+                  padding: "10px 16px",
+                  backgroundColor: "#111827",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: 8,
+                }}
+              >
+                Ride History
               </Link>
             </div>
           ) : null}

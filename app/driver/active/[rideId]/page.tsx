@@ -24,6 +24,8 @@ type Ride = {
     latitude?: number;
     longitude?: number;
   } | null;
+  driverPhone?: string;
+  riderId?: string;
 };
 
 type Coordinates = {
@@ -236,6 +238,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const completeRide = async () => {
     if (!ride) return;
 
+    const confirmed = window.confirm("Mark this ride as completed?");
+    if (!confirmed) return;
+
     try {
       await updateDoc(doc(db, "rides", ride.id), {
         status: "completed",
@@ -258,6 +263,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
     window.location.href = mapsUrl;
   };
+
+  const riderCallHref = ride.riderPhone ? `tel:${ride.riderPhone}` : null;
+  const riderTextHref = ride.riderPhone ? `sms:${ride.riderPhone}` : null;
 
   if (loading) {
     return (
@@ -346,6 +354,40 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
       >
         Open Maps
       </button>
+
+      {riderCallHref ? (
+        <a
+          href={riderCallHref}
+          style={{
+            display: "inline-block",
+            marginLeft: 12,
+            padding: "8px 14px",
+            backgroundColor: "#1d4ed8",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+          }}
+        >
+          Call Rider
+        </a>
+      ) : null}
+
+      {riderTextHref ? (
+        <a
+          href={riderTextHref}
+          style={{
+            display: "inline-block",
+            marginLeft: 12,
+            padding: "8px 14px",
+            backgroundColor: "#0f766e",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+          }}
+        >
+          Text Rider
+        </a>
+      ) : null}
 
       <h1 style={{ marginTop: 20 }}>Active Ride</h1>
 

@@ -27,6 +27,7 @@ type Ride = {
     latitude?: number;
     longitude?: number;
   } | null;
+  canceledBy?: string;
   createdAt?: {
     seconds?: number;
     nanoseconds?: number;
@@ -45,8 +46,31 @@ function getStatusMessage(status?: string) {
       return "Your driver has arrived at the pickup location.";
     case "picked_up":
       return "You have been picked up and the ride is in progress.";
+    case "completed":
+      return "Your ride has been completed.";
+    case "canceled":
+      return "This ride was canceled.";
     default:
       return "No active ride right now.";
+  }
+}
+
+function getStatusAccent(status?: string) {
+  switch (status) {
+    case "open":
+      return { backgroundColor: "#fef3c7", color: "#92400e" };
+    case "accepted":
+      return { backgroundColor: "#dbeafe", color: "#1d4ed8" };
+    case "arrived":
+      return { backgroundColor: "#ffedd5", color: "#c2410c" };
+    case "picked_up":
+      return { backgroundColor: "#dcfce7", color: "#166534" };
+    case "completed":
+      return { backgroundColor: "#e5e7eb", color: "#111827" };
+    case "canceled":
+      return { backgroundColor: "#fee2e2", color: "#b91c1c" };
+    default:
+      return { backgroundColor: "#e5e7eb", color: "#111827" };
   }
 }
 
@@ -175,6 +199,18 @@ export default function RideStatusPage() {
       ) : (
         <>
           <p>{getStatusMessage(activeRide.status)}</p>
+          <div
+            style={{
+              display: "inline-block",
+              padding: "6px 10px",
+              borderRadius: 999,
+              fontWeight: 700,
+              marginBottom: 16,
+              ...getStatusAccent(activeRide.status),
+            }}
+          >
+            {String(activeRide.status).replace("_", " ").toUpperCase()}
+          </div>
 
           <div
             style={{
@@ -204,6 +240,37 @@ export default function RideStatusPage() {
             <p>
               <strong>Driver Email:</strong> {activeRide.driverEmail || "Not available yet"}
             </p>
+            {activeRide.driverPhone ? (
+              <div style={{ marginBottom: 12 }}>
+                <a
+                  href={`tel:${activeRide.driverPhone}`}
+                  style={{
+                    display: "inline-block",
+                    padding: "10px 14px",
+                    backgroundColor: "#1d4ed8",
+                    color: "white",
+                    textDecoration: "none",
+                    borderRadius: 8,
+                    marginRight: 10,
+                  }}
+                >
+                  Call Driver
+                </a>
+                <a
+                  href={`sms:${activeRide.driverPhone}`}
+                  style={{
+                    display: "inline-block",
+                    padding: "10px 14px",
+                    backgroundColor: "#0f766e",
+                    color: "white",
+                    textDecoration: "none",
+                    borderRadius: 8,
+                  }}
+                >
+                  Text Driver
+                </a>
+              </div>
+            ) : null}
             <p>
               <strong>Driver GPS:</strong>{" "}
               {activeRide.driverLocation?.latitude != null && activeRide.driverLocation?.longitude != null
@@ -219,6 +286,22 @@ export default function RideStatusPage() {
           </div>
 
           <LiveRideMap riderLocation={riderLocation} driverLocation={driverLocation} />
+
+          <div style={{ marginTop: 20 }}>
+            <Link
+              href="/history"
+              style={{
+                display: "inline-block",
+                padding: "10px 16px",
+                backgroundColor: "#111827",
+                color: "white",
+                textDecoration: "none",
+                borderRadius: 8,
+              }}
+            >
+              View Ride History
+            </Link>
+          </div>
         </>
       )}
     </main>
