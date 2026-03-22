@@ -354,14 +354,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const riderPhone = ride?.riderPhone ?? null;
   const riderCallHref = riderPhone ? `tel:${riderPhone}` : null;
   const riderTextHref = riderPhone ? `sms:${riderPhone}` : null;
-  const statusActionLabel =
-    ride.status === "arrived" ? "Picked Up" : ride.status === "accepted" ? "I'm Here" : null;
-  const handleStatusAction =
-    ride.status === "arrived"
-      ? () => updateRideStage("picked_up")
-      : ride.status === "accepted"
-        ? () => updateRideStage("arrived")
-        : null;
 
   if (loading) {
     return (
@@ -418,6 +410,15 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
       </main>
     );
   }
+
+  const statusActionLabel =
+    ride.status === "arrived" ? "Picked Up" : ride.status === "accepted" ? "I'm Here" : null;
+  const handleStatusAction =
+    ride.status === "arrived"
+      ? () => updateRideStage("picked_up")
+      : ride.status === "accepted"
+        ? () => updateRideStage("arrived")
+        : null;
 
   return (
     <main style={{ padding: 20 }}>
