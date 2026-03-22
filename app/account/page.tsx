@@ -3,10 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
-import { auth, db, storage } from "../../lib/firebase";
+import { auth, db } from "../../lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 type UserProfile = {
   name?: string;
@@ -78,6 +77,65 @@ export default function AccountPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const convertImageToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+          return;
+        }
+
+        reject(new Error("Could not read the selected image."));
+      };
+      reader.onerror = () => reject(new Error("Could not read the selected image."));
+      reader.readAsDataURL(file);
+    });
+
+  const shrinkImage = async (file: File) => {
+    const sourceUrl = await convertImageToDataUrl(file);
+    const image = new window.Image();
+
+    const loaded = new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Could not load the selected image."));
+    });
+
+    image.src = sourceUrl;
+    await loaded;
+
+    const maxDimension = 480;
+    const scale = Math.min(maxDimension / image.width, maxDimension / image.height, 1);
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Could not process the selected image.");
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    let quality = 0.82;
+    let compressed = canvas.toDataURL("image/jpeg", quality);
+
+    while (compressed.length > 180000 && quality > 0.45) {
+      quality -= 0.08;
+      compressed = canvas.toDataURL("image/jpeg", quality);
+    }
+
+    if (compressed.length > 180000) {
+      throw new Error("That photo is still too large. Please choose a smaller image.");
+    }
+
+    return compressed;
+  };
+
   const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -95,20 +153,15 @@ export default function AccountPage() {
 
     try {
       setUploadingPhoto(true);
-      setStatusMessage("Uploading profile photo...");
+      setStatusMessage("Preparing profile photo...");
 
-      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-      const fileRef = ref(storage, `profile-photos/${user.uid}/profile.${extension}`);
-      await uploadBytes(fileRef, file, {
-        contentType: file.type,
-      });
-      const downloadUrl = await getDownloadURL(fileRef);
+      const compressedPhoto = await shrinkImage(file);
 
-      setForm((prev) => ({ ...prev, driverPhotoUrl: downloadUrl }));
-      setStatusMessage("Profile photo uploaded. Save account details to keep it.");
+      setForm((prev) => ({ ...prev, driverPhotoUrl: compressedPhoto }));
+      setStatusMessage("Profile photo is ready. Save account details to keep it.");
     } catch (error) {
       console.error(error);
-      setStatusMessage("Could not upload the profile photo.");
+      setStatusMessage(error instanceof Error ? error.message : "Could not process the profile photo.");
     } finally {
       setUploadingPhoto(false);
       event.target.value = "";
@@ -279,7 +332,12 @@ export default function AccountPage() {
         <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.driverPhotoUrl} onChange={(e) => handleChange("driverPhotoUrl", e.target.value)} placeholder="Driver photo URL" style={{ marginBottom: 10 }} />
+        <input
+          value={form.driverPhotoUrl}
+          onChange={(e) => handleChange("driverPhotoUrl", e.target.value)}
+          placeholder="Driver photo URL or leave your uploaded photo"
+          style={{ marginBottom: 10 }}
+        />
 
         <button type="button" onClick={handleSave} disabled={saving || uploadingPhoto}>
           Save Account Details
