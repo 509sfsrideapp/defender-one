@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { getChatDisplayNameParts } from "../../lib/chat";
@@ -154,7 +155,7 @@ export default function ChatPage() {
   };
 
   if (loading) {
-    return <main style={{ padding: 20 }}><p>Loading chat...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Chat" caption="Pulling the latest squadron-wide message traffic." /></main>;
   }
 
   if (!user) {

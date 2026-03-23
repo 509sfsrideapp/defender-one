@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppLoadingState from "../../components/AppLoadingState";
 import { auth } from "../../../lib/firebase";
 import { ADMIN_EMAIL, isAdminEmail } from "../../../lib/admin";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -67,7 +68,7 @@ export default function AdminLoginPage() {
   if (checkingSession) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading...</p>
+        <AppLoadingState title="Loading Admin Access" caption="Preparing secure admin authentication." />
       </main>
     );
   }

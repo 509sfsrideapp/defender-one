@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { formatEtaLabel } from "../../lib/eta";
@@ -189,7 +190,7 @@ export default function RideStatusPage() {
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading ride status...</p>
+        <AppLoadingState title="Loading Ride Status" caption="Tracking your driver, route, and ride timeline." />
       </main>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideStatusLabel } from "../../lib/ride-lifecycle";
@@ -73,11 +74,11 @@ export default function RiderHistoryPage() {
   }, [user]);
 
   if (loading) {
-    return <main style={{ padding: 20 }}><p>Loading ride history...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Ride History" caption="Pulling your completed and canceled missions." /></main>;
   }
 
   if (driverActiveRide || riderActiveRide) {
-    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Active Ride Found" caption="Redirecting you back to your live ride." /></main>;
   }
 
   return (

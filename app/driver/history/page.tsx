@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../../components/AppLoadingState";
 import { auth, db } from "../../../lib/firebase";
 import { formatRideTimestamp, getRideStatusLabel } from "../../../lib/ride-lifecycle";
 import { useActiveRides } from "../../../lib/use-active-rides";
@@ -66,11 +67,11 @@ export default function DriverHistoryPage() {
   }, [user]);
 
   if (loading) {
-    return <main style={{ padding: 20 }}><p>Loading driver history...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Driver History" caption="Reviewing your completed and canceled driver missions." /></main>;
   }
 
   if (driverActiveRide) {
-    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Active Driver Ride Found" caption="Redirecting you back to your live driver screen." /></main>;
   }
 
   return (

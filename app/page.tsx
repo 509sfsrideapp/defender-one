@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppLoadingState from "./components/AppLoadingState";
 import { useRouter } from "next/navigation";
 import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
@@ -229,7 +230,13 @@ export default function HomePage() {
           </div>
         ) : null}
       </div>
-      {checkingAuth ? <p>Checking sign-in status...</p> : null}
+      {checkingAuth ? (
+        <AppLoadingState
+          compact
+          title="Checking Sign-In"
+          caption="Verifying your account status and mission access."
+        />
+      ) : null}
       {authWarning ? (
         <p style={{ color: "#b45309", maxWidth: 560 }}>{authWarning}</p>
       ) : null}
@@ -286,17 +293,31 @@ export default function HomePage() {
         </div>
       ) : (
         <div style={{ marginTop: 20 }}>
-          {activeRideLoading ? <p>Checking for active rides...</p> : null}
+          {activeRideLoading ? (
+            <AppLoadingState
+              compact
+              title="Checking Active Rides"
+              caption="Scanning your rider and driver status now."
+            />
+          ) : null}
           <p><strong>Logged in as:</strong> {profile?.name || user.email}</p>
           <p><strong>Phone:</strong> {profile?.phone || "N/A"}</p>
           <p><strong>Status:</strong> {profile?.available ? "Clocked In" : "Clocked Out"}</p>
 
           {driverActiveRide ? (
-            <p style={{ maxWidth: 560 }}>You already accepted an active ride. Redirecting to the driver active ride page.</p>
+            <AppLoadingState
+              compact
+              title="Driver Ride Found"
+              caption="Redirecting you back to your active driver mission."
+            />
           ) : null}
 
           {!driverActiveRide && riderActiveRide ? (
-            <p style={{ maxWidth: 560 }}>You already have an active ride request. Redirecting to ride status.</p>
+            <AppLoadingState
+              compact
+              title="Ride Request Found"
+              caption="Redirecting you back to your current ride status."
+            />
           ) : null}
 
           {!driverActiveRide && !riderActiveRide ? (

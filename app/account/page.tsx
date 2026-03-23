@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { disablePushNotifications, enablePushNotifications } from "../../lib/push-notifications";
@@ -399,7 +400,7 @@ export default function AccountPage() {
   };
 
   if (loading) {
-    return <main style={{ padding: 20 }}><p>Loading account details...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Account Settings" caption="Pulling your account profile and device settings." /></main>;
   }
 
   if (!user) {
@@ -425,7 +426,7 @@ export default function AccountPage() {
   }
 
   if (driverActiveRide || riderActiveRide) {
-    return <main style={{ padding: 20 }}><p>Redirecting to your active ride...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Active Ride Found" caption="Redirecting you back to your live ride screen." /></main>;
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { auth, db } from "../../lib/firebase";
@@ -197,7 +198,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading...</p>
+        <AppLoadingState title="Loading Admin Dashboard" caption="Building the ride board and driver availability view." />
       </main>
     );
   }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../../../components/AppLoadingState";
 import { auth, db } from "../../../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -463,7 +464,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading ride...</p>
+        <AppLoadingState title="Loading Active Ride" caption="Building your live driver mission card now." />
       </main>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { useActiveRides } from "../../lib/use-active-rides";
@@ -255,7 +256,7 @@ export default function RequestPage() {
   };
 
   if (loading) {
-    return <main style={{ padding: 20 }}><p>Loading...</p></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Preparing Request" caption="Loading your rider profile and pickup defaults." /></main>;
   }
 
   return (
@@ -267,9 +268,9 @@ export default function RequestPage() {
       {!user || !profile ? (
         <p>You need to log in first.</p>
       ) : driverActiveRide ? (
-        <p>You already accepted a driver ride. Redirecting to the active driver screen...</p>
+        <AppLoadingState compact title="Active Driver Ride Found" caption="Redirecting you to the active driver screen." />
       ) : riderActiveRide ? (
-        <p>You already have an active ride. Redirecting to ride status...</p>
+        <AppLoadingState compact title="Active Ride Found" caption="Redirecting you to your current ride status." />
       ) : (
         <>
           <p><strong>Name:</strong> {profile.name}</p>

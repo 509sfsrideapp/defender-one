@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
@@ -208,7 +209,7 @@ export default function DriverPage() {
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading...</p>
+        <AppLoadingState title="Loading Driver Dashboard" caption="Checking your availability and open ride queue." />
       </main>
     );
   }
