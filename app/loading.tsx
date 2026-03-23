@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Loading() {
   return (
     <main className="loading-screen" aria-label="Loading Defender Drivers">
@@ -14,7 +16,14 @@ export default function Loading() {
           <div className="loading-origin">
             <div className="loading-origin-ring" />
             <div className="loading-origin-core">
-              <span>AFGSC</span>
+              <Image
+                src="/afgsc.png"
+                alt="Air Force Global Strike Command"
+                width={76}
+                height={76}
+                unoptimized
+                className="loading-origin-logo"
+              />
             </div>
           </div>
 

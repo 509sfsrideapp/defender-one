@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type AppLoadingStateProps = {
   title?: string;
   caption?: string;
@@ -12,6 +14,16 @@ export default function AppLoadingState({
   return (
     <div className={`loading-state ${compact ? "loading-state-compact" : ""}`} aria-label={title}>
       <div className="loading-state-visual" aria-hidden="true">
+        <div className="loading-state-origin">
+          <Image
+            src="/afgsc.png"
+            alt="Air Force Global Strike Command"
+            width={36}
+            height={36}
+            unoptimized
+            className="loading-state-origin-logo"
+          />
+        </div>
         <div className="loading-state-track" />
         <div className="loading-state-b2">
           <svg viewBox="0 0 160 72" fill="none" role="presentation">
