@@ -241,6 +241,37 @@ export default function HomePage() {
         <p style={{ color: "#b45309", maxWidth: 560 }}>{authWarning}</p>
       ) : null}
 
+      <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <Link
+          href="/loading-preview/full"
+          style={{
+            display: "inline-block",
+            padding: "10px 16px",
+            backgroundColor: "#0f172a",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+            border: "1px solid rgba(96, 165, 250, 0.18)",
+          }}
+        >
+          Preview Full Loader
+        </Link>
+        <Link
+          href="/loading-preview/inline"
+          style={{
+            display: "inline-block",
+            padding: "10px 16px",
+            backgroundColor: "#0f172a",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+            border: "1px solid rgba(96, 165, 250, 0.18)",
+          }}
+        >
+          Preview Inline Loader
+        </Link>
+      </div>
+
       {!user ? (
         <div style={{ marginTop: 20 }}>
           <div style={{ marginBottom: 20 }}>
