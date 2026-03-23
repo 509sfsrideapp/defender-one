@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const DEVELOPER_COOKIE_NAME = "developer_access";
-const DEFAULT_DEVELOPER_CODE = "509SFSDEV";
+const DEFAULT_DEVELOPER_CODE = "2187";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { code?: string } | null;
