@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   description: "Request and manage squadron rides with Defender Drivers.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/new-logo.jpg",
+    shortcut: "/new-logo.jpg",
+    apple: "/new-logo.jpg",
   },
   appleWebApp: {
     capable: true,
@@ -45,7 +45,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 39
+          Version 40
         </footer>
       </body>
     </html>
