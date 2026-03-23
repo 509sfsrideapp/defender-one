@@ -91,5 +91,21 @@ service cloud.firestore {
         )
       );
     }
+
+    match /globalMessages/{messageId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn() &&
+        request.resource.data.senderUid == request.auth.uid &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() > 0 &&
+        request.resource.data.text.size() <= 500 &&
+        request.resource.data.senderRank is string &&
+        request.resource.data.senderRank.size() > 0 &&
+        request.resource.data.senderLastName is string &&
+        request.resource.data.senderLastName.size() > 0 &&
+        request.resource.data.senderFlight is string &&
+        request.resource.data.senderFlight.size() > 0;
+    }
   }
 }

@@ -73,14 +73,21 @@ export default function ChatPage() {
   useEffect(() => {
     const messagesQuery = query(collection(db, "globalMessages"), orderBy("createdAt", "asc"), limit(150));
 
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      setMessages(
-        snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...(docSnap.data() as Omit<ChatMessage, "id">),
-        }))
-      );
-    });
+    const unsubscribe = onSnapshot(
+      messagesQuery,
+      (snapshot) => {
+        setMessages(
+          snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() as Omit<ChatMessage, "id">),
+          }))
+        );
+      },
+      (error) => {
+        console.error(error);
+        setStatusMessage("Chat could not load. Firestore access may still need to be deployed.");
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -132,7 +139,11 @@ export default function ChatPage() {
       setMessageText("");
     } catch (error) {
       console.error(error);
-      setStatusMessage("Could not send that message.");
+      setStatusMessage(
+        error instanceof Error && error.message.toLowerCase().includes("permission")
+          ? "Chat send is blocked right now. Firestore rules may still need to be deployed."
+          : "Could not send that message."
+      );
     } finally {
       setSending(false);
     }
