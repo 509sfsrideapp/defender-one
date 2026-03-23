@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken, isSupported, Messaging, onMessage } from "firebase/messaging";
+import { deleteToken, getToken, isSupported, Messaging, onMessage } from "firebase/messaging";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
@@ -83,6 +83,25 @@ async function saveTokenToProfile(token: string) {
   }, { merge: true });
 }
 
+async function removeTokenFromProfile(token: string) {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("You need to log in before disabling notifications.");
+  }
+
+  const userRef = doc(db, "users", currentUser.uid);
+  const userSnap = await getDoc(userRef);
+  const existingTokens = userSnap.exists() ? ((userSnap.data().notificationTokens as string[] | undefined) ?? []) : [];
+  const nextTokens = existingTokens.filter((existingToken) => existingToken !== token);
+
+  await setDoc(userRef, {
+    notificationTokens: nextTokens,
+    notificationsEnabled: nextTokens.length > 0,
+    notificationsUpdatedAt: new Date(),
+  }, { merge: true });
+}
+
 export async function enablePushNotifications() {
   if (typeof window === "undefined") {
     throw new Error("Notifications are only available in the browser.");
@@ -133,6 +152,39 @@ export async function enablePushNotifications() {
 
   await saveTokenToProfile(token);
   return token;
+}
+
+export async function disablePushNotifications() {
+  if (typeof window === "undefined") {
+    throw new Error("Notifications are only available in the browser.");
+  }
+
+  const vapidKey = getVapidKey();
+  const messaging = await getMessagingInstance();
+
+  if (!messaging || !vapidKey) {
+    throw new Error("This device does not support web push.");
+  }
+
+  const registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+  const token = await getToken(messaging, {
+    vapidKey,
+    serviceWorkerRegistration: registration,
+  }).catch(() => null);
+
+  if (token) {
+    await removeTokenFromProfile(token);
+    await deleteToken(messaging).catch(() => undefined);
+  } else {
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        notificationsEnabled: false,
+        notificationsUpdatedAt: new Date(),
+      }, { merge: true });
+    }
+  }
 }
 
 export async function attachForegroundNotificationListener(onForegroundNotification?: (payload: { title: string; body: string }) => void) {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../lib/firebase";
+import { disablePushNotifications, enablePushNotifications } from "../../lib/push-notifications";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
@@ -33,8 +34,11 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [updatingNotifications, setUpdatingNotifications] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [originalUsername, setOriginalUsername] = useState("");
+  const [notificationTokenCount, setNotificationTokenCount] = useState(0);
+  const [notificationPermission, setNotificationPermission] = useState("unknown");
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
   const [form, setForm] = useState({
     name: "",
@@ -63,6 +67,21 @@ export default function AccountPage() {
       try {
         const snap = await getDoc(doc(db, "users", currentUser.uid));
         const data = snap.exists() ? (snap.data() as UserProfile) : null;
+        const idToken = await currentUser.getIdToken();
+        const notificationResponse = await fetch("/api/notifications/debug", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }).catch(() => null);
+
+        if (typeof window !== "undefined" && "Notification" in window) {
+          setNotificationPermission(Notification.permission);
+        }
+
+        if (notificationResponse?.ok) {
+          const notificationDetails = (await notificationResponse.json()) as { tokenCount?: number };
+          setNotificationTokenCount(notificationDetails.tokenCount ?? 0);
+        }
 
         setForm({
           name: data?.name || "",
@@ -283,6 +302,45 @@ export default function AccountPage() {
     }
   };
 
+  const handleNotificationToggle = async () => {
+    try {
+      setUpdatingNotifications(true);
+
+      if (notificationTokenCount > 0 && notificationPermission === "granted") {
+        await disablePushNotifications();
+        setNotificationTokenCount(0);
+        setStatusMessage("Notifications disabled on this device.");
+        return;
+      }
+
+      await enablePushNotifications();
+      setNotificationPermission("granted");
+
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const idToken = await currentUser.getIdToken();
+        const response = await fetch("/api/notifications/debug", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const details = (await response.json()) as { tokenCount?: number };
+          setNotificationTokenCount(details.tokenCount ?? 0);
+        }
+      }
+
+      setStatusMessage("Notifications enabled on this device.");
+    } catch (error) {
+      console.error(error);
+      setStatusMessage(error instanceof Error ? error.message : "Could not update notification settings.");
+    } finally {
+      setUpdatingNotifications(false);
+    }
+  };
+
   if (loading) {
     return <main style={{ padding: 20 }}><p>Loading account details...</p></main>;
   }
@@ -412,6 +470,23 @@ export default function AccountPage() {
           placeholder="Profile photo URL or leave your uploaded photo"
           style={{ marginBottom: 10 }}
         />
+
+        <h2 style={{ marginTop: 24 }}>Notifications</h2>
+        <p style={{ marginTop: 0, color: "#cbd5e1" }}>
+          Status: {notificationTokenCount > 0 && notificationPermission === "granted" ? "Enabled on this device" : "Not enabled on this device"}
+        </p>
+        <button
+          type="button"
+          onClick={handleNotificationToggle}
+          disabled={updatingNotifications}
+          style={{ marginBottom: 18 }}
+        >
+          {updatingNotifications
+            ? "Updating..."
+            : notificationTokenCount > 0 && notificationPermission === "granted"
+              ? "Turn Off Notifications"
+              : "Turn On Notifications"}
+        </button>
 
         <h2 style={{ marginTop: 24 }}>Vehicle Details</h2>
         <input value={form.carYear} onChange={(e) => handleChange("carYear", e.target.value)} placeholder="Car year (optional)" style={{ marginBottom: 10 }} />

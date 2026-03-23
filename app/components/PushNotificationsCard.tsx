@@ -10,6 +10,7 @@ export default function PushNotificationsCard() {
   const [sendingTest, setSendingTest] = useState(false);
   const [tokenCount, setTokenCount] = useState<number | null>(null);
   const [permissionState, setPermissionState] = useState<string>("unknown");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -52,7 +53,12 @@ export default function PushNotificationsCard() {
         })
         .catch((error) => {
           console.error("Notification debug lookup failed", error);
+        })
+        .finally(() => {
+          setLoaded(true);
         });
+    } else {
+      setLoaded(true);
     }
   }, []);
 
@@ -105,6 +111,10 @@ export default function PushNotificationsCard() {
       setSendingTest(false);
     }
   };
+
+  if (loaded && permissionState === "granted" && (tokenCount ?? 0) > 0) {
+    return null;
+  }
 
   return (
     <div
