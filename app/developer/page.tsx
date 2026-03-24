@@ -76,6 +76,14 @@ export default async function DeveloperPage() {
             Preview Inline Loader
           </Link>
         </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Bug Reports</h2>
+          <p style={{ maxWidth: 320 }}>Review bug reports submitted from the live report-bug page.</p>
+          <Link href="/developer/bugs" style={featureLinkStyle}>
+            Open Bug Reports
+          </Link>
+        </div>
       </div>
     </main>
   );

@@ -107,5 +107,17 @@ service cloud.firestore {
         request.resource.data.senderFlight is string &&
         request.resource.data.senderFlight.size() > 0;
     }
+
+    match /bugReports/{reportId} {
+      allow create: if signedIn() &&
+        request.resource.data.reporterUid == request.auth.uid &&
+        request.resource.data.description is string &&
+        request.resource.data.description.size() > 0 &&
+        request.resource.data.description.size() <= 4000 &&
+        request.resource.data.reporterName is string &&
+        request.resource.data.reporterName.size() > 0;
+
+      allow read: if isAdmin();
+    }
   }
 }
