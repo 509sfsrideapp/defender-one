@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type BackIconButtonProps = {
@@ -23,6 +24,19 @@ const baseStyle: React.CSSProperties = {
 
 export default function BackIconButton({ style }: BackIconButtonProps) {
   const router = useRouter();
+  const [canGoBack, setCanGoBack] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCanGoBack(window.history.length > 1);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -32,6 +46,10 @@ export default function BackIconButton({ style }: BackIconButtonProps) {
 
     router.push("/");
   };
+
+  if (!canGoBack) {
+    return null;
+  }
 
   return (
     <button
