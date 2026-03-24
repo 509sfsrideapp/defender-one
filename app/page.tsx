@@ -11,7 +11,7 @@ import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 type UserProfile = {
   name: string;
@@ -114,62 +114,10 @@ export default function HomePage() {
     }
   }, [activeRideLoading, driverActiveRide, riderActiveRide, router, user]);
 
-  const handleClockIn = async () => {
-    if (!user) {
-      alert("Log in first");
-      return;
-    }
-
-    if (driverActiveRide) {
-      router.replace(`/driver/active/${driverActiveRide.id}`);
-      return;
-    }
-
-    if (riderActiveRide) {
-      router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
-      return;
-    }
-
-    const driverReadinessIssues = getDriverReadinessIssues(profile);
-
-    if (driverReadinessIssues.length > 0) {
-      alert(driverReadinessIssues[0]);
-      router.push("/account");
-      return;
-    }
-
-    try {
-      await updateDoc(doc(db, "users", user.uid), {
-        available: true,
-      });
-      window.location.href = "/driver";
-    } catch (error) {
-      console.error(error);
-      alert("Failed to clock in");
-    }
-  };
-
   const rideIssues = getRideReadinessIssues(profile);
   const driverIssues = getDriverReadinessIssues(profile);
   const rideReady = canRequestRide(profile);
   const driverReady = canDrive(profile);
-
-  const handleClockOut = async () => {
-    if (!user) return;
-
-    try {
-      await updateDoc(doc(db, "users", user.uid), {
-        available: false,
-      });
-      setProfile((prev) =>
-        prev ? { ...prev, available: false } : prev
-      );
-      alert("Clocked out");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to clock out");
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -371,9 +319,6 @@ export default function HomePage() {
               caption="Scanning your rider and driver status now."
             />
           ) : null}
-          <p><strong>Logged in as:</strong> {profile?.name || user.email}</p>
-          <p><strong>Phone:</strong> {profile?.phone || "N/A"}</p>
-          <p><strong>Status:</strong> {profile?.available ? "Clocked In" : "Clocked Out"}</p>
 
           {driverActiveRide ? (
             <AppLoadingState
@@ -466,93 +411,38 @@ export default function HomePage() {
 
           {!driverActiveRide && !riderActiveRide ? (
             <div style={{ marginTop: 20 }}>
-            {!profile?.available ? (
-              driverReady ? (
-                <button
-                  onClick={handleClockIn}
-                  style={{
-                    padding: "10px 16px",
-                    backgroundColor: "#1f2937",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                  }}
-                >
-                  Clock In as Driver
-                </button>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      display: "inline-block",
-                      padding: "10px 16px",
-                      backgroundColor: "rgba(51, 65, 85, 0.9)",
-                      color: "#cbd5e1",
-                      borderRadius: 8,
-                      opacity: 0.82,
-                    }}
-                  >
-                    Clock In as Driver
-                  </div>
-                  <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
-                    You must complete additional account information in order to use this feature.
-                  </p>
-                  {driverIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p> : null}
-                </>
-              )
+            {driverReady ? (
+              <Link
+                href="/driver"
+                style={{
+                  display: "inline-block",
+                  padding: "10px 16px",
+                  backgroundColor: "#1f2937",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: 8,
+                }}
+              >
+                Driver Dashboard
+              </Link>
             ) : (
               <>
-                {driverReady ? (
-                  <Link
-                    href="/driver"
-                    style={{
-                      display: "inline-block",
-                      padding: "10px 16px",
-                      backgroundColor: "#1f2937",
-                      color: "white",
-                      textDecoration: "none",
-                      borderRadius: 8,
-                      marginRight: 12,
-                    }}
-                  >
-                    Driver Dashboard
-                  </Link>
-                ) : (
-                  <>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "10px 16px",
-                        backgroundColor: "rgba(51, 65, 85, 0.9)",
-                        color: "#cbd5e1",
-                        borderRadius: 8,
-                        marginRight: 12,
-                        opacity: 0.82,
-                      }}
-                    >
-                      Driver Dashboard
-                    </div>
-                    <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
-                      You must complete additional account information in order to use this feature.
-                    </p>
-                    {driverIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p> : null}
-                  </>
-                )}
-
-                <button
-                  onClick={handleClockOut}
+                <div
                   style={{
+                    display: "inline-block",
                     padding: "10px 16px",
-                    backgroundColor: "#7f1d1d",
-                    color: "white",
-                    border: "none",
+                    backgroundColor: "rgba(51, 65, 85, 0.9)",
+                    color: "#cbd5e1",
                     borderRadius: 8,
-                    cursor: "pointer",
+                    opacity: 0.82,
                   }}
                 >
-                  Clock Out
-                </button>
+                  Driver Dashboard
+                </div>
+                <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
+                  You must complete additional account information in order to use this feature.
+                </p>
+                {driverIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p> : null}
               </>
             )}
             </div>
