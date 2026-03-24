@@ -60,7 +60,7 @@ export default function MessageThreadPage() {
   const messages = useMemo(() => (thread ? getSystemThreadMessages(thread.id) : []), [thread]);
 
   if (loading) {
-    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Messages" caption="Opening the selected message thread." /></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Inbox" caption="Opening the selected inbox thread." /></main>;
   }
 
   if (!user) {
@@ -78,7 +78,7 @@ export default function MessageThreadPage() {
     return (
       <main style={{ padding: 20 }}>
         <Link href="/messages" style={{ display: "inline-block", marginBottom: 20, color: "#93c5fd", textDecoration: "none" }}>
-          Back to Messages
+          Back to Inbox
         </Link>
         <h1>Message Not Found</h1>
         <p>This thread does not exist yet.</p>
@@ -89,7 +89,7 @@ export default function MessageThreadPage() {
   return (
     <main style={{ padding: 20 }}>
       <Link href="/messages" style={{ display: "inline-block", marginBottom: 18, color: "#93c5fd", textDecoration: "none" }}>
-        Back to Messages
+        Back to Inbox
       </Link>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
