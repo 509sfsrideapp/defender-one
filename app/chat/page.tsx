@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AppLoadingState from "../components/AppLoadingState";
-import HomeIconLink from "../components/HomeIconLink";
+import DeveloperBackLink from "../components/DeveloperBackLink";
 import { auth, db } from "../../lib/firebase";
 import { getChatDisplayNameParts } from "../../lib/chat";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -182,7 +182,7 @@ export default function ChatPage() {
 
   return (
     <main style={{ padding: 20 }}>
-      <HomeIconLink />
+      <DeveloperBackLink />
 
       <h1>Global Chat</h1>
       <p style={{ maxWidth: 720 }}>

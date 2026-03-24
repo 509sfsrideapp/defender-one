@@ -1,10 +1,10 @@
 import AppLoadingState from "../../components/AppLoadingState";
-import HomeIconLink from "../../components/HomeIconLink";
+import DeveloperBackLink from "../../components/DeveloperBackLink";
 
 export default function InlineLoadingPreviewPage() {
   return (
     <main style={{ padding: 20 }}>
-      <HomeIconLink />
+      <DeveloperBackLink />
       <h1>Inline Loading Preview</h1>
       <p style={{ maxWidth: 640 }}>
         This page holds the smaller in-page loader so you can watch it without the app navigating away.
