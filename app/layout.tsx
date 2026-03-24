@@ -1,10 +1,8 @@
 import ForegroundNotificationBridge from "./components/ForegroundNotificationBridge";
 import AccountAccessGate from "./components/AccountAccessGate";
-import BottomBackButton from "./components/BottomBackButton";
 import BottomUtilityNav from "./components/BottomUtilityNav";
 import DeveloperAccessCleaner from "./components/DeveloperAccessCleaner";
 import InitialAppSplash from "./components/InitialAppSplash";
-import NavigationHistoryTracker from "./components/NavigationHistoryTracker";
 import type { Metadata, Viewport } from "next";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
 import ProfileCompletionGate from "./components/ProfileCompletionGate";
@@ -43,13 +41,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <InitialAppSplash />
         <ForegroundNotificationBridge />
-        <NavigationHistoryTracker />
         <NotificationNavigationBridge />
         <DeveloperAccessCleaner />
         <AccountAccessGate />
         <ProfileCompletionGate />
         <div className="flex-1">{children}</div>
-        <BottomBackButton />
         <BottomUtilityNav />
         <footer
           style={{
@@ -59,7 +55,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 109
+          Version 110
         </footer>
       </body>
     </html>
