@@ -12,11 +12,13 @@ export default function InlineLoadingPreviewPage() {
 
       <div style={{ marginTop: 20, display: "grid", gap: 18, maxWidth: 720 }}>
         <AppLoadingState
+          delayMs={0}
           title="Loading Ride Status"
           caption="Tracking your driver, route, and ride timeline."
         />
         <AppLoadingState
           compact
+          delayMs={0}
           title="Checking Active Rides"
           caption="Scanning your rider and driver status now."
         />

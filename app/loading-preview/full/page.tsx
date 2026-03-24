@@ -1,5 +1,5 @@
 import DeveloperBackLink from "../../components/DeveloperBackLink";
-import MissionLoadingScreen from "../../loading";
+import DelayedRouteLoading from "../../components/DelayedRouteLoading";
 
 export default function FullLoadingPreviewPage() {
   return (
@@ -7,7 +7,7 @@ export default function FullLoadingPreviewPage() {
       <main style={{ padding: 20 }}>
         <DeveloperBackLink />
       </main>
-      <MissionLoadingScreen />
+      <DelayedRouteLoading delayMs={0} />
     </div>
   );
 }
