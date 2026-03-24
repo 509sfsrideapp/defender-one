@@ -12,6 +12,27 @@ import { isValidUsername, normalizeUsername } from "../../lib/username";
 const flightOptions = ["Alpha", "Bravo", "Charlie", "Delta", "Foxtrot", "Staff"] as const;
 const rankOptions = ["AB", "Amn", "A1C", "SrA", "SSgt", "TSgt", "MSgt", "SMSgt", "CMSgt", "2d Lt", "1st Lt", "Capt", "Maj", "Lt Col", "Col", "Brig Gen", "Maj Gen", "Lt Gen", "Gen"] as const;
 
+function getSignupErrorMessage(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "That email is already being used by another account.";
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+    case "auth/weak-password":
+      return "Password must be at least 6 characters.";
+    case "auth/network-request-failed":
+      return "Network error while creating the account. Try again.";
+    default:
+      if (error instanceof Error && error.message) {
+        return `Signup failed: ${error.message}`;
+      }
+
+      return "Signup failed. Check the email and password and try again.";
+  }
+}
+
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -251,7 +272,7 @@ export default function SignupPage() {
       window.location.href = "/login";
     } catch (error) {
       console.error(error);
-      setStatusMessage("Signup failed.");
+      setStatusMessage(getSignupErrorMessage(error));
     }
   };
 
