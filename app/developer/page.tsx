@@ -92,6 +92,14 @@ export default async function DeveloperPage() {
             Open Suggestions
           </Link>
         </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Driving Simulator</h2>
+          <p style={{ maxWidth: 320 }}>Open the polished impairment-driving simulator prototype while it stays hidden from the main app.</p>
+          <Link href="/developer/driving-sim" style={featureLinkStyle}>
+            Launch Simulator
+          </Link>
+        </div>
       </div>
     </main>
   );
