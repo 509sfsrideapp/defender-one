@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
 import { isAdminEmail } from "../lib/admin";
+import { getDriverReadinessIssues } from "../lib/profile-readiness";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -22,8 +23,14 @@ type UserProfile = {
   email: string;
   available: boolean;
   notificationsEnabled?: boolean;
+  homeAddress?: string;
+  homeAddressVerified?: boolean;
   driverPhotoUrl?: string;
   riderPhotoUrl?: string;
+  carYear?: string;
+  carMake?: string;
+  carModel?: string;
+  carColor?: string;
 };
 
 export default function HomePage() {
@@ -101,6 +108,14 @@ export default function HomePage() {
 
     if (riderActiveRide) {
       router.replace(`/ride-status?rideId=${riderActiveRide.id}`);
+      return;
+    }
+
+    const driverReadinessIssues = getDriverReadinessIssues(profile);
+
+    if (driverReadinessIssues.length > 0) {
+      alert(driverReadinessIssues[0]);
+      router.push("/account");
       return;
     }
 

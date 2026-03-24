@@ -21,6 +21,7 @@ type UserProfile = {
   phone?: string;
   email?: string;
   homeAddress?: string;
+  homeAddressVerified?: boolean;
   available?: boolean;
   rank?: string;
   flight?: string;
@@ -51,6 +52,8 @@ export default function AccountPage() {
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(true);
   const [hasRideHistory, setHasRideHistory] = useState(false);
   const [hasDriverHistory, setHasDriverHistory] = useState(false);
+  const [homeAddressVerified, setHomeAddressVerified] = useState(false);
+  const [addressCheckMessage, setAddressCheckMessage] = useState("");
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
   const [form, setForm] = useState({
     firstName: "",
@@ -117,6 +120,7 @@ export default function AccountPage() {
         });
         setOriginalUsername(data?.username || "");
         setLocationServicesEnabled(data?.locationServicesEnabled !== false);
+        setHomeAddressVerified(data?.homeAddressVerified === true);
       } catch (error) {
         console.error(error);
         setStatusMessage("We could not load your account details.");
@@ -272,8 +276,8 @@ export default function AccountPage() {
       return;
     }
 
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.rank.trim() || !form.flight.trim() || !form.phone.trim() || !form.email.trim()) {
-      setStatusMessage("First name, last name, rank, flight, phone, and email are required.");
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.rank.trim() || !form.flight.trim() || !form.phone.trim() || !form.email.trim() || !form.username.trim()) {
+      setStatusMessage("First name, last name, rank, flight, username, phone, and email are required.");
       return;
     }
 
@@ -302,6 +306,35 @@ export default function AccountPage() {
         }
       }
 
+      let verifiedHomeAddress = false;
+      let normalizedHomeAddress = form.homeAddress.trim();
+
+      if (normalizedHomeAddress) {
+        setAddressCheckMessage("Verifying home address...");
+        const validationResponse = await fetch("/api/geocode/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: normalizedHomeAddress }),
+        });
+        const validationDetails = (await validationResponse.json().catch(() => null)) as
+          | { valid?: boolean; normalizedAddress?: string; error?: string }
+          | null;
+
+        if (!validationResponse.ok || !validationDetails?.valid || !validationDetails.normalizedAddress) {
+          setStatusMessage(validationDetails?.error || "Please enter a real home address before saving.");
+          setAddressCheckMessage("");
+          return;
+        }
+
+        normalizedHomeAddress = validationDetails.normalizedAddress;
+        verifiedHomeAddress = true;
+        setAddressCheckMessage(`Verified: ${normalizedHomeAddress}`);
+      } else {
+        setAddressCheckMessage("Add your home address before requesting rides.");
+      }
+
       const batch = writeBatch(db);
       const profilePhotoUrl = form.profilePhotoUrl.trim();
       const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
@@ -314,7 +347,8 @@ export default function AccountPage() {
           username: normalizedUsername,
           phone: form.phone.trim(),
           email: form.email.trim(),
-          homeAddress: form.homeAddress.trim(),
+          homeAddress: normalizedHomeAddress,
+          homeAddressVerified: verifiedHomeAddress,
           rank: form.rank.trim(),
           flight: form.flight.trim(),
           rankOrRole: form.rank.trim(),
@@ -348,6 +382,8 @@ export default function AccountPage() {
       await batch.commit();
 
       setOriginalUsername(normalizedUsername);
+      setHomeAddressVerified(verifiedHomeAddress);
+      setForm((prev) => ({ ...prev, homeAddress: normalizedHomeAddress }));
       setStatusMessage("Account details saved.");
     } catch (error) {
       console.error(error);
@@ -471,6 +507,7 @@ export default function AccountPage() {
       </p>
 
       {statusMessage ? <p style={{ marginTop: 12 }}>{statusMessage}</p> : null}
+      {addressCheckMessage ? <p style={{ marginTop: 8, color: "#94a3b8" }}>{addressCheckMessage}</p> : null}
 
       <div
         style={{
@@ -492,7 +529,14 @@ export default function AccountPage() {
         </p>
         <input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="Phone Number" style={{ marginBottom: 10 }} />
         <input value={form.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Email" style={{ marginBottom: 10 }} />
-        <input value={form.homeAddress} onChange={(e) => handleChange("homeAddress", e.target.value)} placeholder="Home Address" style={{ marginBottom: 10 }} />
+        <input value={form.homeAddress} onChange={(e) => {
+          handleChange("homeAddress", e.target.value);
+          setHomeAddressVerified(false);
+          setAddressCheckMessage("");
+        }} placeholder="Home Address" style={{ marginBottom: 6 }} />
+        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: homeAddressVerified ? "#86efac" : "#94a3b8" }}>
+          {homeAddressVerified ? "Home address verified." : "Home address will be verified when you save Account Settings."}
+        </p>
         <input value={form.rank} onChange={(e) => handleChange("rank", e.target.value)} placeholder="Rank" style={{ marginBottom: 10 }} />
         <select
           value={form.flight}
@@ -610,6 +654,33 @@ export default function AccountPage() {
         <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
+
+        <h2 style={{ marginTop: 24 }}>Readiness Alerts</h2>
+        <div
+          style={{
+            marginBottom: 18,
+            padding: 16,
+            borderRadius: 14,
+            border: "1px solid rgba(148, 163, 184, 0.18)",
+            backgroundColor: "rgba(7, 11, 18, 0.76)",
+          }}
+        >
+          <p style={{ marginTop: 0, color: form.profilePhotoUrl.trim() ? "#86efac" : "#fca5a5" }}>
+            {form.profilePhotoUrl.trim()
+              ? "Ready for identity photo checks."
+              : "Upload a clear profile picture before requesting rides or driving."}
+          </p>
+          <p style={{ color: form.homeAddress.trim() && homeAddressVerified ? "#86efac" : "#fca5a5" }}>
+            {form.homeAddress.trim() && homeAddressVerified
+              ? "Home address is verified for rider use."
+              : "Add and verify your home address before requesting rides."}
+          </p>
+          <p style={{ marginBottom: 0, color: form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim() ? "#86efac" : "#fca5a5" }}>
+            {form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim()
+              ? "Vehicle details are ready for driver use."
+              : "Add your vehicle year, make, model, and color before driving."}
+          </p>
+        </div>
 
         <h2 style={{ marginTop: 24 }}>History</h2>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>

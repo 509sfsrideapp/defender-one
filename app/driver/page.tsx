@@ -6,6 +6,7 @@ import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
+import { canDrive, getDriverReadinessIssues } from "../../lib/profile-readiness";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
   collection,
@@ -134,6 +135,14 @@ export default function DriverPage() {
       return;
     }
 
+    const driverReadinessIssues = getDriverReadinessIssues(profile);
+
+    if (driverReadinessIssues.length > 0) {
+      alert(driverReadinessIssues[0]);
+      router.push("/account");
+      return;
+    }
+
     if (acceptedRides.length > 0) {
       alert("You already have an active ride.");
       router.replace(`/driver/active/${acceptedRides[0].id}`);
@@ -248,6 +257,29 @@ export default function DriverPage() {
       </p>
 
       <PushNotificationsCard />
+
+      {!canDrive(profile) ? (
+        <div
+          style={{
+            marginTop: 20,
+            maxWidth: 560,
+            padding: 18,
+            borderRadius: 14,
+            border: "1px solid rgba(248, 113, 113, 0.24)",
+            backgroundColor: "rgba(69, 10, 10, 0.3)",
+          }}
+        >
+          <h2 style={{ marginTop: 0 }}>Finish Driver Setup</h2>
+          {getDriverReadinessIssues(profile).map((issue) => (
+            <p key={issue} style={{ marginBottom: 10 }}>
+              {issue}
+            </p>
+          ))}
+          <button type="button" onClick={() => router.push("/account")}>
+            Open Account Settings
+          </button>
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 30 }}>
         <h3>Current Accepted Rides</h3>

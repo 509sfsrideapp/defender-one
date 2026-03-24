@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
+import { canRequestRide, getRideReadinessIssues } from "../../lib/profile-readiness";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, addDoc, doc, getDoc } from "firebase/firestore";
@@ -26,6 +27,7 @@ type UserProfile = {
   phone: string;
   email: string;
   homeAddress?: string;
+  homeAddressVerified?: boolean;
   available: boolean;
   riderPhotoUrl?: string;
   driverPhotoUrl?: string;
@@ -166,6 +168,14 @@ export default function RequestPage() {
       return;
     }
 
+    const rideReadinessIssues = getRideReadinessIssues(profile);
+
+    if (rideReadinessIssues.length > 0) {
+      alert(rideReadinessIssues[0]);
+      router.push("/account");
+      return;
+    }
+
     if (driverActiveRide) {
       router.push(`/driver/active/${driverActiveRide.id}`);
       return;
@@ -271,6 +281,27 @@ export default function RequestPage() {
         <AppLoadingState compact title="Active Driver Ride Found" caption="Redirecting you to the active driver screen." />
       ) : riderActiveRide ? (
         <AppLoadingState compact title="Active Ride Found" caption="Redirecting you to your current ride status." />
+      ) : !canRequestRide(profile) ? (
+        <div
+          style={{
+            marginTop: 20,
+            maxWidth: 560,
+            padding: 18,
+            borderRadius: 14,
+            border: "1px solid rgba(248, 113, 113, 0.24)",
+            backgroundColor: "rgba(69, 10, 10, 0.3)",
+          }}
+        >
+          <h2 style={{ marginTop: 0 }}>Finish Account Setup</h2>
+          {getRideReadinessIssues(profile).map((issue) => (
+            <p key={issue} style={{ marginBottom: 10 }}>
+              {issue}
+            </p>
+          ))}
+          <button type="button" onClick={() => router.push("/account")}>
+            Open Account Settings
+          </button>
+        </div>
       ) : (
         <>
           <p><strong>Name:</strong> {profile.name}</p>
