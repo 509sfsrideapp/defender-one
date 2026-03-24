@@ -1,4 +1,5 @@
 import ForegroundNotificationBridge from "./components/ForegroundNotificationBridge";
+import AccountAccessGate from "./components/AccountAccessGate";
 import BottomUtilityNav from "./components/BottomUtilityNav";
 import type { Metadata, Viewport } from "next";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ForegroundNotificationBridge />
         <NotificationNavigationBridge />
+        <AccountAccessGate />
         <ProfileCompletionGate />
         <div className="flex-1">{children}</div>
         <BottomUtilityNav />
@@ -49,7 +51,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 72
+          Version 73
         </footer>
       </body>
     </html>

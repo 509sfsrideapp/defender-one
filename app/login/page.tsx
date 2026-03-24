@@ -4,9 +4,28 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { looksLikeEmail, normalizeUsername } from "../../lib/username";
+
+function getLoginErrorMessage(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+
+  switch (code) {
+    case "auth/user-disabled":
+      return "This account has been frozen. Contact an administrator.";
+    case "auth/invalid-credential":
+      return "Login failed. Check your username/email and password.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Try again in a bit.";
+    default:
+      if (error instanceof Error && error.message) {
+        return `Login failed: ${error.message}`;
+      }
+
+      return "Login failed.";
+  }
+}
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -17,6 +36,19 @@ export default function LoginPage() {
 
   useEffect(() => {
     setReady(true);
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("status");
+
+    if (status === "frozen") {
+      setStatusMessage("This account has been frozen. Contact an administrator.");
+      return;
+    }
+
+    if (status === "removed") {
+      setStatusMessage("This account has been removed.");
+      return;
+    }
+
     setStatusMessage("Enter your username or email and password.");
   }, []);
 
@@ -54,16 +86,27 @@ export default function LoginPage() {
         loginEmail = usernameData.email;
       }
 
-      await signInWithEmailAndPassword(auth, loginEmail, password);
+      const credential = await signInWithEmailAndPassword(auth, loginEmail, password);
+      const profileSnap = await getDoc(doc(db, "users", credential.user.uid));
+      const profile = profileSnap.exists() ? (profileSnap.data() as { accountFrozen?: boolean }) : null;
+
+      if (!profileSnap.exists()) {
+        await signOut(auth);
+        setStatusMessage("This account has been removed.");
+        return;
+      }
+
+      if (profile?.accountFrozen) {
+        await signOut(auth);
+        setStatusMessage("This account has been frozen. Contact an administrator.");
+        return;
+      }
+
       setStatusMessage("Login successful. Redirecting...");
       window.location.href = "/";
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) {
-        setStatusMessage(`Login failed: ${error.message}`);
-      } else {
-        setStatusMessage("Login failed.");
-      }
+      setStatusMessage(getLoginErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
