@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { getTrackedHistory, setTrackedHistory } from "./NavigationHistoryTracker";
 
 type BackIconButtonProps = {
   style?: React.CSSProperties;
@@ -24,30 +25,45 @@ const baseStyle: React.CSSProperties = {
 
 export default function BackIconButton({ style }: BackIconButtonProps) {
   const router = useRouter();
-  const [canGoBack, setCanGoBack] = useState(false);
+  const pathname = usePathname();
+  const [backTarget, setBackTarget] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || !pathname) {
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      setCanGoBack(window.history.length > 1);
-    }, 0);
+    const frame = window.requestAnimationFrame(() => {
+      const history = getTrackedHistory();
 
-    return () => window.clearTimeout(timer);
-  }, []);
+      if (history[history.length - 1] !== pathname) {
+        setBackTarget(history[history.length - 1] ?? null);
+        return;
+      }
+
+      setBackTarget(history[history.length - 2] ?? null);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
 
   const handleBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
+    if (backTarget) {
+      const history = getTrackedHistory();
+      const targetIndex = history.lastIndexOf(backTarget);
+
+      if (targetIndex >= 0) {
+        setTrackedHistory(history.slice(0, targetIndex + 1));
+      }
+
+      router.push(backTarget);
       return;
     }
 
     router.push("/");
   };
 
-  if (!canGoBack) {
+  if (!backTarget) {
     return null;
   }
 
@@ -58,20 +74,10 @@ export default function BackIconButton({ style }: BackIconButtonProps) {
       onClick={handleBack}
       style={{ ...baseStyle, ...style }}
     >
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
-          d="M14.75 4.25 7 12l7.75 7.75"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M7.5 12H18"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M10.75 4.5 3.5 12l7.25 7.5 2.1-2.1-3.55-3.65H20.5v-3.5H9.3l3.55-3.65-2.1-2.1Z"
+          fill="currentColor"
         />
       </svg>
     </button>
