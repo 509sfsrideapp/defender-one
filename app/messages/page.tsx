@@ -8,7 +8,7 @@ import { auth } from "../../lib/firebase";
 import { getAllMessageThreads, type MessageThreadDefinition, type MessageThreadIconKey } from "../../lib/messages";
 import { onAuthStateChanged, User } from "firebase/auth";
 
-function ThreadIcon({ iconKey }: { iconKey: MessageThreadIconKey }) {
+function ThreadIcon({ iconKey }: { iconKey: MessageThreadIconKey | "user" }) {
   if (iconKey === "bell") {
     return (
       <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
