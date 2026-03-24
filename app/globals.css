@@ -283,12 +283,15 @@ button:disabled {
 
 .loading-b2 {
   position: absolute;
+  left: 50%;
   width: clamp(4.5rem, 10vw, 6rem);
+  color: #f8fbff;
   filter: drop-shadow(0 8px 18px rgba(14, 165, 233, 0.18));
-  animation: loading-fly 2.4s ease-in-out infinite;
+  transform: translateX(-50%);
+  animation: loading-spin 2.4s linear infinite;
 }
 
-.loading-b2-image {
+.loading-b2-shape {
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -336,6 +339,15 @@ button:disabled {
   }
   100% {
     transform: translateX(0%) translateY(0) scale(0.94);
+  }
+}
+
+@keyframes loading-spin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
   }
 }
 

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import afgscLogo from "./afgsc.png";
-import b2Image from "./b2.png";
 import targetImage from "./target.png";
 
 export default function Loading() {
@@ -32,13 +31,12 @@ export default function Loading() {
           <div className="loading-track">
             <div className="loading-track-line" />
             <div className="loading-b2">
-              <Image
-                src={b2Image}
-                alt="B-2 Spirit silhouette"
-                width={160}
-                height={72}
-                className="loading-b2-image"
-              />
+              <svg viewBox="0 0 160 72" fill="none" role="presentation" className="loading-b2-shape">
+                <path
+                  d="M80 8L154 38L140 50L113 31L99 42L90 35L80 44L70 35L61 42L47 31L20 50L6 38L80 8Z"
+                  fill="currentColor"
+                />
+              </svg>
             </div>
           </div>
 
