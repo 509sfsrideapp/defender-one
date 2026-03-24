@@ -25,11 +25,11 @@ export default function InitialAppSplash() {
 
     const fadeTimer = window.setTimeout(() => {
       setFadingOut(true);
-    }, 2700);
+    }, 1700);
 
     const hideTimer = window.setTimeout(() => {
       setVisible(false);
-    }, 3000);
+    }, 2000);
 
     return () => {
       window.clearTimeout(fadeTimer);

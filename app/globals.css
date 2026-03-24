@@ -374,7 +374,7 @@ button:disabled {
   background:
     linear-gradient(90deg, rgba(37, 99, 235, 0.24) 0%, rgba(59, 130, 246, 0.9) 42%, rgba(125, 211, 252, 0.95) 74%, rgba(187, 247, 208, 0.9) 100%);
   transform-origin: left center;
-  animation: splash-load 3s ease-out forwards;
+  animation: splash-load 2s ease-out forwards;
 }
 
 .initial-app-splash-status {
