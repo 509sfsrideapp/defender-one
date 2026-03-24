@@ -261,38 +261,6 @@ button:disabled {
   width: 3.9rem;
 }
 
-.route-ready-shell {
-  position: relative;
-  flex: 1;
-}
-
-.route-ready-shell-overlay {
-  position: fixed;
-  inset:
-    calc(env(safe-area-inset-top) + 0.35rem)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
-  z-index: 40;
-  background:
-    radial-gradient(circle at top, rgba(42, 109, 244, 0.08), transparent 28%),
-    linear-gradient(180deg, rgba(5, 7, 13, 0.96) 0%, rgba(3, 4, 6, 0.98) 100%);
-  opacity: 1;
-  pointer-events: none;
-  animation: route-shell-overlay-fade 260ms ease forwards;
-}
-
-.route-ready-shell-content {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-
-.route-ready-shell-content-hidden {
-  opacity: 0.01;
-  transform: translateY(4px);
-}
-
 .initial-app-splash {
   position: fixed;
   inset: 0;
@@ -441,14 +409,6 @@ button:disabled {
   }
 }
 
-@keyframes route-shell-overlay-fade {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
 
 .vault-screen {
   min-height: calc(100dvh - env(safe-area-inset-top));
