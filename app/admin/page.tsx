@@ -41,30 +41,15 @@ type Ride = {
 type AppUser = {
   id: string;
   name?: string;
-  firstName?: string;
-  lastName?: string;
-  username?: string;
   email?: string;
   phone?: string;
   available?: boolean;
-  accountFrozen?: boolean;
-  homeAddress?: string;
-  homeStreet?: string;
-  homeCity?: string;
-  homeState?: string;
-  homeZip?: string;
-  rank?: string;
-  flight?: string;
-  riderPhotoUrl?: string;
   carYear?: string;
   carMake?: string;
   carModel?: string;
   carColor?: string;
   carPlate?: string;
   driverPhotoUrl?: string;
-  locationServicesEnabled?: boolean;
-  createdAt?: { seconds?: number };
-  updatedAt?: { seconds?: number };
 };
 
 export default function AdminPage() {
@@ -74,13 +59,6 @@ export default function AdminPage() {
   const [rides, setRides] = useState<Ride[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [selectedDriversByRide, setSelectedDriversByRide] = useState<Record<string, string>>({});
-  const [accountSearch, setAccountSearch] = useState("");
-  const [accountStatusFilter, setAccountStatusFilter] = useState("all");
-  const [availabilityFilter, setAvailabilityFilter] = useState("all");
-  const [flightFilter, setFlightFilter] = useState("all");
-  const [rankFilter, setRankFilter] = useState("all");
-  const [actingOnUserId, setActingOnUserId] = useState("");
-  const [accountActionMessage, setAccountActionMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -216,75 +194,6 @@ export default function AdminPage() {
     }
   };
 
-  const handleAccountAction = async (action: "freeze" | "unfreeze" | "delete", appUser: AppUser) => {
-    if (!auth.currentUser) {
-      setAccountActionMessage("Admin session expired. Please log in again.");
-      return;
-    }
-
-    if (isAdminEmail(appUser.email)) {
-      setAccountActionMessage("The admin account cannot be managed from this panel.");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      action === "delete"
-        ? `Delete ${appUser.name || appUser.email || appUser.id}? This removes the account entirely.`
-        : action === "freeze"
-          ? `Freeze ${appUser.name || appUser.email || appUser.id}? They will be signed out and blocked from login.`
-          : `Unfreeze ${appUser.name || appUser.email || appUser.id}?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setActingOnUserId(appUser.id);
-      setAccountActionMessage(
-        action === "delete"
-          ? "Deleting account..."
-          : action === "freeze"
-            ? "Freezing account..."
-            : "Unfreezing account..."
-      );
-
-      const idToken = await auth.currentUser.getIdToken();
-      const response = await fetch("/api/admin/accounts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          action,
-          userId: appUser.id,
-          username: appUser.username || "",
-          email: appUser.email || "",
-        }),
-      });
-
-      const payload = (await response.json().catch(() => ({}))) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.error || "The account action failed.");
-      }
-
-      setAccountActionMessage(
-        action === "delete"
-          ? "Account deleted."
-          : action === "freeze"
-            ? "Account frozen."
-            : "Account unfrozen."
-      );
-    } catch (error) {
-      console.error(error);
-      setAccountActionMessage(error instanceof Error ? error.message : "The account action failed.");
-    } finally {
-      setActingOnUserId("");
-    }
-  };
-
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
@@ -338,53 +247,6 @@ export default function AdminPage() {
       ride.status === "picked_up"
   );
   const availableDrivers = users.filter((appUser) => appUser.available);
-  const normalizedAccountSearch = accountSearch.trim().toLowerCase();
-  const uniqueFlights = Array.from(new Set(users.map((appUser) => appUser.flight).filter(Boolean))).sort();
-  const uniqueRanks = Array.from(new Set(users.map((appUser) => appUser.rank).filter(Boolean))).sort();
-  const filteredUsers = users
-    .filter((appUser) => {
-      if (accountStatusFilter === "frozen" && !appUser.accountFrozen) return false;
-      if (accountStatusFilter === "active" && appUser.accountFrozen) return false;
-      if (availabilityFilter === "available" && !appUser.available) return false;
-      if (availabilityFilter === "unavailable" && appUser.available) return false;
-      if (flightFilter !== "all" && (appUser.flight || "") !== flightFilter) return false;
-      if (rankFilter !== "all" && (appUser.rank || "") !== rankFilter) return false;
-
-      if (!normalizedAccountSearch) {
-        return true;
-      }
-
-      const searchableFields = [
-        appUser.name,
-        appUser.firstName,
-        appUser.lastName,
-        appUser.username,
-        appUser.email,
-        appUser.phone,
-        appUser.rank,
-        appUser.flight,
-        appUser.homeAddress,
-        appUser.homeStreet,
-        appUser.homeCity,
-        appUser.homeState,
-        appUser.homeZip,
-        appUser.carYear,
-        appUser.carMake,
-        appUser.carModel,
-        appUser.carColor,
-        appUser.carPlate,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchableFields.includes(normalizedAccountSearch);
-    })
-    .sort((left, right) => {
-      const leftName = (left.name || left.email || left.id).toLowerCase();
-      const rightName = (right.name || right.email || right.id).toLowerCase();
-      return leftName.localeCompare(rightName);
-    });
 
   return (
     <main style={{ padding: 20 }}>
@@ -410,11 +272,6 @@ export default function AdminPage() {
       <p>
         <strong>Signed in as:</strong> {user.email}
       </p>
-      {accountActionMessage ? (
-        <p style={{ marginTop: 12, color: accountActionMessage.toLowerCase().includes("failed") || accountActionMessage.toLowerCase().includes("cannot") ? "#fca5a5" : "#bfdbfe" }}>
-          {accountActionMessage}
-        </p>
-      ) : null}
 
       <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
         <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(18, 37, 63, 0.86)", color: "#dbeafe", border: "1px solid rgba(96, 165, 250, 0.2)" }}>
@@ -454,204 +311,21 @@ export default function AdminPage() {
         >
           Open Ride History
         </Link>
-      </div>
-
-      <section style={{ marginTop: 32 }}>
-        <h2>Account Manager</h2>
-        <div
+        <Link
+          href="/admin/accounts"
           style={{
-            marginBottom: 18,
-            padding: 16,
-            borderRadius: 12,
-            border: "1px solid rgba(148, 163, 184, 0.18)",
-            backgroundColor: "rgba(9, 15, 25, 0.88)",
-            display: "grid",
-            gap: 10,
+            display: "inline-block",
+            marginLeft: 12,
+            padding: "10px 16px",
+            backgroundColor: "#0f766e",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
           }}
         >
-          <input
-            value={accountSearch}
-            onChange={(event) => setAccountSearch(event.target.value)}
-            placeholder="Search by name, username, phone, rank, flight, vehicle, or address"
-            style={{ width: "100%" }}
-          />
-          <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-            <select value={accountStatusFilter} onChange={(event) => setAccountStatusFilter(event.target.value)}>
-              <option value="all">All Account States</option>
-              <option value="active">Active Accounts</option>
-              <option value="frozen">Frozen Accounts</option>
-            </select>
-            <select value={availabilityFilter} onChange={(event) => setAvailabilityFilter(event.target.value)}>
-              <option value="all">All Availability</option>
-              <option value="available">Clocked In Drivers</option>
-              <option value="unavailable">Not Clocked In</option>
-            </select>
-            <select value={flightFilter} onChange={(event) => setFlightFilter(event.target.value)}>
-              <option value="all">All Flights</option>
-              {uniqueFlights.map((flight) => (
-                <option key={flight} value={flight}>
-                  {flight}
-                </option>
-              ))}
-            </select>
-            <select value={rankFilter} onChange={(event) => setRankFilter(event.target.value)}>
-              <option value="all">All Ranks</option>
-              {uniqueRanks.map((rank) => (
-                <option key={rank} value={rank}>
-                  {rank}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {filteredUsers.length === 0 ? (
-          <p>No accounts match the current filters.</p>
-        ) : (
-          filteredUsers.map((appUser) => {
-            const vehicleSummary = [appUser.carColor, appUser.carYear, appUser.carMake, appUser.carModel].filter(Boolean).join(" ").trim();
-            const addressSummary =
-              appUser.homeAddress ||
-              [appUser.homeStreet, appUser.homeCity, appUser.homeState, appUser.homeZip].filter(Boolean).join(", ");
-            const photoUrl = appUser.driverPhotoUrl || appUser.riderPhotoUrl || "";
-            const busy = actingOnUserId === appUser.id;
-
-            return (
-              <div
-                key={appUser.id}
-                style={{
-                  border: "1px solid rgba(148, 163, 184, 0.18)",
-                  backgroundColor: "rgba(9, 15, 25, 0.88)",
-                  color: "#e5edf7",
-                  borderRadius: 12,
-                  padding: 16,
-                  marginBottom: 14,
-                  boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
-                  <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                    {photoUrl ? (
-                      <Link href={photoUrl} target="_blank" style={{ display: "inline-flex" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={photoUrl}
-                          alt={`${appUser.name || appUser.email || "User"} profile`}
-                          style={{ width: 64, height: 64, borderRadius: 999, objectFit: "cover", border: "1px solid rgba(148, 163, 184, 0.22)" }}
-                        />
-                      </Link>
-                    ) : (
-                      <div
-                        style={{
-                          width: 64,
-                          height: 64,
-                          borderRadius: 999,
-                          display: "grid",
-                          placeItems: "center",
-                          backgroundColor: "rgba(18, 37, 63, 0.72)",
-                          color: "#dbeafe",
-                          border: "1px solid rgba(96, 165, 250, 0.2)",
-                          fontFamily: "var(--font-display)",
-                          fontSize: "1.3rem",
-                        }}
-                      >
-                        {(appUser.firstName || appUser.name || appUser.email || "?").charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <h3 style={{ margin: 0 }}>{appUser.name || "Unnamed Account"}</h3>
-                      <p style={{ margin: "6px 0 0", color: "#cbd5e1" }}>
-                        {appUser.rank || "No rank"} {appUser.flight ? `• ${appUser.flight}` : ""}
-                      </p>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                        <span style={{ padding: "4px 10px", borderRadius: 999, backgroundColor: appUser.accountFrozen ? "rgba(127, 29, 29, 0.92)" : "rgba(10, 51, 44, 0.88)", color: "white", fontSize: 12 }}>
-                          {appUser.accountFrozen ? "Frozen" : "Active"}
-                        </span>
-                        <span style={{ padding: "4px 10px", borderRadius: 999, backgroundColor: appUser.available ? "rgba(15, 118, 110, 0.9)" : "rgba(30, 41, 59, 0.92)", color: "white", fontSize: 12 }}>
-                          {appUser.available ? "Clocked In" : "Not Clocked In"}
-                        </span>
-                        {isAdminEmail(appUser.email) ? (
-                          <span style={{ padding: "4px 10px", borderRadius: 999, backgroundColor: "rgba(91, 33, 182, 0.92)", color: "white", fontSize: 12 }}>
-                            Admin
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button
-                      type="button"
-                      onClick={() => handleAccountAction(appUser.accountFrozen ? "unfreeze" : "freeze", appUser)}
-                      disabled={busy || isAdminEmail(appUser.email)}
-                      style={{
-                        padding: "8px 12px",
-                        backgroundColor: appUser.accountFrozen ? "#0f766e" : "#7f1d1d",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {busy && actingOnUserId === appUser.id
-                        ? "Working..."
-                        : appUser.accountFrozen
-                          ? "Unfreeze"
-                          : "Freeze"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAccountAction("delete", appUser)}
-                      disabled={busy || isAdminEmail(appUser.email)}
-                      style={{
-                        padding: "8px 12px",
-                        backgroundColor: "#b91c1c",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {busy && actingOnUserId === appUser.id ? "Working..." : "Delete"}
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", marginTop: 16 }}>
-                  <div>
-                    <strong>Email:</strong> {appUser.email || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Username:</strong> {appUser.username || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Phone:</strong> {appUser.phone || "N/A"}
-                  </div>
-                  <div>
-                    <strong>User ID:</strong> {appUser.id}
-                  </div>
-                  <div>
-                    <strong>Flight:</strong> {appUser.flight || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Rank:</strong> {appUser.rank || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Location Services:</strong> {appUser.locationServicesEnabled === false ? "Off" : "On"}
-                  </div>
-                  <div>
-                    <strong>Vehicle:</strong> {vehicleSummary || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Plate:</strong> {appUser.carPlate || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Address:</strong> {addressSummary || "N/A"}
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </section>
+          Open Accounts
+        </Link>
+      </div>
 
       <section style={{ marginTop: 32 }}>
         <h2>Available Drivers</h2>
@@ -761,7 +435,7 @@ export default function AdminPage() {
                   : "Not shared"}
               </p>
 
-              {(ride.status === "open" || ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
+              {ride.status === "open" || ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up" ? (
                 <div style={{ marginTop: 12 }}>
                   {ride.status === "open" ? (
                     <div style={{ marginBottom: 12, maxWidth: 360 }}>
@@ -839,7 +513,7 @@ export default function AdminPage() {
                 </div>
               ) : null}
 
-              {(ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up") ? (
+              {ride.status === "accepted" || ride.status === "arrived" || ride.status === "picked_up" ? (
                 <LiveRideMap
                   riderLocation={
                     ride.riderLocation?.latitude != null && ride.riderLocation?.longitude != null
