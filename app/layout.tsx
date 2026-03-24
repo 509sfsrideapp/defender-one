@@ -1,4 +1,5 @@
 import ForegroundNotificationBridge from "./components/ForegroundNotificationBridge";
+import BottomUtilityNav from "./components/BottomUtilityNav";
 import type { Metadata, Viewport } from "next";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
 import "./globals.css";
@@ -37,6 +38,7 @@ export default function RootLayout({
         <ForegroundNotificationBridge />
         <NotificationNavigationBridge />
         <div className="flex-1">{children}</div>
+        <BottomUtilityNav />
         <footer
           style={{
             padding: "10px 16px 14px",
@@ -45,7 +47,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 60
+          Version 61
         </footer>
       </body>
     </html>
