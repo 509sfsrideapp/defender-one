@@ -752,8 +752,8 @@ export default function AccountPage() {
               ? "Ready for identity photo checks."
               : "Upload a clear profile picture before requesting rides or driving."}
           </p>
-          <p style={{ color: form.homeAddress.trim() && homeAddressVerified ? "#86efac" : "#fca5a5" }}>
-            {form.homeAddress.trim() && homeAddressVerified
+          <p style={{ color: form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim() && homeAddressVerified ? "#86efac" : "#fca5a5" }}>
+            {form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim() && homeAddressVerified
               ? "Home address is verified for rider use."
               : "Add and verify your home address before requesting rides."}
           </p>
