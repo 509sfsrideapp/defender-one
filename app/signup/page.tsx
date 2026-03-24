@@ -9,6 +9,7 @@ import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { isValidUsername, normalizeUsername } from "../../lib/username";
 
 const flightOptions = ["Alpha", "Bravo", "Charlie", "Delta", "Foxtrot", "Staff"] as const;
+const rankOptions = ["AB", "Amn", "A1C", "SrA", "SSgt", "TSgt", "MSgt", "SMSgt", "CMSgt", "2d Lt", "1st Lt", "Capt", "Maj", "Lt Col", "Col", "Brig Gen", "Maj Gen", "Lt Gen", "Gen"] as const;
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
@@ -253,12 +254,18 @@ export default function SignupPage() {
           style={{ display: "block", marginBottom: 10, width: "100%" }}
         />
 
-        <input
+        <select
           value={rank}
           onChange={(e) => setRank(e.target.value)}
-          placeholder="Rank"
           style={{ display: "block", marginBottom: 10, width: "100%" }}
-        />
+        >
+          <option value="">Select Rank</option>
+          {rankOptions.map((rankOption) => (
+            <option key={rankOption} value={rankOption}>
+              {rankOption}
+            </option>
+          ))}
+        </select>
 
         <select
           value={flight}

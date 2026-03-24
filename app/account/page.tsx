@@ -38,6 +38,7 @@ type UserProfile = {
 
 export default function AccountPage() {
   const flightOptions = ["Alpha", "Bravo", "Charlie", "Delta", "Foxtrot", "Staff"] as const;
+  const rankOptions = ["AB", "Amn", "A1C", "SrA", "SSgt", "TSgt", "MSgt", "SMSgt", "CMSgt", "2d Lt", "1st Lt", "Capt", "Maj", "Lt Col", "Col", "Brig Gen", "Maj Gen", "Lt Gen", "Gen"] as const;
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -537,7 +538,18 @@ export default function AccountPage() {
         <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: homeAddressVerified ? "#86efac" : "#94a3b8" }}>
           {homeAddressVerified ? "Home address verified." : "Home address will be verified when you save Account Settings."}
         </p>
-        <input value={form.rank} onChange={(e) => handleChange("rank", e.target.value)} placeholder="Rank" style={{ marginBottom: 10 }} />
+        <select
+          value={form.rank}
+          onChange={(e) => handleChange("rank", e.target.value)}
+          style={{ display: "block", marginBottom: 10, width: "100%" }}
+        >
+          <option value="">Select Rank</option>
+          {rankOptions.map((rankOption) => (
+            <option key={rankOption} value={rankOption}>
+              {rankOption}
+            </option>
+          ))}
+        </select>
         <select
           value={form.flight}
           onChange={(e) => handleChange("flight", e.target.value)}
