@@ -212,6 +212,20 @@ export default function DriverPage() {
     }
   };
 
+  const clockIn = async () => {
+    if (!user) return;
+
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        available: true,
+      });
+      setProfile((current) => (current ? { ...current, available: true } : current));
+    } catch (error) {
+      console.error(error);
+      alert("Failed to clock in");
+    }
+  };
+
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
@@ -233,19 +247,37 @@ export default function DriverPage() {
     <main style={{ padding: 20 }}>
       <HomeIconLink style={{ marginRight: 12 }} />
 
-      <button
-        onClick={clockOut}
-        style={{
-          padding: "8px 14px",
-          backgroundColor: "#7f1d1d",
-          color: "white",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-        }}
-      >
-        Clock Out
-      </button>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {!profile?.available ? (
+          <button
+            onClick={clockIn}
+            style={{
+              padding: "8px 14px",
+              backgroundColor: "#0f766e",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
+          >
+            Clock In
+          </button>
+        ) : null}
+
+        <button
+          onClick={clockOut}
+          style={{
+            padding: "8px 14px",
+            backgroundColor: "#7f1d1d",
+            color: "white",
+            border: "none",
+            borderRadius: 8,
+            cursor: "pointer",
+          }}
+        >
+          Clock Out
+        </button>
+      </div>
 
       <h1 style={{ marginTop: 20 }}>Driver Dashboard</h1>
 

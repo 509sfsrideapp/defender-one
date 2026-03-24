@@ -32,6 +32,7 @@ type UserProfile = {
   carMake?: string;
   carModel?: string;
   carColor?: string;
+  locationServicesEnabled?: boolean;
   emergencyRideAddressConsent?: boolean;
 };
 
@@ -227,6 +228,29 @@ export default function HomePage() {
     try {
       setSubmittingEmergencyRide(true);
       const pickupAddress = profile.homeAddress?.trim() || "";
+      const riderLocation =
+        profile.locationServicesEnabled === false
+          ? null
+          : await new Promise<{ latitude: number; longitude: number } | null>((resolve) => {
+              if (typeof window === "undefined" || !("geolocation" in navigator)) {
+                resolve(null);
+                return;
+              }
+
+              navigator.geolocation.getCurrentPosition(
+                (position) =>
+                  resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                  }),
+                () => resolve(null),
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 60000,
+                }
+              );
+            });
       const rideRef = await addDoc(collection(db, "rides"), {
         riderId: user.uid,
         riderName: profile.name,
@@ -237,7 +261,7 @@ export default function HomePage() {
         pickupLocationName: null,
         pickupLocationAddress: pickupAddress,
         destination: "Destination to be confirmed with rider",
-        riderLocation: null,
+        riderLocation,
         status: "open",
         isEmergencyRide: true,
         createdAt: new Date(),
