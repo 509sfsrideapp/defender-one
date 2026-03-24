@@ -88,17 +88,13 @@ function DevIcon() {
       height="34"
       fill="none"
       stroke="currentColor"
-      strokeWidth="3"
+      strokeWidth="4"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M38 12 52 26 46 32 32 18 38 12Z" />
-      <path d="M28 20 16 32l4 4-6 6" />
-      <path d="m26 40-6 6" />
-      <path d="m15 22-5 5 5 5" />
-      <path d="m49 22 5 5-5 5" />
-      <path d="M28 49h8" />
-      <path d="M26 17h-8" />
+      <path d="m22 22-10 10 10 10" />
+      <path d="m42 22 10 10-10 10" />
+      <path d="M36 18 28 46" />
     </svg>
   );
 }
