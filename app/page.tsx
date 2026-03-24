@@ -34,6 +34,31 @@ type UserProfile = {
   carColor?: string;
 };
 
+const appTilePlaceholderCount = 8;
+
+function SteeringWheelIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      width="34"
+      height="34"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="32" cy="32" r="20" />
+      <circle cx="32" cy="24" r="6" />
+      <path d="M32 30v22" />
+      <path d="M14 38l14-5" />
+      <path d="M50 38l-14-5" />
+      <path d="M20 46c2-6 6-9 12-9s10 3 12 9" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -343,56 +368,179 @@ export default function HomePage() {
 
           {!driverActiveRide && !riderActiveRide ? (
             <div style={{ marginTop: 20 }}>
-            {rideReady ? (
-              <Link
-                href="/request"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: 540,
-                  padding: "16px 20px",
-                  background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 14,
-                  textAlign: "center",
-                  fontSize: 18,
-                  fontFamily: "var(--font-display)",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  boxShadow: "0 16px 38px rgba(127, 18, 18, 0.34)",
-                }}
-              >
-                Request Ride
-              </Link>
-            ) : (
-              <>
-                <div
+              {rideReady ? (
+                <Link
+                  href="/request"
                   style={{
                     display: "block",
                     width: "100%",
                     maxWidth: 540,
                     padding: "16px 20px",
-                    background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
-                    color: "#cbd5e1",
+                    background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
+                    color: "white",
+                    textDecoration: "none",
                     borderRadius: 14,
                     textAlign: "center",
                     fontSize: 18,
                     fontFamily: "var(--font-display)",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
-                    opacity: 0.82,
+                    boxShadow: "0 16px 38px rgba(127, 18, 18, 0.34)",
                   }}
                 >
                   Request Ride
+                </Link>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      maxWidth: 540,
+                      padding: "16px 20px",
+                      background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
+                      color: "#cbd5e1",
+                      borderRadius: 14,
+                      textAlign: "center",
+                      fontSize: 18,
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
+                      opacity: 0.82,
+                    }}
+                  >
+                    Request Ride
+                  </div>
+                  <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
+                    You must complete additional account information in order to use this feature.
+                  </p>
+                  {rideIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{rideIssues[0]}</p> : null}
+                </>
+              )}
+
+              <div style={{ maxWidth: 540, marginTop: 24 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {driverReady ? (
+                    <Link
+                      href="/driver"
+                      style={{
+                        minHeight: 112,
+                        padding: "14px 12px",
+                        borderRadius: 18,
+                        textDecoration: "none",
+                        color: "#e5edf7",
+                        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
+                        border: "1px solid rgba(96, 165, 250, 0.18)",
+                        boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
+                        display: "grid",
+                        justifyItems: "center",
+                        alignContent: "center",
+                        gap: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: 999,
+                          display: "grid",
+                          placeItems: "center",
+                          backgroundColor: "rgba(59, 130, 246, 0.12)",
+                          color: "#dbeafe",
+                        }}
+                      >
+                        <SteeringWheelIcon />
+                      </div>
+                      <span
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          fontFamily: "var(--font-display)",
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Driver Dashboard
+                      </span>
+                    </Link>
+                  ) : (
+                    <div
+                      style={{
+                        minHeight: 112,
+                        padding: "14px 12px",
+                        borderRadius: 18,
+                        color: "#94a3b8",
+                        background: "linear-gradient(180deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.94) 100%)",
+                        border: "1px solid rgba(148, 163, 184, 0.16)",
+                        display: "grid",
+                        justifyItems: "center",
+                        alignContent: "center",
+                        gap: 10,
+                        opacity: 0.82,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: 999,
+                          display: "grid",
+                          placeItems: "center",
+                          backgroundColor: "rgba(148, 163, 184, 0.12)",
+                          color: "#cbd5e1",
+                        }}
+                      >
+                        <SteeringWheelIcon />
+                      </div>
+                      <span
+                        style={{
+                          textAlign: "center",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          fontFamily: "var(--font-display)",
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Driver Dashboard
+                      </span>
+                    </div>
+                  )}
+
+                  {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (
+                    <div
+                      key={index}
+                      aria-hidden="true"
+                      style={{
+                        minHeight: 112,
+                        borderRadius: 18,
+                        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.46) 0%, rgba(9, 15, 25, 0.7) 100%)",
+                        border: "1px dashed rgba(148, 163, 184, 0.14)",
+                        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.02)",
+                      }}
+                    />
+                  ))}
                 </div>
-                <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
-                  You must complete additional account information in order to use this feature.
-                </p>
-                {rideIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{rideIssues[0]}</p> : null}
-              </>
-            )}
+
+                {!driverReady ? (
+                  <>
+                    <p style={{ maxWidth: 540, marginTop: 12, color: "#94a3b8" }}>
+                      You must complete additional account information in order to use this feature.
+                    </p>
+                    {driverIssues[0] ? (
+                      <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
             </div>
           ) : null}
 
@@ -411,45 +559,6 @@ export default function HomePage() {
               >
                 Current Ride Status
               </Link>
-            </div>
-          ) : null}
-
-          {!driverActiveRide && !riderActiveRide ? (
-            <div style={{ marginTop: 20 }}>
-            {driverReady ? (
-              <Link
-                href="/driver"
-                style={{
-                  display: "inline-block",
-                  padding: "10px 16px",
-                  backgroundColor: "#1f2937",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 8,
-                }}
-              >
-                Driver Dashboard
-              </Link>
-            ) : (
-              <>
-                <div
-                  style={{
-                    display: "inline-block",
-                    padding: "10px 16px",
-                    backgroundColor: "rgba(51, 65, 85, 0.9)",
-                    color: "#cbd5e1",
-                    borderRadius: 8,
-                    opacity: 0.82,
-                  }}
-                >
-                  Driver Dashboard
-                </div>
-                <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
-                  You must complete additional account information in order to use this feature.
-                </p>
-                {driverIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p> : null}
-              </>
-            )}
             </div>
           ) : null}
 
