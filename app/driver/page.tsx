@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
@@ -22,8 +23,11 @@ type Ride = {
   id: string;
   riderId?: string;
   riderName?: string;
+  riderRank?: string;
+  riderLastName?: string;
   riderPhone?: string;
   riderEmail?: string;
+  riderPhotoUrl?: string;
   pickup: string;
   pickupLocationName?: string;
   pickupLocationAddress?: string;
@@ -64,6 +68,10 @@ function renderPickupSummary(ride: Ride) {
   return ride.pickupLocationName || ride.pickupLocationAddress || ride.pickup || "Not resolved yet";
 }
 
+function renderRiderName(ride: Ride) {
+  return [ride.riderRank?.trim(), ride.riderLastName?.trim()].filter(Boolean).join(" ").trim() || ride.riderName || "N/A";
+}
+
 export default function DriverPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -91,6 +99,10 @@ export default function DriverPage() {
   }, []);
 
   useEffect(() => {
+    if (!user || !profile?.available) {
+      return;
+    }
+
     const q = query(collection(db, "rides"), where("status", "==", "open"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -102,7 +114,7 @@ export default function DriverPage() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [profile?.available, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -329,24 +341,56 @@ export default function DriverPage() {
                 borderRadius: 12,
                 backgroundColor: "rgba(9, 15, 25, 0.88)",
                 color: "#e5edf7",
-                boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
-              }}
-            >
-              <p>
-                <strong>Rider:</strong> {ride.riderName || "N/A"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {ride.riderPhone || "N/A"}
-              </p>
-              <p>
-                <strong>Stage:</strong> {ride.status}
-              </p>
-              <p>
-                <strong>Pickup:</strong> {renderPickupSummary(ride)}
-              </p>
-              <p>
-                <strong>Destination:</strong> {ride.destination}
-              </p>
+              boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
+            }}
+          >
+              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                {ride.riderPhotoUrl ? (
+                  <Image
+                    src={ride.riderPhotoUrl}
+                    alt={`${renderRiderName(ride)} profile`}
+                    width={68}
+                    height={68}
+                    unoptimized
+                    style={{
+                      width: 68,
+                      height: 68,
+                      objectFit: "cover",
+                      borderRadius: 999,
+                      border: "1px solid rgba(96, 165, 250, 0.22)",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 68,
+                      height: 68,
+                      borderRadius: 999,
+                      display: "grid",
+                      placeItems: "center",
+                      backgroundColor: "rgba(18, 37, 63, 0.72)",
+                      color: "#dbeafe",
+                      border: "1px solid rgba(96, 165, 250, 0.2)",
+                      fontFamily: "var(--font-display)",
+                      fontSize: "1.35rem",
+                    }}
+                  >
+                    {renderRiderName(ride).charAt(0).toUpperCase()}
+                  </div>
+                )}
+
+                <div>
+                  <p style={{ margin: 0 }}>
+                    <strong>Rider:</strong> {renderRiderName(ride)}
+                  </p>
+                  <p style={{ margin: "8px 0 0" }}>
+                    <strong>Stage:</strong> {ride.status}
+                  </p>
+                  <p style={{ margin: "8px 0 0" }}>
+                    <strong>Pickup:</strong> {renderPickupSummary(ride)}
+                  </p>
+                </div>
+              </div>
               {ride.pickupLocationAddress ? (
                 <p>
                   <strong>Address:</strong> {ride.pickupLocationAddress}
@@ -388,21 +432,53 @@ export default function DriverPage() {
                 borderRadius: 12,
                 backgroundColor: "rgba(9, 15, 25, 0.88)",
                 color: "#e5edf7",
-                boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
-              }}
-            >
-              <p>
-                <strong>Rider:</strong> {ride.riderName || "N/A"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {ride.riderPhone || "N/A"}
-              </p>
-              <p>
-                <strong>Pickup:</strong> {renderPickupSummary(ride)}
-              </p>
-              <p>
-                <strong>Destination:</strong> {ride.destination}
-              </p>
+              boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
+            }}
+          >
+              <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                {ride.riderPhotoUrl ? (
+                  <Image
+                    src={ride.riderPhotoUrl}
+                    alt={`${renderRiderName(ride)} profile`}
+                    width={68}
+                    height={68}
+                    unoptimized
+                    style={{
+                      width: 68,
+                      height: 68,
+                      objectFit: "cover",
+                      borderRadius: 999,
+                      border: "1px solid rgba(96, 165, 250, 0.22)",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 68,
+                      height: 68,
+                      borderRadius: 999,
+                      display: "grid",
+                      placeItems: "center",
+                      backgroundColor: "rgba(18, 37, 63, 0.72)",
+                      color: "#dbeafe",
+                      border: "1px solid rgba(96, 165, 250, 0.2)",
+                      fontFamily: "var(--font-display)",
+                      fontSize: "1.35rem",
+                    }}
+                  >
+                    {renderRiderName(ride).charAt(0).toUpperCase()}
+                  </div>
+                )}
+
+                <div>
+                  <p style={{ margin: 0 }}>
+                    <strong>Rider:</strong> {renderRiderName(ride)}
+                  </p>
+                  <p style={{ margin: "8px 0 0" }}>
+                    <strong>Pickup:</strong> {renderPickupSummary(ride)}
+                  </p>
+                </div>
+              </div>
 
               <button
                 onClick={() => acceptRide(ride.id)}

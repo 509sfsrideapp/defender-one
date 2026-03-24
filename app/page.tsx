@@ -20,6 +20,7 @@ type UserProfile = {
   rank?: string;
   flight?: string;
   username?: string;
+  rank?: string;
   phone: string;
   email: string;
   available: boolean;
@@ -245,6 +246,9 @@ export default function HomePage() {
     try {
       setSubmittingEmergencyRide(true);
       const pickupAddress = profile.homeAddress?.trim() || "";
+      const riderDisplayName =
+        [profile.rank?.trim(), profile.lastName?.trim()].filter(Boolean).join(" ").trim() ||
+        profile.name;
       const riderLocation: Coordinates | null =
         profile.locationServicesEnabled === false
           ? null
@@ -297,10 +301,12 @@ export default function HomePage() {
         (riderLocation ? "Current GPS location" : pickupAddress);
       const rideRef = await addDoc(collection(db, "rides"), {
         riderId: user.uid,
-        riderName: profile.name,
+        riderName: riderDisplayName,
         riderPhone: profile.phone,
         riderEmail: profile.email,
         riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
+        riderRank: profile.rank?.trim() || null,
+        riderLastName: profile.lastName?.trim() || null,
         pickup: resolvedPickup,
         pickupLocationName: geocodedPickup?.placeName || null,
         pickupLocationAddress: resolvedPickupAddress,

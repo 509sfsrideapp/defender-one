@@ -15,8 +15,46 @@ service cloud.firestore {
         request.auth.token.email == "509sfsrideapp@gmail.com";
     }
 
+    function isAvailableDriver() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.available == true;
+    }
+
     function activeRideStatus(status) {
       return status in ["open", "accepted", "arrived", "picked_up"];
+    }
+
+    function ownerEditableUserFields() {
+      return [
+        "name",
+        "firstName",
+        "lastName",
+        "username",
+        "phone",
+        "homeAddress",
+        "homeStreet",
+        "homeCity",
+        "homeState",
+        "homeZip",
+        "rank",
+        "rankOrRole",
+        "flight",
+        "riderPhotoUrl",
+        "driverPhotoUrl",
+        "carYear",
+        "carMake",
+        "carModel",
+        "carColor",
+        "carPlate",
+        "locationServicesEnabled",
+        "notificationsEnabled",
+        "notificationTokens",
+        "notificationDeviceId",
+        "notificationsUpdatedAt",
+        "available",
+        "updatedAt",
+        "emergencyRideAddressConsent"
+      ];
     }
 
     match /users/{userId} {
@@ -26,7 +64,11 @@ service cloud.firestore {
 
       allow read: if isOwner(userId) || isAdmin();
 
-      allow update: if isOwner(userId) || isAdmin();
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.email == resource.data.email &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(ownerEditableUserFields())
+      );
     }
 
     match /usernames/{username} {
@@ -54,10 +96,28 @@ service cloud.firestore {
     match /rides/{rideId} {
       allow create: if signedIn() &&
         request.resource.data.riderId == request.auth.uid &&
-        request.resource.data.status == "open";
+        request.resource.data.status == "open" &&
+        request.resource.data.keys().hasOnly([
+          "riderId",
+          "riderName",
+          "riderPhone",
+          "riderEmail",
+          "riderPhotoUrl",
+          "riderRank",
+          "riderLastName",
+          "pickup",
+          "pickupLocationName",
+          "pickupLocationAddress",
+          "destination",
+          "riderLocation",
+          "status",
+          "createdAt",
+          "isEmergencyRide",
+          "emergencySavedAddress"
+        ]);
 
       allow read: if signedIn() && (
-        resource.data.status == "open" ||
+        (resource.data.status == "open" && isAvailableDriver()) ||
         resource.data.riderId == request.auth.uid ||
         resource.data.acceptedBy == request.auth.uid ||
         isAdmin()

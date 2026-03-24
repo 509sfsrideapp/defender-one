@@ -639,9 +639,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           </div>
         </div>
         <p>
-          <strong>Destination:</strong> {ride.destination || "N/A"}
-        </p>
-        <p>
           <strong>Navigation:</strong>{" "}
           {mapsUrl
             ? isMobileDevice

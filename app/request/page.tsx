@@ -23,6 +23,9 @@ type ReverseGeocodeResult = {
 
 type UserProfile = {
   name: string;
+  firstName?: string;
+  lastName?: string;
+  rank?: string;
   username?: string;
   phone: string;
   email: string;
@@ -201,6 +204,9 @@ export default function RequestPage() {
 
     try {
       setSubmitting(true);
+      const riderDisplayName =
+        [profile.rank?.trim(), profile.lastName?.trim()].filter(Boolean).join(" ").trim() ||
+        profile.name;
       const geocodedPickup = coordinates ? await resolvePickupLocation(coordinates).catch(() => null) : null;
       const resolvedPickupLabel =
         pickup.trim() ||
@@ -211,10 +217,12 @@ export default function RequestPage() {
 
       const rideRef = await addDoc(collection(db, "rides"), {
         riderId: user.uid,
-        riderName: profile.name,
+        riderName: riderDisplayName,
         riderPhone: profile.phone,
         riderEmail: profile.email,
         riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
+        riderRank: profile.rank?.trim() || null,
+        riderLastName: profile.lastName?.trim() || null,
         pickup: resolvedPickupLabel,
         pickupLocationName: geocodedPickup?.placeName || null,
         pickupLocationAddress: geocodedPickup?.address || geocodedPickup?.display || null,
