@@ -600,8 +600,11 @@ export default function AccountPage() {
             accept="image/*"
             onChange={handlePhotoUpload}
             disabled={uploadingPhoto}
-            style={{ marginBottom: 10 }}
+            style={{ marginBottom: 6 }}
           />
+          <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
+            Use a clear photo that shows what you look like so riders and drivers know who to look for.
+          </p>
         </div>
 
         <input

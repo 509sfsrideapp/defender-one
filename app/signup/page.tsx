@@ -138,7 +138,7 @@ export default function SignupPage() {
         <select
           value={flight}
           onChange={(e) => setFlight(e.target.value)}
-          style={{ display: "block", marginBottom: 6, width: "100%" }}
+          style={{ display: "block", marginBottom: 10, width: "100%" }}
         >
           <option value="">Select Flight</option>
           {flightOptions.map((flightOption) => (
@@ -147,10 +147,6 @@ export default function SignupPage() {
             </option>
           ))}
         </select>
-
-        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
-          Flight options: Alpha, Bravo, Charlie, Delta, Foxtrot, or Staff.
-        </p>
 
         <input
           value={phone}
@@ -189,7 +185,10 @@ export default function SignupPage() {
           style={{ display: "block", marginBottom: 16, width: "100%" }}
         />
 
-        <h2>Finish Later</h2>
+        <h2>Complete Now or Later</h2>
+        <p style={{ marginTop: 0, marginBottom: 12, color: "#94a3b8" }}>
+          Certain features will not be available until this information is completed.
+        </p>
         <div
           style={{
             marginBottom: 16,
