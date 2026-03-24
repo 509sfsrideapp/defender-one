@@ -38,6 +38,7 @@ type UserProfile = {
   carPlate?: string;
   driverPhotoUrl?: string;
   locationServicesEnabled?: boolean;
+  emergencyRideAddressConsent?: boolean;
 };
 
 export default function AccountPage() {
@@ -682,6 +683,25 @@ export default function AccountPage() {
               ? "Turn Off Location Services"
               : "Turn On Location Services"}
         </button>
+
+        <h2 style={{ marginTop: 24 }}>App Permissions</h2>
+        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
+          Review emergency ride permissions and future app access settings here.
+        </p>
+        <Link
+          href="/account/permissions"
+          style={{
+            display: "inline-block",
+            padding: "10px 16px",
+            backgroundColor: "#111827",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+            marginBottom: 18,
+          }}
+        >
+          Open App Permissions
+        </Link>
 
         <h2 style={{ marginTop: 24 }}>Vehicle Details</h2>
         <input value={form.carYear} onChange={(e) => handleChange("carYear", e.target.value)} placeholder="Car year (optional)" style={{ marginBottom: 10 }} />

@@ -98,7 +98,12 @@ export async function validateSignupDraft(draft: SignupDraft) {
   return { ok: true as const, normalizedUsername };
 }
 
-export async function finalizeSignupFromDraft(draft: SignupDraft) {
+export async function finalizeSignupFromDraft(
+  draft: SignupDraft,
+  options?: {
+    emergencyRideAddressConsent?: boolean;
+  }
+) {
   const validation = await validateSignupDraft(draft);
 
   if (!validation.ok) {
@@ -140,6 +145,7 @@ export async function finalizeSignupFromDraft(draft: SignupDraft) {
     carModel: draft.carModel.trim(),
     carColor: draft.carColor.trim(),
     carPlate: "",
+    emergencyRideAddressConsent: Boolean(options?.emergencyRideAddressConsent),
     available: false,
     createdAt: new Date(),
   });

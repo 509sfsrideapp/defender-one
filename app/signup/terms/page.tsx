@@ -57,7 +57,9 @@ export default function SignupTermsPage() {
     try {
       setSubmitting(true);
       setStatusMessage("Creating account...");
-      await finalizeSignupFromDraft(draft);
+      await finalizeSignupFromDraft(draft, {
+        emergencyRideAddressConsent,
+      });
       window.sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
       alert("Account created");
       window.location.href = "/login";
@@ -72,7 +74,7 @@ export default function SignupTermsPage() {
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
-        <p>Loading terms...</p>
+        <p>Loading app permissions...</p>
       </main>
     );
   }
@@ -80,9 +82,9 @@ export default function SignupTermsPage() {
   return (
     <main style={{ padding: 20 }}>
       <HomeIconLink />
-      <h1>Terms of Service</h1>
+      <h1>App Permissions</h1>
       <p style={{ maxWidth: 760 }}>
-        This is the placeholder Terms of Service step for account creation. We will add the real terms text here next.
+        Review and accept the app permissions tied to emergency ride behavior before creating your account.
       </p>
 
       <div
@@ -96,7 +98,7 @@ export default function SignupTermsPage() {
           boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Placeholder Terms</h2>
+        <h2 style={{ marginTop: 0 }}>Account Creation Permissions</h2>
         <label
           style={{
             display: "flex",
@@ -118,8 +120,8 @@ export default function SignupTermsPage() {
           </span>
         </label>
         <p>
-          Future terms of service text will go here, including user responsibilities, acceptable use, and ride-system
-          expectations.
+          Future permissions and terms text will go here, including user responsibilities, acceptable use, and
+          ride-system expectations.
         </p>
         <p>
           For now, this page exists as the required checkpoint before the account is actually created.
@@ -143,7 +145,7 @@ export default function SignupTermsPage() {
           Back to Signup
         </Link>
         <button type="button" onClick={handleAcceptTerms} disabled={submitting}>
-          {submitting ? "Creating Account..." : "Agree and Create Account"}
+          {submitting ? "Creating Account..." : "Accept and Create Account"}
         </button>
       </div>
     </main>

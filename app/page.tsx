@@ -11,7 +11,7 @@ import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 
 type UserProfile = {
   name: string;
@@ -32,6 +32,7 @@ type UserProfile = {
   carMake?: string;
   carModel?: string;
   carColor?: string;
+  emergencyRideAddressConsent?: boolean;
 };
 
 const appTilePlaceholderCount = 6;
@@ -107,6 +108,7 @@ export default function HomePage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authWarning, setAuthWarning] = useState("");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [submittingEmergencyRide, setSubmittingEmergencyRide] = useState(false);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
@@ -183,6 +185,7 @@ export default function HomePage() {
   const driverIssues = getDriverReadinessIssues(profile);
   const rideReady = canRequestRide(profile);
   const driverReady = canDrive(profile);
+  const emergencyRideEnabled = Boolean(profile?.emergencyRideAddressConsent);
 
   const handleLogout = async () => {
     try {
@@ -191,6 +194,78 @@ export default function HomePage() {
     } catch (error) {
       console.error(error);
       alert("Logout failed");
+    }
+  };
+
+  const submitEmergencyRide = async () => {
+    if (!user || !profile) {
+      return;
+    }
+
+    if (!emergencyRideEnabled) {
+      router.push("/request");
+      return;
+    }
+
+    if (!rideReady) {
+      if (rideIssues[0]) {
+        alert(rideIssues[0]);
+      }
+      return;
+    }
+
+    if (driverActiveRide) {
+      router.push(`/driver/active/${driverActiveRide.id}`);
+      return;
+    }
+
+    if (riderActiveRide) {
+      router.push(`/ride-status?rideId=${riderActiveRide.id}`);
+      return;
+    }
+
+    try {
+      setSubmittingEmergencyRide(true);
+      const pickupAddress = profile.homeAddress?.trim() || "";
+      const rideRef = await addDoc(collection(db, "rides"), {
+        riderId: user.uid,
+        riderName: profile.name,
+        riderPhone: profile.phone,
+        riderEmail: profile.email,
+        riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
+        pickup: pickupAddress,
+        pickupLocationName: null,
+        pickupLocationAddress: pickupAddress,
+        destination: "Destination to be confirmed with rider",
+        riderLocation: null,
+        status: "open",
+        isEmergencyRide: true,
+        createdAt: new Date(),
+      });
+
+      const idToken = await auth.currentUser?.getIdToken();
+
+      if (idToken) {
+        void fetch("/api/notifications/ride-request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            rideId: rideRef.id,
+          }),
+        }).catch((error) => {
+          console.error("Driver notification request failed", error);
+        });
+      }
+
+      router.push(`/ride-status?rideId=${rideRef.id}`);
+    } catch (error) {
+      console.error(error);
+      alert("Could not request the emergency ride.");
+    } finally {
+      setSubmittingEmergencyRide(false);
     }
   };
 
@@ -409,27 +484,34 @@ export default function HomePage() {
           {!driverActiveRide && !riderActiveRide ? (
             <div style={{ marginTop: 20 }}>
               {rideReady ? (
-                <Link
-                  href="/request"
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (emergencyRideEnabled) {
+                      void submitEmergencyRide();
+                    } else {
+                      router.push("/request");
+                    }
+                  }}
+                  disabled={submittingEmergencyRide}
                   style={{
                     display: "block",
                     width: "100%",
                     maxWidth: 540,
-                    padding: "16px 20px",
+                    padding: "18px 22px",
                     background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
                     color: "white",
-                    textDecoration: "none",
                     borderRadius: 14,
                     textAlign: "center",
-                    fontSize: 18,
+                    fontSize: 19,
                     fontFamily: "var(--font-display)",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     boxShadow: "0 16px 38px rgba(127, 18, 18, 0.34)",
                   }}
                 >
-                  Request Ride
-                </Link>
+                  {submittingEmergencyRide ? "Requesting..." : "Request Emergency Ride"}
+                </button>
               ) : (
                 <>
                   <div
