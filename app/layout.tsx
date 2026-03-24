@@ -3,6 +3,7 @@ import AccountAccessGate from "./components/AccountAccessGate";
 import BottomUtilityNav from "./components/BottomUtilityNav";
 import DeveloperAccessCleaner from "./components/DeveloperAccessCleaner";
 import InitialAppSplash from "./components/InitialAppSplash";
+import RouteReadyShell from "./components/RouteReadyShell";
 import type { Metadata, Viewport } from "next";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
 import ProfileCompletionGate from "./components/ProfileCompletionGate";
@@ -45,7 +46,9 @@ export default function RootLayout({
         <DeveloperAccessCleaner />
         <AccountAccessGate />
         <ProfileCompletionGate />
-        <div className="flex-1">{children}</div>
+        <RouteReadyShell>
+          <div className="flex-1">{children}</div>
+        </RouteReadyShell>
         <BottomUtilityNav />
         <footer
           style={{
@@ -55,7 +58,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 89
+          Version 90
         </footer>
       </body>
     </html>
