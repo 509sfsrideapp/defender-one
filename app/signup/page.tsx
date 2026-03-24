@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
+import { ChangeEvent, useState } from "react";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -19,7 +20,98 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [homeAddress, setHomeAddress] = useState("");
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
+  const [carYear, setCarYear] = useState("");
+  const [carMake, setCarMake] = useState("");
+  const [carModel, setCarModel] = useState("");
+  const [carColor, setCarColor] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [addressCheckMessage, setAddressCheckMessage] = useState("");
+
+  const convertImageToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+          return;
+        }
+
+        reject(new Error("Could not read the selected image."));
+      };
+      reader.onerror = () => reject(new Error("Could not read the selected image."));
+      reader.readAsDataURL(file);
+    });
+
+  const shrinkImage = async (file: File) => {
+    const sourceUrl = await convertImageToDataUrl(file);
+    const image = new window.Image();
+
+    const loaded = new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Could not load the selected image."));
+    });
+
+    image.src = sourceUrl;
+    await loaded;
+
+    const maxDimension = 480;
+    const scale = Math.min(maxDimension / image.width, maxDimension / image.height, 1);
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Could not process the selected image.");
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    let quality = 0.82;
+    let compressed = canvas.toDataURL("image/jpeg", quality);
+
+    while (compressed.length > 180000 && quality > 0.45) {
+      quality -= 0.08;
+      compressed = canvas.toDataURL("image/jpeg", quality);
+    }
+
+    if (compressed.length > 180000) {
+      throw new Error("That photo is still too large. Please choose a smaller image.");
+    }
+
+    return compressed;
+  };
+
+  const handlePhotoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setStatusMessage("Please choose an image file.");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      setStatusMessage("Preparing profile photo...");
+      const compressedPhoto = await shrinkImage(file);
+      setProfilePhotoUrl(compressedPhoto);
+      setStatusMessage("Profile photo is ready and will be saved with your account.");
+    } catch (error) {
+      console.error(error);
+      setStatusMessage(error instanceof Error ? error.message : "Could not process the profile photo.");
+    } finally {
+      setUploadingPhoto(false);
+      event.target.value = "";
+    }
+  };
 
   const handleSignup = async () => {
     if (
@@ -57,10 +149,42 @@ export default function SignupPage() {
         return;
       }
 
+      let normalizedHomeAddress = homeAddress.trim();
+      let homeAddressVerified = false;
+
+      if (normalizedHomeAddress) {
+        setAddressCheckMessage("Verifying home address...");
+
+        const validationResponse = await fetch("/api/geocode/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: normalizedHomeAddress }),
+        });
+
+        const validationDetails = (await validationResponse.json().catch(() => null)) as
+          | { valid?: boolean; normalizedAddress?: string; error?: string }
+          | null;
+
+        if (!validationResponse.ok || !validationDetails?.valid || !validationDetails.normalizedAddress) {
+          setStatusMessage(validationDetails?.error || "Please enter a real home address or leave it blank for now.");
+          setAddressCheckMessage("");
+          return;
+        }
+
+        normalizedHomeAddress = validationDetails.normalizedAddress;
+        homeAddressVerified = true;
+        setAddressCheckMessage(`Verified: ${normalizedHomeAddress}`);
+      } else {
+        setAddressCheckMessage("");
+      }
+
       setStatusMessage("Creating account...");
 
       const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      const trimmedPhoto = profilePhotoUrl.trim();
 
       const batch = writeBatch(db);
       batch.set(doc(db, "users", userCredential.user.uid), {
@@ -73,14 +197,14 @@ export default function SignupPage() {
         username: normalizedUsername,
         phone: phone.trim(),
         email: email.trim(),
-        homeAddress: "",
-        homeAddressVerified: false,
-        riderPhotoUrl: "",
-        driverPhotoUrl: "",
-        carYear: "",
-        carMake: "",
-        carModel: "",
-        carColor: "",
+        homeAddress: normalizedHomeAddress,
+        homeAddressVerified,
+        riderPhotoUrl: trimmedPhoto,
+        driverPhotoUrl: trimmedPhoto,
+        carYear: carYear.trim(),
+        carMake: carMake.trim(),
+        carModel: carModel.trim(),
+        carColor: carColor.trim(),
         carPlate: "",
         available: false,
         createdAt: new Date(),
@@ -111,6 +235,7 @@ export default function SignupPage() {
 
       <div style={{ marginTop: 20, maxWidth: 460 }}>
         {statusMessage ? <p style={{ marginBottom: 12 }}>{statusMessage}</p> : null}
+        {addressCheckMessage ? <p style={{ marginBottom: 12, color: "#94a3b8" }}>{addressCheckMessage}</p> : null}
 
         <h2 style={{ marginTop: 0 }}>Required Now</h2>
 
@@ -198,18 +323,78 @@ export default function SignupPage() {
             backgroundColor: "rgba(9, 15, 25, 0.88)",
           }}
         >
-          <p style={{ marginTop: 0 }}>
-            <strong>Before requesting rides:</strong> add and verify your home address in Account Settings.
-          </p>
-          <p>
-            <strong>Before driving:</strong> add your vehicle year, make, model, and color in Account Settings.
-          </p>
-          <p style={{ marginBottom: 0 }}>
-            <strong>Before doing either:</strong> upload a clear profile picture so riders and drivers know who to look for.
-          </p>
+          <input
+            value={homeAddress}
+            onChange={(e) => {
+              setHomeAddress(e.target.value);
+              setAddressCheckMessage("");
+            }}
+            placeholder="Home Address"
+            style={{ display: "block", marginBottom: 10, width: "100%" }}
+          />
+
+          <div style={{ marginBottom: 12 }}>
+            {profilePhotoUrl ? (
+              <Image
+                src={profilePhotoUrl}
+                alt="Profile preview"
+                width={96}
+                height={96}
+                unoptimized
+                style={{
+                  width: 96,
+                  height: 96,
+                  objectFit: "cover",
+                  borderRadius: 999,
+                  border: "1px solid rgba(148, 163, 184, 0.22)",
+                  display: "block",
+                  marginBottom: 10,
+                }}
+              />
+            ) : null}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              disabled={uploadingPhoto}
+              style={{ marginBottom: 6 }}
+            />
+            <p style={{ marginTop: 0, marginBottom: 0, fontSize: 13, color: "#94a3b8" }}>
+              Use a clear photo that shows what you look like so riders and drivers know who to look for.
+            </p>
+          </div>
+
+          <input
+            value={carYear}
+            onChange={(e) => setCarYear(e.target.value)}
+            placeholder="Vehicle Year"
+            style={{ display: "block", marginBottom: 10, width: "100%" }}
+          />
+
+          <input
+            value={carMake}
+            onChange={(e) => setCarMake(e.target.value)}
+            placeholder="Vehicle Make"
+            style={{ display: "block", marginBottom: 10, width: "100%" }}
+          />
+
+          <input
+            value={carModel}
+            onChange={(e) => setCarModel(e.target.value)}
+            placeholder="Vehicle Model"
+            style={{ display: "block", marginBottom: 10, width: "100%" }}
+          />
+
+          <input
+            value={carColor}
+            onChange={(e) => setCarColor(e.target.value)}
+            placeholder="Vehicle Color"
+            style={{ display: "block", marginBottom: 0, width: "100%" }}
+          />
         </div>
 
-        <button type="button" onClick={handleSignup} style={{ padding: 10 }}>
+        <button type="button" onClick={handleSignup} style={{ padding: 10 }} disabled={uploadingPhoto}>
           Create Account
         </button>
       </div>
