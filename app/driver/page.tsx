@@ -8,6 +8,7 @@ import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
 import { canDrive, getDriverReadinessIssues } from "../../lib/profile-readiness";
+import { getLatestActiveRideForDriver } from "../../lib/ride-state";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
   collection,
@@ -17,6 +18,7 @@ import {
   doc,
   updateDoc,
   getDoc,
+  runTransaction,
 } from "firebase/firestore";
 
 type Ride = {
@@ -162,26 +164,65 @@ export default function DriverPage() {
     }
 
     try {
+      const existingRide = await getLatestActiveRideForDriver(user.uid);
+
+      if (existingRide) {
+        alert("You already have an active ride.");
+        router.replace(`/driver/active/${existingRide.id}`);
+        return;
+      }
+
       const selectedRide = openRides.find((ride) => ride.id === rideId);
       const rideRef = doc(db, "rides", rideId);
-      await updateDoc(rideRef, {
-        status: "accepted",
-        acceptedBy: user.uid,
-        driverName: profile.name,
-        driverPhone: profile.phone,
-        driverEmail: profile.email,
-        driverPhotoUrl: profile.driverPhotoUrl || null,
-        carYear: profile.carYear || null,
-        carMake: profile.carMake || null,
-        carModel: profile.carModel || null,
-        carColor: profile.carColor || null,
-        carPlate: profile.carPlate || null,
-        acceptedAt: new Date(),
-        arrivedAt: null,
-        pickedUpAt: null,
-        completedAt: null,
-        canceledAt: null,
+      const driverRef = doc(db, "users", user.uid);
+      await runTransaction(db, async (transaction) => {
+        const rideSnap = await transaction.get(rideRef);
+        const driverSnap = await transaction.get(driverRef);
+
+        if (!rideSnap.exists()) {
+          throw new Error("That ride is no longer available.");
+        }
+
+        const rideData = rideSnap.data() as Ride;
+
+        if (rideData.status !== "open") {
+          throw new Error("This ride was already accepted by another driver.");
+        }
+
+        if (rideData.acceptedBy) {
+          throw new Error("This ride was already assigned.");
+        }
+
+        const driverData = driverSnap.data() as UserProfile | undefined;
+
+        if (!driverData?.available) {
+          throw new Error("Clock in before accepting rides.");
+        }
+
+        transaction.update(rideRef, {
+          status: "accepted",
+          acceptedBy: user.uid,
+          driverName: profile.name,
+          driverPhone: profile.phone,
+          driverEmail: profile.email,
+          driverPhotoUrl: profile.driverPhotoUrl || null,
+          carYear: profile.carYear || null,
+          carMake: profile.carMake || null,
+          carModel: profile.carModel || null,
+          carColor: profile.carColor || null,
+          carPlate: profile.carPlate || null,
+          acceptedAt: new Date(),
+          arrivedAt: null,
+          pickedUpAt: null,
+          completedAt: null,
+          canceledAt: null,
+        });
+        transaction.update(driverRef, {
+          available: false,
+          updatedAt: new Date(),
+        });
       });
+      setProfile((current) => (current ? { ...current, available: false } : current));
 
       const idToken = await auth.currentUser?.getIdToken();
 
@@ -205,7 +246,7 @@ export default function DriverPage() {
       router.replace(`/driver/active/${rideId}`);
     } catch (error) {
       console.error(error);
-      alert("Error accepting ride");
+      alert(error instanceof Error ? error.message : "Error accepting ride");
     }
   };
 
@@ -213,6 +254,14 @@ export default function DriverPage() {
     if (!user) return;
 
     try {
+      const existingRide = await getLatestActiveRideForDriver(user.uid);
+
+      if (existingRide) {
+        alert("You can't clock out during an active ride.");
+        router.replace(`/driver/active/${existingRide.id}`);
+        return;
+      }
+
       await updateDoc(doc(db, "users", user.uid), {
         available: false,
       });
@@ -220,7 +269,7 @@ export default function DriverPage() {
       window.location.href = "/";
     } catch (error) {
       console.error(error);
-      alert("Failed to clock out");
+      alert(error instanceof Error ? error.message : "Failed to clock out");
     }
   };
 

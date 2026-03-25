@@ -8,7 +8,7 @@ import AppLoadingState from "../../../components/AppLoadingState";
 import { auth, db } from "../../../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, runTransaction, updateDoc } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -194,6 +194,21 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   }, [ride, router, user]);
 
   useEffect(() => {
+    if (!user || !ride || ride.acceptedBy !== user.uid) return;
+
+    if (ride.status !== "canceled" && ride.status !== "completed") {
+      return;
+    }
+
+    void updateDoc(doc(db, "users", user.uid), {
+      available: true,
+      updatedAt: new Date(),
+    }).catch((error) => {
+      console.error(error);
+    });
+  }, [ride, user]);
+
+  useEffect(() => {
     if (!user) return;
 
     const loadLocationPreference = async () => {
@@ -363,21 +378,41 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   }, [geolocationAvailable, locationServicesEnabled, ride, user]);
 
   const updateRideStage = async (status: "arrived" | "picked_up") => {
-    if (!ride) return;
-
-    const updates =
-      status === "arrived"
-        ? {
-            status,
-            arrivedAt: new Date(),
-          }
-        : {
-            status,
-            pickedUpAt: new Date(),
-          };
+    if (!ride || !user) return;
 
     try {
-      await updateDoc(doc(db, "rides", ride.id), updates);
+      await runTransaction(db, async (transaction) => {
+        const rideRef = doc(db, "rides", ride.id);
+        const rideSnap = await transaction.get(rideRef);
+
+        if (!rideSnap.exists()) {
+          throw new Error("This ride is no longer available.");
+        }
+
+        const currentRide = rideSnap.data() as Ride;
+
+        if (currentRide.acceptedBy !== user.uid) {
+          throw new Error("This ride is assigned to another driver.");
+        }
+
+        if (status === "arrived" && currentRide.status !== "accepted") {
+          throw new Error("You can only mark the ride as arrived after it has been accepted.");
+        }
+
+        if (status === "picked_up" && currentRide.status !== "arrived") {
+          throw new Error("Mark the driver as arrived before moving to picked up.");
+        }
+
+        transaction.update(rideRef, status === "arrived"
+          ? {
+              status,
+              arrivedAt: new Date(),
+            }
+          : {
+              status,
+              pickedUpAt: new Date(),
+            });
+      });
 
       if (status === "arrived") {
         const idToken = await auth.currentUser?.getIdToken();
@@ -401,27 +436,51 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
       }
     } catch (error) {
       console.error(error);
-      alert(`Error updating ride to ${status}.`);
+      alert(error instanceof Error ? error.message : `Error updating ride to ${status}.`);
     }
   };
 
   const completeRide = async () => {
-    if (!ride) return;
+    if (!ride || !user) return;
 
     const confirmed = window.confirm("Mark this ride as completed?");
     if (!confirmed) return;
 
     try {
-      await updateDoc(doc(db, "rides", ride.id), {
-        status: "completed",
-        completedAt: new Date(),
-        driverLocation: driverCoordinates ?? ride.driverLocation ?? null,
+      await runTransaction(db, async (transaction) => {
+        const rideRef = doc(db, "rides", ride.id);
+        const driverRef = doc(db, "users", user.uid);
+        const rideSnap = await transaction.get(rideRef);
+
+        if (!rideSnap.exists()) {
+          throw new Error("This ride is no longer available.");
+        }
+
+        const currentRide = rideSnap.data() as Ride;
+
+        if (currentRide.acceptedBy !== user.uid) {
+          throw new Error("This ride is assigned to another driver.");
+        }
+
+        if (currentRide.status !== "picked_up") {
+          throw new Error("A ride must be marked as picked up before it can be completed.");
+        }
+
+        transaction.update(rideRef, {
+          status: "completed",
+          completedAt: new Date(),
+          driverLocation: driverCoordinates ?? currentRide.driverLocation ?? null,
+        });
+        transaction.update(driverRef, {
+          available: true,
+          updatedAt: new Date(),
+        });
       });
       alert("Ride completed");
       router.replace("/driver");
     } catch (error) {
       console.error(error);
-      alert("Error completing ride");
+      alert(error instanceof Error ? error.message : "Error completing ride");
     }
   };
 

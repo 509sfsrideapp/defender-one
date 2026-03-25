@@ -4,18 +4,11 @@ import { User } from "firebase/auth";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "./firebase";
-
-export type ActiveRideRef = {
-  id: string;
-  status?: string;
-  createdAt?: {
-    seconds?: number;
-    nanoseconds?: number;
-  };
-};
-
-export const RIDER_ACTIVE_RIDE_STATUSES = ["open", "accepted", "arrived", "picked_up"] as const;
-export const DRIVER_ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
+import {
+  DRIVER_ACTIVE_RIDE_STATUSES,
+  RIDER_ACTIVE_RIDE_STATUSES,
+  type ActiveRideStateRef as ActiveRideRef,
+} from "./ride-state";
 
 function sortNewestRide(a: ActiveRideRef, b: ActiveRideRef) {
   return (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0);

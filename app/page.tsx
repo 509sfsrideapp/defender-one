@@ -9,6 +9,7 @@ import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
 import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
+import { getLatestActiveRideForRider } from "../lib/ride-state";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
@@ -414,6 +415,14 @@ export default function HomePage() {
 
     try {
       setSubmittingEmergencyRide(true);
+      const existingRide = await getLatestActiveRideForRider(user.uid);
+
+      if (existingRide) {
+        alert("You already have an active ride request.");
+        router.push(`/ride-status?rideId=${existingRide.id}`);
+        return;
+      }
+
       const pickupAddress = profile.homeAddress?.trim() || "";
       const riderDisplayName =
         [profile.rank?.trim(), profile.lastName?.trim()].filter(Boolean).join(" ").trim() ||
@@ -507,7 +516,7 @@ export default function HomePage() {
       router.push(`/ride-status?rideId=${rideRef.id}`);
     } catch (error) {
       console.error(error);
-      alert("Could not request the emergency ride.");
+      alert(error instanceof Error ? error.message : "Could not request the emergency ride.");
     } finally {
       setSubmittingEmergencyRide(false);
     }

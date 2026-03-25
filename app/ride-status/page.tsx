@@ -10,7 +10,7 @@ import { formatEtaLabel } from "../../lib/eta";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, runTransaction, where } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -174,14 +174,33 @@ export default function RideStatusPage() {
 
     try {
       setCancelingRide(true);
-      await updateDoc(doc(db, "rides", activeRide.id), {
-        status: "canceled",
-        canceledAt: new Date(),
-        canceledBy: user.uid,
+      await runTransaction(db, async (transaction) => {
+        const rideRef = doc(db, "rides", activeRide.id);
+        const rideSnap = await transaction.get(rideRef);
+
+        if (!rideSnap.exists()) {
+          throw new Error("This ride is no longer available.");
+        }
+
+        const currentRide = rideSnap.data() as Ride;
+
+        if (currentRide.riderId !== user.uid) {
+          throw new Error("This ride belongs to another rider.");
+        }
+
+        if (!currentRide.status || !["open", "accepted", "arrived"].includes(currentRide.status)) {
+          throw new Error("This ride can no longer be canceled from the rider screen.");
+        }
+
+        transaction.update(rideRef, {
+          status: "canceled",
+          canceledAt: new Date(),
+          canceledBy: user.uid,
+        });
       });
     } catch (error) {
       console.error(error);
-      alert("We could not cancel your ride.");
+      alert(error instanceof Error ? error.message : "We could not cancel your ride.");
     } finally {
       setCancelingRide(false);
     }

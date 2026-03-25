@@ -6,6 +6,7 @@ import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { canRequestRide, getRideReadinessIssues } from "../../lib/profile-readiness";
+import { getLatestActiveRideForRider } from "../../lib/ride-state";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, addDoc, doc, getDoc } from "firebase/firestore";
@@ -204,6 +205,14 @@ export default function RequestPage() {
 
     try {
       setSubmitting(true);
+      const existingRide = await getLatestActiveRideForRider(user.uid);
+
+      if (existingRide) {
+        alert("You already have an active ride request.");
+        router.push(`/ride-status?rideId=${existingRide.id}`);
+        return;
+      }
+
       const riderDisplayName =
         [profile.rank?.trim(), profile.lastName?.trim()].filter(Boolean).join(" ").trim() ||
         profile.name;
@@ -267,7 +276,7 @@ export default function RequestPage() {
       router.push(`/ride-status?rideId=${rideRef.id}`);
     } catch (error) {
       console.error(error);
-      alert("Error submitting request");
+      alert(error instanceof Error ? error.message : "Error submitting request");
     } finally {
       setSubmitting(false);
     }
