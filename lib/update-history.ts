@@ -7,7 +7,7 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
-    commit: "pending",
+    commit: "46d1793",
     title: "Dev Tile for All Accounts",
     summary: "Made the Dev app tile stay visible for any logged-in account instead of hiding it behind the admin account only.",
   },
