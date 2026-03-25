@@ -78,6 +78,7 @@ export default function AccountPage() {
     carColor: "",
     carPlate: "",
   });
+  const isAdminAccount = isAdminEmail(user?.email);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -292,7 +293,16 @@ export default function AccountPage() {
       return;
     }
 
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.rank.trim() || !form.flight.trim() || !form.phone.trim() || !form.email.trim() || !form.username.trim()) {
+    if (
+      !isAdminAccount &&
+      (!form.firstName.trim() ||
+        !form.lastName.trim() ||
+        !form.rank.trim() ||
+        !form.flight.trim() ||
+        !form.phone.trim() ||
+        !form.email.trim() ||
+        !form.username.trim())
+    ) {
       setStatusMessage("First name, last name, rank, flight, username, phone, and email are required.");
       return;
     }
@@ -342,7 +352,7 @@ export default function AccountPage() {
 
       const batch = writeBatch(db);
       const profilePhotoUrl = form.profilePhotoUrl.trim();
-      const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+      const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || profile?.name?.trim() || "Admin";
       batch.set(
         doc(db, "users", user.uid),
         {
