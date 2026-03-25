@@ -159,37 +159,6 @@ function PlaceholderTile() {
   );
 }
 
-function ReadinessActionCard({
-  href,
-  title,
-  status,
-  detail,
-}: {
-  href: string;
-  title: string;
-  status: string;
-  detail: string;
-}) {
-  return (
-    <Link
-      href={href}
-      style={{
-        padding: "0.95rem 1rem",
-        borderRadius: 18,
-        border: "1px solid rgba(248, 113, 113, 0.22)",
-        background: "linear-gradient(180deg, rgba(69, 10, 10, 0.68) 0%, rgba(31, 41, 55, 0.9) 100%)",
-        textDecoration: "none",
-        color: "#e5edf7",
-        boxShadow: "0 10px 24px rgba(2, 6, 23, 0.16)",
-      }}
-    >
-      <p style={{ margin: 0, color: "#fca5a5", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase" }}>{title}</p>
-      <p style={{ margin: "0.35rem 0 0", color: "#fee2e2", fontFamily: "var(--font-display)" }}>{status}</p>
-      <p style={{ margin: "0.35rem 0 0", color: "#cbd5e1", fontSize: 13 }}>{detail}</p>
-    </Link>
-  );
-}
-
 function SteeringWheelIcon() {
   return (
     <svg
@@ -375,6 +344,10 @@ export default function HomePage() {
         }
       : null,
   ].filter((card): card is { href: string; title: string; status: string; detail: string } => card !== null);
+  void firstName;
+  void displayName;
+  void userRoleLabel;
+  void readinessCards;
 
   const handleLogout = async () => {
     try {
@@ -786,67 +759,6 @@ export default function HomePage() {
 
           {!driverActiveRide && !riderActiveRide ? (
             <div style={{ marginTop: 20, display: "grid", gap: 20 }}>
-              <section
-                style={{
-                  ...homepageCardStyle,
-                  padding: "clamp(1.15rem, 3vw, 1.8rem)",
-                  display: "grid",
-                  gap: 18,
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "start" }}>
-                  <div style={{ maxWidth: 700 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "#7dd3fc",
-                        letterSpacing: "0.16em",
-                        textTransform: "uppercase",
-                        fontSize: 12,
-                      }}
-                    >
-                      Mission Hub
-                    </p>
-                    <h2 style={{ margin: "0.45rem 0 0.5rem" }}>Welcome back, {displayName}</h2>
-                    <p style={{ margin: 0, color: "#cbd5e1", maxWidth: 640 }}>
-                      Launch an emergency ride fast, monitor your current mission status, or move into your assigned tools from one clean operations screen.
-                    </p>
-                  </div>
-
-                  <div
-                    style={{
-                      minWidth: 220,
-                      padding: "0.95rem 1rem",
-                      borderRadius: 18,
-                      border: "1px solid rgba(148, 163, 184, 0.16)",
-                      background: "rgba(8, 14, 24, 0.76)",
-                    }}
-                  >
-                    <p style={{ margin: 0, color: "#7dd3fc", letterSpacing: "0.14em", textTransform: "uppercase", fontSize: 12 }}>
-                      Account Status
-                    </p>
-                    <p style={{ margin: "0.45rem 0 0", fontFamily: "var(--font-display)", fontSize: "1.1rem" }}>{userRoleLabel}</p>
-                    <p style={{ margin: "0.2rem 0 0", color: profile?.available ? "#86efac" : "#94a3b8" }}>
-                      {profile?.available ? "Driver availability is active" : "Driver availability is currently off"}
-                    </p>
-                  </div>
-                </div>
-
-                {readinessCards.length > 0 ? (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-                    {readinessCards.map((card) => (
-                      <ReadinessActionCard
-                        key={card.title}
-                        href={card.href}
-                        title={card.title}
-                        status={card.status}
-                        detail={card.detail}
-                      />
-                    ))}
-                  </div>
-                ) : null}
-              </section>
-
               {rideReady ? (
                 <>
                   <button
