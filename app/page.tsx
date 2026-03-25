@@ -48,6 +48,115 @@ type ReverseGeocodeResult = {
 };
 
 const appTilePlaceholderCount = 6;
+const homepageCardStyle: React.CSSProperties = {
+  borderRadius: 24,
+  border: "1px solid rgba(148, 163, 184, 0.16)",
+  background: "linear-gradient(180deg, rgba(10, 16, 27, 0.92) 0%, rgba(5, 8, 14, 0.96) 100%)",
+  boxShadow: "0 18px 42px rgba(2, 6, 23, 0.22)",
+};
+
+function AppTile({
+  href,
+  icon,
+  label,
+  disabled = false,
+}: {
+  href?: string;
+  icon: React.ReactNode;
+  label: string;
+  disabled?: boolean;
+}) {
+  const sharedStyle: React.CSSProperties = {
+    minHeight: 120,
+    padding: "16px 12px",
+    borderRadius: 20,
+    display: "grid",
+    justifyItems: "center",
+    alignContent: "center",
+    gap: 12,
+    textAlign: "center",
+  };
+
+  const iconShell = (
+    <div
+      style={{
+        width: 56,
+        height: 56,
+        borderRadius: 999,
+        display: "grid",
+        placeItems: "center",
+        backgroundColor: disabled ? "rgba(148, 163, 184, 0.12)" : "rgba(59, 130, 246, 0.12)",
+        color: disabled ? "#cbd5e1" : "#dbeafe",
+      }}
+    >
+      {icon}
+    </div>
+  );
+
+  const labelNode = (
+    <span
+      style={{
+        fontSize: 12,
+        lineHeight: 1.3,
+        fontFamily: "var(--font-display)",
+        letterSpacing: "0.05em",
+        textTransform: "uppercase",
+      }}
+    >
+      {label}
+    </span>
+  );
+
+  if (disabled || !href) {
+    return (
+      <div
+        style={{
+          ...sharedStyle,
+          color: "#94a3b8",
+          background: "linear-gradient(180deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.94) 100%)",
+          border: "1px solid rgba(148, 163, 184, 0.16)",
+          opacity: 0.82,
+        }}
+      >
+        {iconShell}
+        {labelNode}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      style={{
+        ...sharedStyle,
+        textDecoration: "none",
+        color: "#e5edf7",
+        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
+        border: "1px solid rgba(96, 165, 250, 0.18)",
+        boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
+      }}
+    >
+      {iconShell}
+      {labelNode}
+    </Link>
+  );
+}
+
+function PlaceholderTile() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        minHeight: 120,
+        borderRadius: 20,
+        padding: "16px 12px",
+        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.46) 0%, rgba(9, 15, 25, 0.7) 100%)",
+        border: "1px dashed rgba(148, 163, 184, 0.14)",
+        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.02)",
+      }}
+    />
+  );
+}
 
 function SteeringWheelIcon() {
   return (
@@ -198,6 +307,10 @@ export default function HomePage() {
   const rideReady = canRequestRide(profile);
   const driverReady = canDrive(profile);
   const emergencyRideEnabled = Boolean(profile?.emergencyRideAddressConsent);
+  const firstName = profile?.firstName?.trim() || "";
+  const displayName = firstName || user?.email?.split("@")[0] || "Operator";
+  const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
+  const showDevTile = Boolean(user?.email && isAdminEmail(user.email));
   const emergencyRideBlockers = [
     !emergencyRideEnabled ? "One-tap emergency ride is off until you accept the App Permissions emergency ride setting." : null,
     profile?.locationServicesEnabled === false
@@ -344,9 +457,22 @@ export default function HomePage() {
   };
 
   return (
-    <main style={{ padding: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-        <h1 style={{ margin: 0 }}>Defender Drivers</h1>
+    <main style={{ padding: 20, maxWidth: 1180, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <div>
+          <p
+            style={{
+              margin: 0,
+              color: "#7dd3fc",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              fontSize: 12,
+            }}
+          >
+            509 SFS Ride Operations
+          </p>
+          <h1 style={{ margin: "0.4rem 0 0" }}>Defender Drivers</h1>
+        </div>
         {user ? (
           <div ref={profileMenuRef} style={{ position: "relative", display: "grid", justifyItems: "end" }}>
             <button
@@ -480,54 +606,91 @@ export default function HomePage() {
       ) : null}
 
       {!user ? (
-        <div style={{ marginTop: 20 }}>
-          <div style={{ marginBottom: 20 }}>
-            <Link
-              href="/signup"
-              style={{
-                display: "inline-block",
-                padding: "10px 16px",
-                backgroundColor: "#1f2937",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: 8,
-              }}
-            >
-              Create Account
-            </Link>
-          </div>
+        <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
+          <section
+            style={{
+              ...homepageCardStyle,
+              padding: "clamp(1.2rem, 3vw, 2rem)",
+              display: "grid",
+              gap: 18,
+            }}
+          >
+            <div style={{ maxWidth: 760 }}>
+              <p style={{ margin: 0, color: "#cbd5e1", fontSize: "1.05rem" }}>
+                Emergency ride coordination for squadron personnel. Request support fast, track live ride status, and keep leadership visibility tight through one shared operations platform.
+              </p>
+            </div>
 
-          <div>
-            <Link
-              href="/login"
-              style={{
-                display: "inline-block",
-                padding: "10px 16px",
-                backgroundColor: "#1f2937",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: 8,
-              }}
-            >
-              Login
-            </Link>
-          </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Link
+                href="/signup"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minWidth: 180,
+                  padding: "14px 18px",
+                  background: "linear-gradient(180deg, rgba(37, 99, 235, 0.96) 0%, rgba(30, 64, 175, 0.98) 100%)",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: 14,
+                  boxShadow: "0 14px 34px rgba(30, 64, 175, 0.28)",
+                }}
+              >
+                Create Account
+              </Link>
+              <Link
+                href="/login"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minWidth: 140,
+                  padding: "14px 18px",
+                  backgroundColor: "#111827",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: 14,
+                  border: "1px solid rgba(148, 163, 184, 0.18)",
+                }}
+              >
+                Login
+              </Link>
+              <Link
+                href="/admin/login"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minWidth: 160,
+                  padding: "14px 18px",
+                  backgroundColor: "rgba(91, 33, 182, 0.9)",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: 14,
+                  border: "1px solid rgba(196, 181, 253, 0.18)",
+                }}
+              >
+                Admin Login
+              </Link>
+            </div>
+          </section>
 
-          <div style={{ marginTop: 20 }}>
-            <Link
-              href="/admin/login"
-              style={{
-                display: "inline-block",
-                padding: "10px 16px",
-                backgroundColor: "#7c3aed",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: 8,
-              }}
-            >
-              Admin Login
-            </Link>
-          </div>
+          <section
+            style={{
+              ...homepageCardStyle,
+              padding: "1.1rem 1.2rem",
+              display: "grid",
+              gap: 10,
+            }}
+          >
+            <h2 style={{ margin: 0 }}>What This Handles</h2>
+            <div style={{ display: "grid", gap: 8 }}>
+              <p style={{ margin: 0, color: "#cbd5e1" }}>Rapid emergency ride requests with live driver response.</p>
+              <p style={{ margin: 0, color: "#cbd5e1" }}>Driver availability and active-ride mission workflow.</p>
+              <p style={{ margin: 0, color: "#cbd5e1" }}>Administrative oversight for accounts, requests, and ride history.</p>
+            </div>
+          </section>
         </div>
       ) : (
         <div style={{ marginTop: 20 }}>
@@ -556,7 +719,102 @@ export default function HomePage() {
           ) : null}
 
           {!driverActiveRide && !riderActiveRide ? (
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginTop: 20, display: "grid", gap: 20 }}>
+              <section
+                style={{
+                  ...homepageCardStyle,
+                  padding: "clamp(1.15rem, 3vw, 1.8rem)",
+                  display: "grid",
+                  gap: 18,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "start" }}>
+                  <div style={{ maxWidth: 700 }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#7dd3fc",
+                        letterSpacing: "0.16em",
+                        textTransform: "uppercase",
+                        fontSize: 12,
+                      }}
+                    >
+                      Mission Hub
+                    </p>
+                    <h2 style={{ margin: "0.45rem 0 0.5rem" }}>Welcome back, {displayName}</h2>
+                    <p style={{ margin: 0, color: "#cbd5e1", maxWidth: 640 }}>
+                      Launch an emergency ride fast, monitor your current mission status, or move into your assigned tools from one clean operations screen.
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      minWidth: 220,
+                      padding: "0.95rem 1rem",
+                      borderRadius: 18,
+                      border: "1px solid rgba(148, 163, 184, 0.16)",
+                      background: "rgba(8, 14, 24, 0.76)",
+                    }}
+                  >
+                    <p style={{ margin: 0, color: "#7dd3fc", letterSpacing: "0.14em", textTransform: "uppercase", fontSize: 12 }}>
+                      Account Status
+                    </p>
+                    <p style={{ margin: "0.45rem 0 0", fontFamily: "var(--font-display)", fontSize: "1.1rem" }}>{userRoleLabel}</p>
+                    <p style={{ margin: "0.2rem 0 0", color: profile?.available ? "#86efac" : "#94a3b8" }}>
+                      {profile?.available ? "Driver availability is active" : "Driver availability is currently off"}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+                  <div
+                    style={{
+                      padding: "0.95rem 1rem",
+                      borderRadius: 18,
+                      border: "1px solid rgba(148, 163, 184, 0.16)",
+                      background: "rgba(8, 14, 24, 0.76)",
+                    }}
+                  >
+                    <p style={{ margin: 0, color: "#7dd3fc", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                      Ride Readiness
+                    </p>
+                    <p style={{ margin: "0.35rem 0 0", color: rideReady ? "#86efac" : "#fca5a5" }}>
+                      {rideReady ? "Ready" : "Needs attention"}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      padding: "0.95rem 1rem",
+                      borderRadius: 18,
+                      border: "1px solid rgba(148, 163, 184, 0.16)",
+                      background: "rgba(8, 14, 24, 0.76)",
+                    }}
+                  >
+                    <p style={{ margin: 0, color: "#7dd3fc", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                      Driver Readiness
+                    </p>
+                    <p style={{ margin: "0.35rem 0 0", color: driverReady ? "#86efac" : "#fca5a5" }}>
+                      {driverReady ? "Ready" : "Needs attention"}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      padding: "0.95rem 1rem",
+                      borderRadius: 18,
+                      border: "1px solid rgba(148, 163, 184, 0.16)",
+                      background: "rgba(8, 14, 24, 0.76)",
+                    }}
+                  >
+                    <p style={{ margin: 0, color: "#7dd3fc", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                      One-Tap Emergency
+                    </p>
+                    <p style={{ margin: "0.35rem 0 0", color: emergencyRideBlockers.length === 0 ? "#86efac" : "#fca5a5" }}>
+                      {emergencyRideBlockers.length === 0 ? "Armed" : "Manual fallback"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
               {rideReady ? (
                 <>
                   <button
@@ -572,23 +830,23 @@ export default function HomePage() {
                     style={{
                       display: "block",
                       width: "100%",
-                      maxWidth: 540,
-                      padding: "18px 22px",
+                      maxWidth: 680,
+                      padding: "22px 24px",
                       background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
                       color: "white",
-                      borderRadius: 14,
+                      borderRadius: 18,
                       textAlign: "center",
-                      fontSize: 19,
+                      fontSize: 21,
                       fontFamily: "var(--font-display)",
-                      letterSpacing: "0.08em",
+                      letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      boxShadow: "0 16px 38px rgba(127, 18, 18, 0.34)",
+                      boxShadow: "0 20px 44px rgba(127, 18, 18, 0.34)",
                     }}
                   >
                     {submittingEmergencyRide ? "Requesting..." : "Request Emergency Ride"}
                   </button>
                   {emergencyRideBlockers.length > 0 ? (
-                    <p style={{ maxWidth: 540, marginTop: 10, marginBottom: 0, color: "#94a3b8", fontSize: 13 }}>
+                    <p style={{ maxWidth: 680, marginTop: 10, marginBottom: 0, color: "#94a3b8", fontSize: 13 }}>
                       {emergencyRideBlockers.join(" ")}
                     </p>
                   ) : null}
@@ -599,15 +857,15 @@ export default function HomePage() {
                     style={{
                       display: "block",
                       width: "100%",
-                      maxWidth: 540,
-                      padding: "16px 20px",
+                      maxWidth: 680,
+                      padding: "20px 24px",
                       background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
                       color: "#cbd5e1",
-                      borderRadius: 14,
+                      borderRadius: 18,
                       textAlign: "center",
-                      fontSize: 18,
+                      fontSize: 20,
                       fontFamily: "var(--font-display)",
-                      letterSpacing: "0.08em",
+                      letterSpacing: "0.1em",
                       textTransform: "uppercase",
                       boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
                       opacity: 0.82,
@@ -615,209 +873,37 @@ export default function HomePage() {
                   >
                     Request Ride
                   </div>
-                  <p style={{ maxWidth: 540, marginTop: 10, color: "#94a3b8" }}>
+                  <p style={{ maxWidth: 680, marginTop: 10, color: "#94a3b8" }}>
                     You must complete additional account information in order to use this feature.
                   </p>
-                  {rideIssues[0] ? <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{rideIssues[0]}</p> : null}
+                  {rideIssues[0] ? <p style={{ maxWidth: 680, marginTop: 0, color: "#fca5a5" }}>{rideIssues[0]}</p> : null}
                 </>
               )}
 
-              <div style={{ maxWidth: 540, marginTop: 24 }}>
+              <section
+                style={{
+                  ...homepageCardStyle,
+                  maxWidth: 840,
+                  padding: "1.1rem 1.15rem 1.2rem",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
+                  <h2 style={{ margin: 0 }}>Applications</h2>
+                  <p style={{ margin: 0, color: "#94a3b8", fontSize: 13 }}>Operational tools and support modules</p>
+                </div>
                 <div
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                     gap: 12,
+                    marginTop: 14,
                   }}
                 >
-                  {driverReady ? (
-                    <Link
-                      href="/driver"
-                      style={{
-                        minHeight: 112,
-                        padding: "14px 12px",
-                        borderRadius: 18,
-                        textDecoration: "none",
-                        color: "#e5edf7",
-                        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
-                        border: "1px solid rgba(96, 165, 250, 0.18)",
-                        boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
-                        display: "grid",
-                        justifyItems: "center",
-                        alignContent: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 52,
-                          height: 52,
-                          borderRadius: 999,
-                          display: "grid",
-                          placeItems: "center",
-                          backgroundColor: "rgba(59, 130, 246, 0.12)",
-                          color: "#dbeafe",
-                        }}
-                      >
-                        <SteeringWheelIcon />
-                      </div>
-                      <span
-                        style={{
-                          textAlign: "center",
-                          fontSize: 12,
-                          lineHeight: 1.3,
-                          fontFamily: "var(--font-display)",
-                          letterSpacing: "0.04em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Driver Dashboard
-                      </span>
-                    </Link>
-                  ) : (
-                    <div
-                      style={{
-                        minHeight: 112,
-                        padding: "14px 12px",
-                        borderRadius: 18,
-                        color: "#94a3b8",
-                        background: "linear-gradient(180deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.94) 100%)",
-                        border: "1px solid rgba(148, 163, 184, 0.16)",
-                        display: "grid",
-                        justifyItems: "center",
-                        alignContent: "center",
-                        gap: 10,
-                        opacity: 0.82,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 52,
-                          height: 52,
-                          borderRadius: 999,
-                          display: "grid",
-                          placeItems: "center",
-                          backgroundColor: "rgba(148, 163, 184, 0.12)",
-                          color: "#cbd5e1",
-                        }}
-                      >
-                        <SteeringWheelIcon />
-                      </div>
-                      <span
-                        style={{
-                          textAlign: "center",
-                          fontSize: 12,
-                          lineHeight: 1.3,
-                          fontFamily: "var(--font-display)",
-                          letterSpacing: "0.04em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Driver Dashboard
-                      </span>
-                    </div>
-                  )}
-
-                  <Link
-                    href="/messages/direct"
-                    style={{
-                      minHeight: 112,
-                      padding: "14px 12px",
-                      borderRadius: 18,
-                      textDecoration: "none",
-                      color: "#e5edf7",
-                      background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
-                      border: "1px solid rgba(96, 165, 250, 0.18)",
-                      boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
-                      display: "grid",
-                      justifyItems: "center",
-                      alignContent: "center",
-                      gap: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 52,
-                        height: 52,
-                        borderRadius: 999,
-                        display: "grid",
-                        placeItems: "center",
-                        backgroundColor: "rgba(59, 130, 246, 0.12)",
-                        color: "#dbeafe",
-                      }}
-                    >
-                      <MessagesIcon />
-                    </div>
-                    <span
-                      style={{
-                        textAlign: "center",
-                        fontSize: 12,
-                        lineHeight: 1.3,
-                        fontFamily: "var(--font-display)",
-                        letterSpacing: "0.04em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Messages
-                    </span>
-                  </Link>
-
-                  <Link
-                    href="/developer"
-                    style={{
-                      minHeight: 112,
-                      padding: "14px 12px",
-                      borderRadius: 18,
-                      textDecoration: "none",
-                      color: "#e5edf7",
-                      background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
-                      border: "1px solid rgba(96, 165, 250, 0.18)",
-                      boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
-                      display: "grid",
-                      justifyItems: "center",
-                      alignContent: "center",
-                      gap: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 52,
-                        height: 52,
-                        borderRadius: 999,
-                        display: "grid",
-                        placeItems: "center",
-                        backgroundColor: "rgba(59, 130, 246, 0.12)",
-                        color: "#dbeafe",
-                      }}
-                    >
-                      <DevIcon />
-                    </div>
-                    <span
-                      style={{
-                        textAlign: "center",
-                        fontSize: 12,
-                        lineHeight: 1.3,
-                        fontFamily: "var(--font-display)",
-                        letterSpacing: "0.04em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Dev
-                    </span>
-                  </Link>
-
-                  {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (
-                    <div
-                      key={index}
-                      aria-hidden="true"
-                      style={{
-                        minHeight: 112,
-                        borderRadius: 18,
-                        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.46) 0%, rgba(9, 15, 25, 0.7) 100%)",
-                        border: "1px dashed rgba(148, 163, 184, 0.14)",
-                        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.02)",
-                      }}
-                    />
+                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" />
+                  <AppTile href="/messages/direct" icon={<MessagesIcon />} label="Messages" />
+                  {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
+                  {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
+                    <PlaceholderTile key={index} />
                   ))}
                 </div>
 
@@ -831,7 +917,7 @@ export default function HomePage() {
                     ) : null}
                   </>
                 ) : null}
-              </div>
+              </section>
             </div>
           ) : null}
 
