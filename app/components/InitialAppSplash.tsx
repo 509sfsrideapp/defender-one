@@ -52,10 +52,35 @@ export default function InitialAppSplash() {
   return (
     <div className={`initial-app-splash${fadingOut ? " initial-app-splash-hidden" : ""}`} aria-label="Opening Designated Defenders">
       <div className="initial-app-splash-door initial-app-splash-door-left" aria-hidden="true">
-        <div className="initial-app-splash-door-panel" />
+        <div className="initial-app-splash-door-panel">
+          <div className="initial-app-splash-door-screen-frame">
+            <div className="initial-app-splash-door-screen">
+              <span>ACCESS</span>
+              <span>ARMED</span>
+              <span>SYNC</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="initial-app-splash-door initial-app-splash-door-right" aria-hidden="true">
-        <div className="initial-app-splash-door-panel" />
+        <div className="initial-app-splash-door-panel">
+          <div className="initial-app-splash-door-screen-frame">
+            <div className="initial-app-splash-door-screen">
+              <span>VAULT</span>
+              <span>ROUTE</span>
+              <span>OPEN</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="initial-app-splash-lock-assembly" aria-hidden="true">
+        <div className="initial-app-splash-lock-core">
+          <div className="initial-app-splash-lock-ring" />
+          <div className="initial-app-splash-lock-pin initial-app-splash-lock-pin-top" />
+          <div className="initial-app-splash-lock-pin initial-app-splash-lock-pin-right" />
+          <div className="initial-app-splash-lock-pin initial-app-splash-lock-pin-bottom" />
+          <div className="initial-app-splash-lock-pin initial-app-splash-lock-pin-left" />
+        </div>
       </div>
 
       <div className="initial-app-splash-core">
