@@ -644,7 +644,7 @@ export default function HomePage() {
         <p style={{ color: "#b45309", maxWidth: 560 }}>{authWarning}</p>
       ) : null}
 
-      {!user ? (
+      {!checkingAuth && !user ? (
         <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
           <section
             style={{
@@ -731,7 +731,7 @@ export default function HomePage() {
             </div>
           </section>
         </div>
-      ) : (
+      ) : !checkingAuth ? (
         <div style={{ marginTop: 20 }}>
           {activeRideLoading ? (
             <AppLoadingState
@@ -903,7 +903,8 @@ export default function HomePage() {
 
           {!checkingAuth && !activeRideLoading && !driverActiveRide && !riderActiveRide ? <PushNotificationsCard /> : null}
         </div>
-      )}
+      ) : null}
+      
     </main>
   );
 }
