@@ -4,9 +4,23 @@ import BottomUtilityNav from "./components/BottomUtilityNav";
 import DeveloperAccessCleaner from "./components/DeveloperAccessCleaner";
 import InitialAppSplash from "./components/InitialAppSplash";
 import type { Metadata, Viewport } from "next";
+import { Manrope, Rajdhani } from "next/font/google";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
 import ProfileCompletionGate from "./components/ProfileCompletionGate";
 import "./globals.css";
+
+const bodyFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const displayFont = Rajdhani({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display-face",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Defender Drivers",
@@ -37,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <InitialAppSplash />
         <ForegroundNotificationBridge />
@@ -55,7 +69,7 @@ export default function RootLayout({
             textAlign: "center",
           }}
         >
-          Version 110
+          Version 111
         </footer>
       </body>
     </html>
