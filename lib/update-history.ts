@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "pending",
+    title: "Vault Timing Extension",
+    summary: "Extended the startup splash to three seconds total and slowed the vault doors down to a full two-second opening animation.",
+  },
+  {
     commit: "cfbfc15",
     title: "Startup Flash Fixes",
     summary: "Stopped the home page and logged-out screen from flashing at the wrong times during startup, and slowed the vault-door opening a little more.",
