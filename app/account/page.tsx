@@ -351,7 +351,6 @@ export default function AccountPage() {
           lastName: form.lastName.trim(),
           username: normalizedUsername,
           phone: form.phone.trim(),
-          email: form.email.trim(),
           homeAddress: normalizedHomeAddress,
           homeStreet: form.homeStreet.trim(),
           homeCity: form.homeCity.trim(),
@@ -400,7 +399,11 @@ export default function AccountPage() {
       setStatusMessage("Account details saved.");
     } catch (error) {
       console.error(error);
-      setStatusMessage("Could not save account details.");
+      if (error instanceof Error && "code" in error && (error as { code?: string }).code === "permission-denied") {
+        setStatusMessage("Could not save account settings. Some protected account fields cannot be changed here.");
+      } else {
+        setStatusMessage("Could not save account details.");
+      }
     } finally {
       setSaving(false);
     }
@@ -519,8 +522,6 @@ export default function AccountPage() {
         Update your basic info, one profile photo, and your vehicle details here.
       </p>
 
-      {statusMessage ? <p style={{ marginTop: 12 }}>{statusMessage}</p> : null}
-
       <div
         style={{
           marginTop: 20,
@@ -540,7 +541,10 @@ export default function AccountPage() {
           Username is only used for login.
         </p>
         <input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="Phone Number" style={{ marginBottom: 10 }} />
-        <input value={form.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="Email" style={{ marginBottom: 10 }} />
+        <input value={form.email} readOnly placeholder="Email" style={{ marginBottom: 4, opacity: 0.78, cursor: "not-allowed" }} />
+        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
+          Email is managed through your login account and cannot be changed here.
+        </p>
         <h2 style={{ marginTop: 24 }}>Home Address</h2>
         <input value={form.homeStreet} onChange={(e) => {
           handleChange("homeStreet", e.target.value);
@@ -791,6 +795,11 @@ export default function AccountPage() {
         <button type="button" onClick={handleSave} disabled={saving || uploadingPhoto}>
           Save Account Settings
         </button>
+        {statusMessage ? (
+          <p style={{ marginTop: 10, marginBottom: 0, color: statusMessage === "Account details saved." ? "#86efac" : "#cbd5e1" }}>
+            {statusMessage}
+          </p>
+        ) : null}
       </div>
     </main>
   );
