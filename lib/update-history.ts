@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "pending",
+    title: "Vault-Style Startup Screen",
+    summary: "Reworked the first-open loading screen into a more techy military vault with split doors that open vertically to reveal the app underneath.",
+  },
+  {
     commit: "d37615f",
     title: "Homepage Mission Hub Removed",
     summary: "Removed the Mission Hub card from the homepage so that area can be redesigned later without affecting the main emergency ride button and app grid.",

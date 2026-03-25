@@ -43,21 +43,37 @@ export default function InitialAppSplash() {
 
   return (
     <div className={`initial-app-splash${fadingOut ? " initial-app-splash-hidden" : ""}`} aria-label="Opening Designated Defenders">
-      <div className="initial-app-splash-panel">
-        <div className="initial-app-splash-grid" aria-hidden="true" />
-        <div className="initial-app-splash-ring" aria-hidden="true" />
-        <Image
-          src={afgscLogo}
-          alt="Air Force Global Strike Command"
-          priority
-          className="initial-app-splash-logo"
-        />
-        <p className="initial-app-splash-kicker">System Launch</p>
-        <h1 className="initial-app-splash-title">Designated Defenders</h1>
-        <div className="initial-app-splash-bar" aria-hidden="true">
-          <div className="initial-app-splash-bar-fill" />
+      <div className="initial-app-splash-door initial-app-splash-door-left" aria-hidden="true">
+        <div className="initial-app-splash-door-panel" />
+      </div>
+      <div className="initial-app-splash-door initial-app-splash-door-right" aria-hidden="true">
+        <div className="initial-app-splash-door-panel" />
+      </div>
+
+      <div className="initial-app-splash-core">
+        <div className="initial-app-splash-panel">
+          <div className="initial-app-splash-grid" aria-hidden="true" />
+          <div className="initial-app-splash-scanline" aria-hidden="true" />
+          <div className="initial-app-splash-seal" aria-hidden="true" />
+          <Image
+            src={afgscLogo}
+            alt="Air Force Global Strike Command"
+            priority
+            className="initial-app-splash-logo"
+          />
+          <p className="initial-app-splash-kicker">Secure Vault Access</p>
+          <h1 className="initial-app-splash-title">Designated Defenders</h1>
+          <p className="initial-app-splash-subtitle">509 SFS emergency ride network</p>
+          <div className="initial-app-splash-bar" aria-hidden="true">
+            <div className="initial-app-splash-bar-fill" />
+          </div>
+          <div className="initial-app-splash-metrics" aria-hidden="true">
+            <span>AUTH</span>
+            <span>ROUTE</span>
+            <span>COMMS</span>
+          </div>
+          <p className="initial-app-splash-status">Unlocking secured operations channel...</p>
         </div>
-        <p className="initial-app-splash-status">Establishing secure ride network...</p>
       </div>
     </div>
   );

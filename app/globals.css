@@ -267,22 +267,103 @@ button:disabled {
   z-index: 1000;
   display: grid;
   place-items: center;
+  overflow: hidden;
   padding:
     calc(env(safe-area-inset-top) + 1.25rem)
     calc(env(safe-area-inset-right) + 1.25rem)
     calc(env(safe-area-inset-bottom) + 1.25rem)
     calc(env(safe-area-inset-left) + 1.25rem);
   background:
-    radial-gradient(circle at 50% 18%, rgba(37, 99, 235, 0.18), transparent 24%),
-    radial-gradient(circle at 50% 84%, rgba(14, 165, 233, 0.1), transparent 28%),
-    linear-gradient(180deg, #03050a 0%, #05070d 45%, #010204 100%);
+    radial-gradient(circle at 50% 18%, rgba(37, 99, 235, 0.16), transparent 26%),
+    radial-gradient(circle at 50% 84%, rgba(14, 165, 233, 0.08), transparent 30%),
+    linear-gradient(180deg, #020307 0%, #05070d 46%, #010204 100%);
   opacity: 1;
-  transition: opacity 280ms ease;
+  transition: opacity 360ms ease 280ms;
 }
 
 .initial-app-splash-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.initial-app-splash-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+}
+
+.initial-app-splash-door-left {
+  left: 0;
+}
+
+.initial-app-splash-door-right {
+  right: 0;
+}
+
+.initial-app-splash-door-panel {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 13, 23, 0.98) 0%, rgba(5, 9, 16, 0.99) 52%, rgba(3, 5, 9, 1) 100%);
+  border-top: 1px solid rgba(125, 211, 252, 0.08);
+  border-bottom: 1px solid rgba(125, 211, 252, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(148, 163, 184, 0.06),
+    inset 0 0 40px rgba(37, 99, 235, 0.08);
+}
+
+.initial-app-splash-door-left .initial-app-splash-door-panel {
+  border-right: 1px solid rgba(125, 211, 252, 0.14);
+}
+
+.initial-app-splash-door-right .initial-app-splash-door-panel {
+  border-left: 1px solid rgba(125, 211, 252, 0.14);
+}
+
+.initial-app-splash-door-panel::before,
+.initial-app-splash-door-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.initial-app-splash-door-panel::before {
+  background:
+    linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.06) 1px, transparent 1px);
+  background-size: 2.6rem 2.6rem;
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.78) 14%, rgba(0, 0, 0, 0.78) 86%, transparent 100%);
+}
+
+.initial-app-splash-door-panel::after {
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(125, 211, 252, 0.12) 48%, rgba(125, 211, 252, 0.18) 50%, rgba(125, 211, 252, 0.12) 52%, transparent 100%);
+  opacity: 0.8;
+}
+
+.initial-app-splash-hidden .initial-app-splash-door-left .initial-app-splash-door-panel {
+  animation: splash-door-open-left 460ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.initial-app-splash-hidden .initial-app-splash-door-right .initial-app-splash-door-panel {
+  animation: splash-door-open-right 460ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.initial-app-splash-core {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 30rem);
+  display: grid;
+  place-items: center;
+  transition: transform 380ms ease, opacity 280ms ease;
+}
+
+.initial-app-splash-hidden .initial-app-splash-core {
+  transform: scale(0.96);
+  opacity: 0;
 }
 
 .initial-app-splash-panel {
@@ -296,16 +377,18 @@ button:disabled {
   padding: 2.4rem 1.6rem;
   overflow: hidden;
   border-radius: 1.8rem;
-  border: 1px solid rgba(96, 165, 250, 0.18);
+  border: 1px solid rgba(96, 165, 250, 0.14);
   background:
-    linear-gradient(180deg, rgba(7, 12, 22, 0.98) 0%, rgba(2, 5, 10, 0.99) 100%);
+    radial-gradient(circle at 50% 22%, rgba(37, 99, 235, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(7, 12, 22, 0.98) 0%, rgba(2, 5, 10, 0.995) 100%);
   box-shadow:
     0 28px 80px rgba(2, 6, 23, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .initial-app-splash-grid,
-.initial-app-splash-ring {
+.initial-app-splash-seal,
+.initial-app-splash-scanline {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -317,22 +400,28 @@ button:disabled {
     linear-gradient(90deg, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
   background-size: 2.2rem 2.2rem;
   mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 16%, rgba(0, 0, 0, 0.8) 84%, transparent 100%);
-  opacity: 0.42;
+  opacity: 0.28;
 }
 
-.initial-app-splash-ring {
-  inset: 14%;
-  border-radius: 999px;
-  border: 1px solid rgba(96, 165, 250, 0.12);
+.initial-app-splash-seal {
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px solid rgba(96, 165, 250, 0.1);
   box-shadow:
-    0 0 0 18px rgba(37, 99, 235, 0.04),
-    0 0 0 42px rgba(14, 165, 233, 0.03);
-  animation: splash-pulse 2.6s ease-in-out infinite;
+    0 0 0 18px rgba(37, 99, 235, 0.03),
+    0 0 0 42px rgba(14, 165, 233, 0.025);
+  animation: splash-pulse 2.4s ease-in-out infinite;
+}
+
+.initial-app-splash-scanline {
+  background: linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.16) 48%, transparent 100%);
+  transform: translateY(-100%);
+  animation: splash-scan 1.85s ease-in-out infinite;
 }
 
 .initial-app-splash-logo {
   position: relative;
-  width: 6.3rem;
+  width: 6.7rem;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 14px 28px rgba(2, 6, 23, 0.36));
@@ -344,7 +433,7 @@ button:disabled {
   color: #7dd3fc;
   font-family: var(--font-display);
   font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
@@ -354,6 +443,16 @@ button:disabled {
   text-align: center;
   font-size: clamp(1.85rem, 6vw, 2.5rem);
   letter-spacing: 0.12em;
+}
+
+.initial-app-splash-subtitle {
+  position: relative;
+  margin: -0.3rem 0 0;
+  text-align: center;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .initial-app-splash-bar {
@@ -372,9 +471,29 @@ button:disabled {
   height: 100%;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(37, 99, 235, 0.24) 0%, rgba(59, 130, 246, 0.9) 42%, rgba(125, 211, 252, 0.95) 74%, rgba(187, 247, 208, 0.9) 100%);
+    linear-gradient(90deg, rgba(37, 99, 235, 0.24) 0%, rgba(59, 130, 246, 0.86) 42%, rgba(125, 211, 252, 0.95) 74%, rgba(187, 247, 208, 0.9) 100%);
   transform-origin: left center;
   animation: splash-load 2s ease-out forwards;
+}
+
+.initial-app-splash-metrics {
+  position: relative;
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.initial-app-splash-metrics span {
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.16);
+  background: rgba(8, 15, 28, 0.72);
+  color: #93c5fd;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .initial-app-splash-status {
@@ -406,6 +525,38 @@ button:disabled {
   50% {
     transform: scale(1.02);
     opacity: 1;
+  }
+}
+
+@keyframes splash-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes splash-door-open-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-105%);
+  }
+}
+
+@keyframes splash-door-open-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(105%);
   }
 }
 
