@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { getAvailableDriverNotificationTokens, getRideDoc } from "../../../../lib/server/firestore-rest";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { sendPushMessage } from "../../../../lib/server/fcm";
@@ -34,10 +35,29 @@ export async function POST(request: Request) {
       link: "/driver",
       origin: new URL(request.url).origin,
     });
+    await writeAuditLog({
+      action: "notification.ride_request",
+      actor: { uid: decoded.sub, email: decoded.email },
+      targetType: "ride",
+      targetId: ride.id,
+      status: "success",
+      message: "Ride request notifications queued for available drivers.",
+      details: {
+        tokenCount: tokens.length,
+        riderId: ride.riderId || null,
+      },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error(error);
+    await writeAuditLog({
+      action: "notification.ride_request",
+      status: "failure",
+      message: error instanceof Error ? error.message : "Could not send ride request notifications.",
+    }).catch((auditError) => {
+      console.error("Audit log write failed", auditError);
+    });
     return NextResponse.json({ error: "Could not send ride request notifications." }, { status: 500 });
   }
 }

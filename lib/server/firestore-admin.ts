@@ -103,6 +103,36 @@ export async function patchFirestoreDocument(documentPath: string, fields: Recor
   }
 }
 
+export async function createFirestoreDocument(collectionPath: string, fields: Record<string, unknown>, documentId?: string) {
+  const accessToken = await getGoogleAccessToken();
+  const encodedPath = collectionPath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  const documentIdQuery = documentId ? `?documentId=${encodeURIComponent(documentId)}` : "";
+  const response = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}${documentIdQuery}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        fields: Object.fromEntries(Object.entries(fields).map(([field, value]) => [field, toFirestoreValue(value)])),
+      }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text().catch(() => "");
+    throw new Error(`Could not create Firestore document in ${collectionPath}: ${details || response.statusText}`);
+  }
+
+  return response.json();
+}
+
 export async function deleteFirestoreDocument(documentPath: string) {
   const accessToken = await getGoogleAccessToken();
   const encodedPath = documentPath

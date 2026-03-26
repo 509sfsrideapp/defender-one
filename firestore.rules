@@ -24,6 +24,42 @@ service cloud.firestore {
       return status in ["open", "accepted", "arrived", "picked_up"];
     }
 
+    function riderCancelRideKeys() {
+      return ["status", "canceledAt", "canceledBy"];
+    }
+
+    function driverAcceptRideKeys() {
+      return [
+        "status",
+        "acceptedBy",
+        "driverName",
+        "driverPhone",
+        "driverEmail",
+        "driverPhotoUrl",
+        "carYear",
+        "carMake",
+        "carModel",
+        "carColor",
+        "carPlate",
+        "acceptedAt",
+        "arrivedAt",
+        "pickedUpAt",
+        "completedAt",
+        "canceledAt"
+      ];
+    }
+
+    function driverRideUpdateKeys() {
+      return [
+        "status",
+        "arrivedAt",
+        "pickedUpAt",
+        "completedAt",
+        "destination",
+        "driverLocation"
+      ];
+    }
+
     function ownerEditableUserFields() {
       return [
         "name",
@@ -129,18 +165,15 @@ service cloud.firestore {
         (
           resource.data.riderId == request.auth.uid &&
           request.resource.data.riderId == resource.data.riderId &&
-          (
-            request.resource.data.status == resource.data.status ||
-            (
-              resource.data.status in ["open", "accepted", "arrived"] &&
-              request.resource.data.status == "canceled"
-            )
-          )
+          resource.data.status in ["open", "accepted", "arrived"] &&
+          request.resource.data.status == "canceled" &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(riderCancelRideKeys())
         ) ||
         (
           resource.data.status == "open" &&
           request.resource.data.status == "accepted" &&
-          request.resource.data.acceptedBy == request.auth.uid
+          request.resource.data.acceptedBy == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(driverAcceptRideKeys())
         ) ||
         (
           resource.data.acceptedBy == request.auth.uid &&
@@ -148,7 +181,8 @@ service cloud.firestore {
           (
             activeRideStatus(request.resource.data.status) ||
             request.resource.data.status == "completed"
-          )
+          ) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(driverRideUpdateKeys())
         )
       );
     }
@@ -208,6 +242,11 @@ service cloud.firestore {
         request.resource.data.reporterName.size() > 0;
 
       allow read: if isAdmin();
+    }
+
+    match /auditLogs/{entryId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
   }
 }

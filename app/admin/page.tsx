@@ -325,6 +325,20 @@ export default function AdminPage() {
         >
           Open Accounts
         </Link>
+        <Link
+          href="/admin/audit"
+          style={{
+            display: "inline-block",
+            marginLeft: 12,
+            padding: "10px 16px",
+            backgroundColor: "#7c3aed",
+            color: "white",
+            textDecoration: "none",
+            borderRadius: 8,
+          }}
+        >
+          Open Audit Log
+        </Link>
       </div>
 
       <section style={{ marginTop: 32 }}>

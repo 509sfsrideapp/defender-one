@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAuditLog } from "../../../../lib/server/audit-log";
 
 const DEVELOPER_COOKIE_NAME = "developer_access";
 const DEFAULT_DEVELOPER_CODE = "2187";
@@ -9,6 +10,11 @@ export async function POST(request: Request) {
   const expectedCode = process.env.DEVELOPER_ACCESS_CODE?.trim() || DEFAULT_DEVELOPER_CODE;
 
   if (!submittedCode || submittedCode !== expectedCode) {
+    await writeAuditLog({
+      action: "developer.unlock.denied",
+      status: "failure",
+      message: "Incorrect developer code submitted.",
+    }).catch(() => {});
     return NextResponse.json(
       { ok: false, message: "Incorrect developer code." },
       { status: 401 }
@@ -23,6 +29,11 @@ export async function POST(request: Request) {
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
+  await writeAuditLog({
+    action: "developer.unlock.granted",
+    status: "success",
+    message: "Developer access granted.",
+  }).catch(() => {});
 
   return response;
 }

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "PENDING",
+    title: "Backend Hardening and Audit Pass",
+    summary: "Added stronger shared admin checks, cleaner notification logging, a new admin audit log view, and tighter ride update rules so the backend is safer and easier to trace without changing normal app flow.",
+  },
+  {
     commit: "0902f33",
     title: "Live GPS Sync Rollback",
     summary: "Turned off the continuous rider and driver Firestore location syncing so ride actions stop tripping quota errors and the ride system can return to stable behavior.",

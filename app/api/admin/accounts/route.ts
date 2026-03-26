@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminEmail } from "../../../../lib/admin";
-import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
+import { verifyAdminRequest } from "../../../../lib/server/admin-access";
+import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { deleteFirestoreDocument, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
 import { deleteIdentityUser, setIdentityUserDisabled } from "../../../../lib/server/identity-toolkit";
 
@@ -13,28 +14,9 @@ type RequestBody = {
   email?: string;
 };
 
-function getBearerToken(request: NextRequest) {
-  const header = request.headers.get("authorization") || request.headers.get("Authorization");
-  if (!header?.startsWith("Bearer ")) {
-    return null;
-  }
-
-  return header.slice("Bearer ".length).trim();
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const idToken = getBearerToken(request);
-
-    if (!idToken) {
-      return NextResponse.json({ error: "Missing admin token." }, { status: 401 });
-    }
-
-    const adminToken = await verifyFirebaseIdToken(idToken);
-
-    if (!isAdminEmail(adminToken.email)) {
-      return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-    }
+    const adminToken = await verifyAdminRequest(request.headers);
 
     const body = (await request.json()) as RequestBody;
     const action = body.action;
@@ -58,6 +40,15 @@ export async function POST(request: NextRequest) {
         frozenByAdminEmail: adminToken.email || "admin",
         available: false,
       });
+      await writeAuditLog({
+        action: "admin.account.freeze",
+        actor: { uid: adminToken.sub, email: adminToken.email },
+        targetType: "user",
+        targetId: userId,
+        status: "success",
+        message: `Froze account ${targetEmail || userId}.`,
+        details: { email: targetEmail || null, username: username || null },
+      });
 
       return NextResponse.json({ ok: true });
     }
@@ -71,6 +62,15 @@ export async function POST(request: NextRequest) {
         unfrozenAt: new Date(),
         unfrozenByAdminEmail: adminToken.email || "admin",
         available: false,
+      });
+      await writeAuditLog({
+        action: "admin.account.unfreeze",
+        actor: { uid: adminToken.sub, email: adminToken.email },
+        targetType: "user",
+        targetId: userId,
+        status: "success",
+        message: `Unfroze account ${targetEmail || userId}.`,
+        details: { email: targetEmail || null, username: username || null },
       });
 
       return NextResponse.json({ ok: true });
@@ -90,6 +90,15 @@ export async function POST(request: NextRequest) {
 
       await deleteIdentityUser(userId);
       await deleteFirestoreDocument(`users/${userId}`);
+      await writeAuditLog({
+        action: "admin.account.delete",
+        actor: { uid: adminToken.sub, email: adminToken.email },
+        targetType: "user",
+        targetId: userId,
+        status: "success",
+        message: `Deleted account ${targetEmail || userId}.`,
+        details: { email: targetEmail || null, username: username || null },
+      });
 
       return NextResponse.json({ ok: true });
     }
@@ -97,6 +106,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unsupported action." }, { status: 400 });
   } catch (error) {
     console.error(error);
+    await writeAuditLog({
+      action: "admin.account.error",
+      status: "failure",
+      message: error instanceof Error ? error.message : "Could not manage that account.",
+    }).catch((auditError) => {
+      console.error("Audit log write failed", auditError);
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Could not manage that account." },
       { status: 500 }
