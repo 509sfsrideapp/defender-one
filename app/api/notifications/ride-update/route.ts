@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .trim();
     const messageBody =
       body.event === "accepted"
-        ? `${driverName} accepted your ride${vehicleDescription ? ` in a ${vehicleDescription}` : ""}.`
+        ? `${driverName} accepted your ride.`
         : `${driverName} has arrived${vehicleDescription ? ` in a ${vehicleDescription}` : ""}.`;
 
     await sendPushMessage({
