@@ -119,11 +119,11 @@ function buildMapsUrl(ride: Ride, userAgent: string) {
 
   if (targetLatitude != null && targetLongitude != null) {
     if (isIPhone) {
-      return `maps://?daddr=${targetLatitude},${targetLongitude}&q=${encodedLabel}`;
+      return `maps://?daddr=${targetLatitude},${targetLongitude}`;
     }
 
     if (isAndroid) {
-      return `geo:${targetLatitude},${targetLongitude}?q=${targetLatitude},${targetLongitude}(${encodedLabel})`;
+      return `geo:${targetLatitude},${targetLongitude}?q=${targetLatitude},${targetLongitude}`;
     }
 
     return `https://www.google.com/maps/dir/?api=1&destination=${targetLatitude},${targetLongitude}`;
