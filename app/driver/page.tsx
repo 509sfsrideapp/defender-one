@@ -174,10 +174,8 @@ export default function DriverPage() {
 
       const selectedRide = openRides.find((ride) => ride.id === rideId);
       const rideRef = doc(db, "rides", rideId);
-      const driverRef = doc(db, "users", user.uid);
       await runTransaction(db, async (transaction) => {
         const rideSnap = await transaction.get(rideRef);
-        const driverSnap = await transaction.get(driverRef);
 
         if (!rideSnap.exists()) {
           throw new Error("That ride is no longer available.");
@@ -191,12 +189,6 @@ export default function DriverPage() {
 
         if (rideData.acceptedBy) {
           throw new Error("This ride was already assigned.");
-        }
-
-        const driverData = driverSnap.data() as UserProfile | undefined;
-
-        if (!driverData?.available) {
-          throw new Error("Clock in before accepting rides.");
         }
 
         transaction.update(rideRef, {
@@ -217,11 +209,17 @@ export default function DriverPage() {
           completedAt: null,
           canceledAt: null,
         });
-        transaction.update(driverRef, {
+      });
+
+      try {
+        await updateDoc(doc(db, "users", user.uid), {
           available: false,
           updatedAt: new Date(),
         });
-      });
+      } catch (availabilityError) {
+        console.error("Driver availability update failed after ride accept", availabilityError);
+      }
+
       setProfile((current) => (current ? { ...current, available: false } : current));
 
       const idToken = await auth.currentUser?.getIdToken();
