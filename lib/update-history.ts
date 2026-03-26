@@ -7,7 +7,7 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
-    commit: "pending",
+    commit: "594b482",
     title: "Live Location Write Throttling",
     summary: "Reduced and de-overlapped rider and driver live-location updates so ride actions like 'I'm Here' stop getting blocked by Firestore quota spikes.",
   },
