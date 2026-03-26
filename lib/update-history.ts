@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "pending",
+    title: "Separate Live Ride Location Document",
+    summary: "Moved rider and driver live GPS updates into their own Firestore document so constant map updates stop competing with ride actions like canceling, arriving, and pickup.",
+  },
+  {
     commit: "3a11e1e",
     title: "Mobile Pull-to-Refresh",
     summary: "Added a mobile pull-down refresh gesture across the app so when you drag down from the top of a page, it refreshes more like a normal phone browser.",

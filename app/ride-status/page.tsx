@@ -10,7 +10,7 @@ import { formatEtaLabel } from "../../lib/eta";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, doc, getDoc, onSnapshot, query, runTransaction, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, runTransaction, setDoc, where } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -71,6 +71,17 @@ type RiderProfile = {
   locationServicesEnabled?: boolean;
 };
 
+type RideLiveState = {
+  riderLocation?: {
+    latitude?: number;
+    longitude?: number;
+  } | null;
+  driverLocation?: {
+    latitude?: number;
+    longitude?: number;
+  } | null;
+};
+
 const ACTIVE_RIDE_STATUSES = ["open", "accepted", "arrived", "picked_up"] as const;
 
 function getStatusMessage(status?: string) {
@@ -98,6 +109,7 @@ export default function RideStatusPage() {
   const [loading, setLoading] = useState(true);
   const [cancelingRide, setCancelingRide] = useState(false);
   const [riderLocationServicesEnabled, setRiderLocationServicesEnabled] = useState(true);
+  const [liveRideState, setLiveRideState] = useState<RideLiveState | null>(null);
   const riderWatchIdRef = useRef<number | null>(null);
   const lastRiderLocationSentRef = useRef<{ latitude: number; longitude: number; sentAt: number } | null>(null);
   const riderLocationUpdateInFlightRef = useRef(false);
@@ -156,15 +168,44 @@ export default function RideStatusPage() {
   }, [user]);
 
   const activeRide = useMemo(() => rides[0] ?? null, [rides]);
+
+  useEffect(() => {
+    if (!activeRide) {
+      setLiveRideState(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, "rideLive", activeRide.id), (snapshot) => {
+      if (!snapshot.exists()) {
+        setLiveRideState(null);
+        return;
+      }
+
+      setLiveRideState(snapshot.data() as RideLiveState);
+    });
+
+    return () => unsubscribe();
+  }, [activeRide]);
+
   const riderLocation: MapPoint | null =
-    activeRide?.riderLocation?.latitude != null && activeRide.riderLocation?.longitude != null
+    liveRideState?.riderLocation?.latitude != null && liveRideState.riderLocation?.longitude != null
+      ? {
+          latitude: liveRideState.riderLocation.latitude,
+          longitude: liveRideState.riderLocation.longitude,
+        }
+      : activeRide?.riderLocation?.latitude != null && activeRide.riderLocation?.longitude != null
       ? {
           latitude: activeRide.riderLocation.latitude,
           longitude: activeRide.riderLocation.longitude,
         }
       : null;
   const driverLocation: MapPoint | null =
-    activeRide?.driverLocation?.latitude != null && activeRide.driverLocation?.longitude != null
+    liveRideState?.driverLocation?.latitude != null && liveRideState.driverLocation?.longitude != null
+      ? {
+          latitude: liveRideState.driverLocation.latitude,
+          longitude: liveRideState.driverLocation.longitude,
+        }
+      : activeRide?.driverLocation?.latitude != null && activeRide.driverLocation?.longitude != null
       ? {
           latitude: activeRide.driverLocation.latitude,
           longitude: activeRide.driverLocation.longitude,
@@ -205,10 +246,10 @@ export default function RideStatusPage() {
 
         try {
           riderLocationUpdateInFlightRef.current = true;
-          await updateDoc(doc(db, "rides", activeRide.id), {
+          await setDoc(doc(db, "rideLive", activeRide.id), {
             riderLocation: nextCoordinates,
             riderLocationUpdatedAt: new Date(),
-          });
+          }, { merge: true });
           lastRiderLocationSentRef.current = { ...nextCoordinates, sentAt: now };
         } catch (error) {
           console.error(error);

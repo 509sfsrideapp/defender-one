@@ -9,7 +9,7 @@ import LiveRideMap, { type MapPoint } from "../../../components/LiveRideMap";
 import { auth, db } from "../../../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, onSnapshot, runTransaction, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -91,6 +91,17 @@ type Coordinates = {
   longitude: number;
 };
 
+type RideLiveState = {
+  riderLocation?: {
+    latitude?: number;
+    longitude?: number;
+  } | null;
+  driverLocation?: {
+    latitude?: number;
+    longitude?: number;
+  } | null;
+};
+
 const ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
 
 function isPlaceholderDestination(destination?: string | null) {
@@ -158,6 +169,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const [driverLocationStatus, setDriverLocationStatus] = useState("Waiting to start driver location sharing...");
   const [driverCoordinates, setDriverCoordinates] = useState<Coordinates | null>(null);
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(true);
+  const [liveRideState, setLiveRideState] = useState<RideLiveState | null>(null);
   const [copyStatus, setCopyStatus] = useState("");
   const launchedNavigationKeyRef = useRef<string | null>(null);
   const watchIdRef = useRef<number | null>(null);
@@ -312,10 +324,33 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
     void syncRiderPhoto();
   }, [ride, user]);
 
+  useEffect(() => {
+    if (!ride) {
+      setLiveRideState(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, "rideLive", ride.id), (snapshot) => {
+      if (!snapshot.exists()) {
+        setLiveRideState(null);
+        return;
+      }
+
+      setLiveRideState(snapshot.data() as RideLiveState);
+    });
+
+    return () => unsubscribe();
+  }, [ride]);
+
   const mapsUrl = useMemo(() => (ride ? buildMapsUrl(ride, userAgent) : null), [ride, userAgent]);
   const lifecycleSteps = useMemo(() => (ride ? getRideLifecycleSteps(ride) : []), [ride]);
   const riderLocation: MapPoint | null =
-    ride?.riderLocation?.latitude != null && ride.riderLocation?.longitude != null
+    liveRideState?.riderLocation?.latitude != null && liveRideState.riderLocation?.longitude != null
+      ? {
+          latitude: liveRideState.riderLocation.latitude,
+          longitude: liveRideState.riderLocation.longitude,
+        }
+      : ride?.riderLocation?.latitude != null && ride.riderLocation?.longitude != null
       ? {
           latitude: ride.riderLocation.latitude,
           longitude: ride.riderLocation.longitude,
@@ -324,7 +359,12 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const liveDriverLocation: MapPoint | null =
     driverCoordinates?.latitude != null && driverCoordinates?.longitude != null
       ? driverCoordinates
-      : ride?.driverLocation?.latitude != null && ride.driverLocation?.longitude != null
+      : liveRideState?.driverLocation?.latitude != null && liveRideState.driverLocation?.longitude != null
+        ? {
+            latitude: liveRideState.driverLocation.latitude,
+            longitude: liveRideState.driverLocation.longitude,
+          }
+        : ride?.driverLocation?.latitude != null && ride.driverLocation?.longitude != null
         ? {
             latitude: ride.driverLocation.latitude,
             longitude: ride.driverLocation.longitude,
@@ -384,10 +424,10 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
         try {
           locationUpdateInFlightRef.current = true;
-          await updateDoc(doc(db, "rides", ride.id), {
+          await setDoc(doc(db, "rideLive", ride.id), {
             driverLocation: nextCoordinates,
             driverLocationUpdatedAt: new Date(),
-          });
+          }, { merge: true });
           lastSentRef.current = { ...nextCoordinates, sentAt: now };
           setDriverLocationStatus("Live driver location is active.");
         } catch (error) {

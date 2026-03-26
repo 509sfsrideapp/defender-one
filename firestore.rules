@@ -153,6 +153,21 @@ service cloud.firestore {
       );
     }
 
+    match /rideLive/{rideId} {
+      allow read: if signedIn() && (
+        (get(/databases/$(database)/documents/rides/$(rideId)).data.status == "open" && isAvailableDriver()) ||
+        get(/databases/$(database)/documents/rides/$(rideId)).data.riderId == request.auth.uid ||
+        get(/databases/$(database)/documents/rides/$(rideId)).data.acceptedBy == request.auth.uid ||
+        isAdmin()
+      );
+
+      allow create, update: if signedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/rides/$(rideId)).data.riderId == request.auth.uid ||
+        get(/databases/$(database)/documents/rides/$(rideId)).data.acceptedBy == request.auth.uid
+      );
+    }
+
     match /globalMessages/{messageId} {
       allow read: if signedIn();
 
