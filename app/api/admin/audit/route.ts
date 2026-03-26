@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminRequest } from "../../../../lib/server/admin-access";
 import { listFirestoreDocuments } from "../../../../lib/server/firestore-admin";
 
+type AuditRecord = {
+  id: string;
+  createdAt?: string;
+};
+
 export async function GET(request: NextRequest) {
   try {
     await verifyAdminRequest(request.headers);
-    const records = await listFirestoreDocuments("auditLogs");
+    const records = (await listFirestoreDocuments("auditLogs")) as AuditRecord[];
     const sorted = records.sort((a, b) => {
       const aTime = typeof a.createdAt === "string" ? Date.parse(a.createdAt) : 0;
       const bTime = typeof b.createdAt === "string" ? Date.parse(b.createdAt) : 0;
