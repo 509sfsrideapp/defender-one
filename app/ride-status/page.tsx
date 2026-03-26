@@ -10,7 +10,7 @@ import { formatEtaLabel } from "../../lib/eta";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, doc, onSnapshot, query, runTransaction, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, runTransaction, updateDoc, where } from "firebase/firestore";
 
 type Ride = {
   id: string;
