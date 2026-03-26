@@ -7,7 +7,7 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
-    commit: "PENDING",
+    commit: "4030a5d",
     title: "Driver Accept Flow Quota Relief",
     summary: "Changed driver ride acceptance to lock the ride first and update the driver availability separately so a busy profile document cannot block the accept action.",
   },
