@@ -691,6 +691,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <p style={{ margin: 0, fontSize: "0.95rem", color: "#8ea1b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Pickup Spot
           </p>
+          <p style={{ margin: "8px 0 0", color: "#facc15", fontSize: "0.95rem" }}>
+            Resolved pickup location may be slightly inaccurate. It&apos;s recommended you call your rider when getting near to verify the pickup location.
+          </p>
           <p style={{ margin: "8px 0 0", fontSize: "1.45rem", lineHeight: 1.1, fontFamily: "var(--font-display)", color: "#f8fbff" }}>
             {ride.pickupLocationName || ride.pickup || "Not resolved yet"}
           </p>
@@ -715,18 +718,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             {copyStatus ? <span style={{ color: "#cbd5e1", alignSelf: "center" }}>{copyStatus}</span> : null}
           </div>
         </div>
-        <p>
-          <strong>Navigation:</strong>{" "}
-          {mapsUrl
-            ? isMobileDevice
-              ? ride.status === "picked_up"
-                ? "Your phone will prompt to open its maps app with the destination ready."
-                : "Your phone will prompt to open its maps app with the rider location ready."
-              : ride.status === "picked_up"
-                ? "Use the button above to open directions to the destination."
-                : "Use the button above to open turn-by-turn directions to pickup."
-            : "No map destination is available. Use the ride details above."}
-        </p>
         <p>
           <strong>Driver Location:</strong>{" "}
           {displayedDriverLocationStatus}
