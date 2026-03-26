@@ -66,31 +66,11 @@ async function saveTokenToProfile(token: string) {
   }
 
   const userRef = doc(db, "users", currentUser.uid);
-  const userSnap = await getDoc(userRef);
-  const existingTokens = userSnap.exists() ? ((userSnap.data().notificationTokens as string[] | undefined) ?? []) : [];
-  const existingTokenMap = userSnap.exists()
-    ? ((userSnap.data().notificationTokenMap as NotificationTokenMap | undefined) ?? {})
-    : {};
-  const previousToken = typeof window === "undefined" ? null : window.localStorage.getItem(pushTokenStorageKey);
   const deviceId = getDeviceId();
-  const previousDeviceToken = existingTokenMap[deviceId] || null;
   const nextTokenMap: NotificationTokenMap = {
-    ...existingTokenMap,
     [deviceId]: token,
   };
-  const nextTokens = Array.from(
-    new Set(
-      [
-        ...Object.values(nextTokenMap),
-        ...existingTokens.filter(
-          (existingToken) =>
-            existingToken &&
-            existingToken !== previousToken &&
-            existingToken !== previousDeviceToken
-        ),
-      ].filter(Boolean)
-    )
-  );
+  const nextTokens = [token];
 
   if (typeof window !== "undefined") {
     window.localStorage.setItem(pushTokenStorageKey, token);
@@ -114,21 +94,13 @@ async function removeTokenFromProfile(token: string) {
 
   const userRef = doc(db, "users", currentUser.uid);
   const userSnap = await getDoc(userRef);
-  const existingTokens = userSnap.exists() ? ((userSnap.data().notificationTokens as string[] | undefined) ?? []) : [];
   const existingTokenMap = userSnap.exists()
     ? ((userSnap.data().notificationTokenMap as NotificationTokenMap | undefined) ?? {})
     : {};
   const deviceId = getDeviceId();
   const nextTokenMap = { ...existingTokenMap };
   delete nextTokenMap[deviceId];
-  const nextTokens = Array.from(
-    new Set(
-      existingTokens
-        .filter((existingToken) => existingToken !== token && !Object.values(existingTokenMap).includes(existingToken))
-        .concat(Object.values(nextTokenMap))
-        .filter(Boolean)
-    )
-  );
+  const nextTokens = Array.from(new Set(Object.values(nextTokenMap).filter((existingToken) => existingToken !== token)));
 
   await setDoc(userRef, {
     notificationTokenMap: nextTokenMap,
