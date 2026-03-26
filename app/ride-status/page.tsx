@@ -224,6 +224,8 @@ export default function RideStatusPage() {
     return () => unsubscribe();
   }, [user]);
 
+  const activeRide = useMemo(() => rides[0] ?? fallbackRide ?? null, [fallbackRide, rides]);
+
   useEffect(() => {
     if (!activeRide) {
       setLiveRideState(null);
@@ -241,8 +243,6 @@ export default function RideStatusPage() {
 
     return () => unsubscribe();
   }, [activeRide]);
-
-  const activeRide = useMemo(() => rides[0] ?? fallbackRide ?? null, [fallbackRide, rides]);
 
   const riderLocation: MapPoint | null =
     liveRideState?.riderLocation?.latitude != null && liveRideState.riderLocation?.longitude != null
