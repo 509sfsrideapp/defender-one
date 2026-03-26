@@ -244,12 +244,13 @@ export default function RequestPage() {
       const idToken = await auth.currentUser?.getIdToken();
 
       if (idToken) {
-        void fetch("/api/notifications/ride-request", {
+        await fetch("/api/notifications/ride-request", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${idToken}`,
           },
+          keepalive: true,
           body: JSON.stringify({
             rideId: rideRef.id,
           }),
@@ -262,7 +263,7 @@ export default function RequestPage() {
           })
           .catch((error) => {
             console.error("Driver notification request failed", error);
-        });
+          });
       }
 
       alert("Ride requested!");

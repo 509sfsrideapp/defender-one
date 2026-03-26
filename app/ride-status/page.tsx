@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
@@ -104,8 +105,10 @@ function getStatusMessage(status?: string) {
 }
 
 export default function RideStatusPage() {
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [rides, setRides] = useState<Ride[]>([]);
+  const [fallbackRide, setFallbackRide] = useState<Ride | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelingRide, setCancelingRide] = useState(false);
   const [riderLocationServicesEnabled, setRiderLocationServicesEnabled] = useState(true);
@@ -147,6 +150,44 @@ export default function RideStatusPage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user) {
+      setFallbackRide(null);
+      return;
+    }
+
+    const requestedRideId = searchParams.get("rideId");
+
+    if (!requestedRideId) {
+      setFallbackRide(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, "rides", requestedRideId), (snapshot) => {
+      if (!snapshot.exists()) {
+        setFallbackRide(null);
+        return;
+      }
+
+      const ride = {
+        id: snapshot.id,
+        ...(snapshot.data() as Omit<Ride, "id">),
+      };
+
+      if (
+        ride.riderId !== user.uid ||
+        !ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number])
+      ) {
+        setFallbackRide(null);
+        return;
+      }
+
+      setFallbackRide(ride);
+    });
+
+    return () => unsubscribe();
+  }, [searchParams, user]);
+
+  useEffect(() => {
     if (!user) return;
 
     const ridesQuery = query(collection(db, "rides"), where("riderId", "==", user.uid));
@@ -167,7 +208,7 @@ export default function RideStatusPage() {
     return () => unsubscribe();
   }, [user]);
 
-  const activeRide = useMemo(() => rides[0] ?? null, [rides]);
+  const activeRide = useMemo(() => rides[0] ?? fallbackRide ?? null, [fallbackRide, rides]);
 
   useEffect(() => {
     if (!activeRide) {
