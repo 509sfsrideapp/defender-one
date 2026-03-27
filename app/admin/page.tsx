@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
+import InboxPostComposer from "../components/InboxPostComposer";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideStatusLabel } from "../../lib/ride-lifecycle";
@@ -340,6 +341,26 @@ export default function AdminPage() {
           Open Audit Log
         </Link>
       </div>
+
+      <section style={{ marginTop: 28 }}>
+        <InboxPostComposer
+          endpoint="/api/admin/inbox-posts"
+          threadId="admin"
+          heading="Post to Admin Inbox"
+          description="Send a formatted admin post into the user inbox. Title and message text are required, and an optional photo will appear on the left side of the post."
+          submitLabel="Send Admin Post"
+        />
+      </section>
+
+      <section style={{ marginTop: 18 }}>
+        <InboxPostComposer
+          endpoint="/api/admin/inbox-posts"
+          threadId="notifications"
+          heading="Post to Notifications Inbox"
+          description="Send a broader system-style notice into the Notifications thread without using a push alert."
+          submitLabel="Send Notification Post"
+        />
+      </section>
 
       <section style={{ marginTop: 32 }}>
         <h2>Available Drivers</h2>

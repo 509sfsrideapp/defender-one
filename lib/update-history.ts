@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v157",
+    title: "Real Inbox Posting",
+    summary: "Added real Admin and Dev inbox post composers with title, body, and optional photo uploads, and wired the Inbox threads to show live stored posts instead of placeholders.",
+  },
+  {
     commit: "v156",
     title: "App Permissions Test Ride",
     summary: "Added a safe test ride button in App Permissions that opens the normal rider status flow without notifying drivers, so permission prompts and ride behavior can be checked without disrupting operations.",

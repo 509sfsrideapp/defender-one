@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import DeveloperLogoutButton from "../components/DeveloperLogoutButton";
 import HomeIconLink from "../components/HomeIconLink";
+import InboxPostComposer from "../components/InboxPostComposer";
 
 const DEVELOPER_COOKIE_NAME = "developer_access";
 
@@ -44,6 +45,16 @@ export default async function DeveloperPage() {
       <p style={{ maxWidth: 720 }}>
         Temporary home for in-progress features so the main screen stays clean while we keep building.
       </p>
+
+      <div style={{ marginTop: 22 }}>
+        <InboxPostComposer
+          endpoint="/api/developer/inbox-posts"
+          threadId="dev"
+          heading="Post to Dev Inbox"
+          description="Send a developer update or follow-up into the Dev inbox thread. An optional photo will appear on the left side of the post."
+          submitLabel="Send Dev Post"
+        />
+      </div>
 
       <div
         style={{
