@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v154",
+    title: "Flight Routing Expansion Hardening",
+    summary: "Made the 5-minute emergency ride expansion check run from active driver dashboards too, so the wider fallback alert does not depend on the rider keeping their ride screen open.",
+  },
+  {
     commit: "v153",
     title: "Flight-Based Emergency Ride Routing",
     summary: "Added an App Permissions setting that can send emergency ride requests to the rider’s own flight first or to everyone except that flight first for 5 minutes before expanding to the rest of the active driver pool.",

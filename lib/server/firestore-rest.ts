@@ -163,6 +163,25 @@ export async function getUserNotificationTokens(userId: string) {
   return getPreferredNotificationTokens(parsed);
 }
 
+export async function getUserDoc(userId: string) {
+  const accessToken = await getGoogleAccessToken();
+  const response = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not load user document.");
+  }
+
+  const document = (await response.json()) as FirestoreDocument;
+  return parseDocument(document);
+}
+
 export async function getRideDoc(rideId: string) {
   const accessToken = await getGoogleAccessToken();
   const response = await fetch(

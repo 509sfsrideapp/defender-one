@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import AppLoadingState from "../components/AppLoadingState";
@@ -8,7 +8,12 @@ import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
 import { canDrive, getDriverReadinessIssues } from "../../lib/profile-readiness";
-import { canDriverSeeRideDuringDispatchWindow, type EmergencyRideDispatchMode } from "../../lib/ride-dispatch";
+import {
+  canDriverSeeRideDuringDispatchWindow,
+  isRideDispatchExpanded,
+  normalizeRideDispatchMode,
+  type EmergencyRideDispatchMode,
+} from "../../lib/ride-dispatch";
 import { getLatestActiveRideForDriver } from "../../lib/ride-state";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
@@ -89,6 +94,7 @@ function renderRiderName(ride: Ride) {
 
 export default function DriverPage() {
   const router = useRouter();
+  const expandedRideRequestIdsRef = useRef<Set<string>>(new Set());
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [openRides, setOpenRides] = useState<Ride[]>([]);
@@ -159,6 +165,68 @@ export default function DriverPage() {
       expandedAt: ride.dispatchExpandedAt,
     })
   );
+
+  useEffect(() => {
+    if (!user || !profile?.available) {
+      return;
+    }
+
+    const dueRides = openRides.filter((ride) => {
+      if (expandedRideRequestIdsRef.current.has(ride.id)) {
+        return false;
+      }
+
+      const dispatchMode = normalizeRideDispatchMode(ride.dispatchMode);
+
+      if (dispatchMode === "all_drivers") {
+        return false;
+      }
+
+      return isRideDispatchExpanded({
+        mode: dispatchMode,
+        createdAt: ride.createdAt,
+        expandedAt: ride.dispatchExpandedAt,
+      }) && !ride.dispatchExpandedAt;
+    });
+
+    if (dueRides.length === 0) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+
+        if (!idToken) {
+          return;
+        }
+
+        await Promise.all(
+          dueRides.map(async (ride) => {
+            expandedRideRequestIdsRef.current.add(ride.id);
+
+            const response = await fetch("/api/notifications/ride-request", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({
+                rideId: ride.id,
+                phase: "expand",
+              }),
+            });
+
+            if (!response.ok) {
+              expandedRideRequestIdsRef.current.delete(ride.id);
+            }
+          })
+        );
+      } catch (error) {
+        console.error("Ride request expansion check failed", error);
+      }
+    })();
+  }, [openRides, profile?.available, user]);
 
   useEffect(() => {
     if (acceptedRides.length > 0) {

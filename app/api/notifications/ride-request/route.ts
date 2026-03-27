@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRideDispatchTargeting, isRideDispatchExpanded, normalizeRideDispatchMode } from "../../../../lib/ride-dispatch";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
-import { getAvailableDriverNotificationTokens, getRideDoc } from "../../../../lib/server/firestore-rest";
+import { getAvailableDriverNotificationTokens, getRideDoc, getUserDoc } from "../../../../lib/server/firestore-rest";
 import { patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { sendPushMessage } from "../../../../lib/server/fcm";
@@ -35,7 +35,14 @@ export async function POST(request: Request) {
     }
 
     if (phase === "expand") {
-      if (ride.riderId !== decoded.sub) {
+      let canExpandRide = ride.riderId === decoded.sub || decoded.email === "509sfsrideapp@gmail.com";
+
+      if (!canExpandRide) {
+        const caller = await getUserDoc(decoded.sub).catch(() => null);
+        canExpandRide = caller?.available === true;
+      }
+
+      if (!canExpandRide) {
         return NextResponse.json({ error: "Unauthorized ride expansion request." }, { status: 403 });
       }
 
