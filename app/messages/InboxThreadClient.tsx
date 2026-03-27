@@ -21,7 +21,13 @@ type InboxPost = {
 
 function ThreadIcon({ iconKey }: { iconKey: MessageThreadIconKey }) {
   if (iconKey === "shield") return <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3 5 6v5c0 4.5 2.7 8.5 7 10 4.3-1.5 7-5.5 7-10V6l-7-3Z" /><path d="m9.5 12 1.7 1.7L14.8 10" /></svg>;
-  return <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3v4" /><path d="M6.6 6.6 9.4 9.4" /><path d="M3 12h4" /><path d="M6.6 17.4 9.4 14.6" /><path d="M12 17v4" /><path d="m17.4 14.6-2.8 2.8" /><path d="M17 12h4" /><path d="m17.4 6.6-2.8 2.8" /><circle cx="12" cy="12" r="3.5" /></svg>;
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 8.5 8.5 12.1 4.5 15.5" />
+      <path d="M19.5 8.5 15.5 12.1 19.5 15.5" />
+      <path d="M10.2 17.2 13.8 6.8" />
+    </svg>
+  );
 }
 
 function formatTimestamp(createdAt?: { seconds?: number; nanoseconds?: number } | null) {
