@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { markInboxThreadsRead } from "../../lib/inbox-badges";
 import { getAllMessageThreads, type MessageThreadDefinition, type MessageThreadIconKey, type MessageThreadId } from "../../lib/messages";
 
 type InboxPost = {
   id: string;
   threadId: MessageThreadId;
   title: string;
+  createdAt?: { seconds?: number; nanoseconds?: number } | null;
 };
 
 function ThreadIcon({ iconKey }: { iconKey: MessageThreadIconKey }) {
@@ -72,6 +74,12 @@ export default function InboxPageClient() {
         }
       });
       setLatestPostsByThread(nextMap);
+      markInboxThreadsRead(
+        Object.fromEntries(
+          (Object.entries(nextMap) as Array<[MessageThreadId, InboxPost]>)
+            .map(([threadId, post]) => [threadId, post.createdAt?.seconds ? post.createdAt.seconds * 1000 : 0])
+        ) as Partial<Record<MessageThreadId, number>>
+      );
     });
     return () => unsubscribe();
   }, []);

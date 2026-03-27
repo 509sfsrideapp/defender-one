@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v158",
+    title: "Home Badge Alerts",
+    summary: "Added unread inbox badges to the home profile avatar and Inbox menu entry, plus a live Driver Dashboard badge that shows how many open ride requests a clocked-in driver can currently see.",
+  },
+  {
     commit: "v157",
     title: "Real Inbox Posting",
     summary: "Added real Admin and Dev inbox post composers with title, body, and optional photo uploads, and wired the Inbox threads to show live stored posts instead of placeholders.",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { markInboxThreadRead } from "../../lib/inbox-badges";
 import { getMessageThreadDefinition, getSystemThreadMessages, type MessageThreadIconKey, type MessageThreadId } from "../../lib/messages";
 
 type InboxPost = {
@@ -35,11 +36,11 @@ export default function InboxThreadClient({ threadId }: { threadId: string }) {
     if (!thread) return;
     const postsQuery = query(collection(db, "inboxPosts"), where("threadId", "==", thread.id));
     const unsubscribe = onSnapshot(postsQuery, (snapshot) => {
-      setPosts(
-        snapshot.docs
+      const nextPosts = snapshot.docs
           .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<InboxPost, "id">) }))
           .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
-      );
+      setPosts(nextPosts);
+      markInboxThreadRead(thread.id, nextPosts[0]?.createdAt?.seconds ? nextPosts[0].createdAt.seconds * 1000 : null);
     });
     return () => unsubscribe();
   }, [thread]);

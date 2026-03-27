@@ -9,11 +9,13 @@ import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
 import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
-import { DEFAULT_RIDE_DISPATCH_MODE, type EmergencyRideDispatchMode, normalizeRideDispatchMode } from "../lib/ride-dispatch";
+import { getInboxUnreadCount, INBOX_READ_EVENT, loadInboxReadState } from "../lib/inbox-badges";
+import { canDriverSeeRideDuringDispatchWindow, DEFAULT_RIDE_DISPATCH_MODE, type EmergencyRideDispatchMode, normalizeRideDispatchMode } from "../lib/ride-dispatch";
 import { getLatestActiveRideForRider } from "../lib/ride-state";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import type { MessageThreadId } from "../lib/messages";
 
 type UserProfile = {
   name: string;
@@ -50,6 +52,23 @@ type ReverseGeocodeResult = {
   display?: string | null;
 };
 
+type InboxPost = {
+  id: string;
+  threadId: MessageThreadId;
+  createdAt?: { seconds?: number; nanoseconds?: number } | null;
+};
+
+type OpenRideBadgeRecord = {
+  id: string;
+  status: string;
+  isTestRide?: boolean;
+  riderFlight?: string | null;
+  dispatchMode?: EmergencyRideDispatchMode;
+  dispatchFlight?: string | null;
+  dispatchExpandedAt?: { seconds?: number; nanoseconds?: number } | null;
+  createdAt?: { seconds?: number; nanoseconds?: number } | null;
+};
+
 const appTilePlaceholderCount = 6;
 const homepageCardStyle: React.CSSProperties = {
   borderRadius: 24,
@@ -58,16 +77,47 @@ const homepageCardStyle: React.CSSProperties = {
   boxShadow: "0 18px 42px rgba(2, 6, 23, 0.22)",
 };
 
+function NotificationBadge({ count, style }: { count: number; style?: React.CSSProperties }) {
+  if (count <= 0) {
+    return null;
+  }
+
+  return (
+    <span
+      style={{
+        minWidth: 20,
+        height: 20,
+        padding: "0 6px",
+        borderRadius: 999,
+        display: "inline-grid",
+        placeItems: "center",
+        backgroundColor: "#dc2626",
+        color: "white",
+        fontSize: 11,
+        fontWeight: 700,
+        lineHeight: 1,
+        border: "2px solid rgba(9, 15, 25, 0.98)",
+        boxShadow: "0 6px 16px rgba(127, 29, 29, 0.28)",
+        ...style,
+      }}
+    >
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
+
 function AppTile({
   href,
   icon,
   label,
   disabled = false,
+  badgeCount = 0,
 }: {
   href?: string;
   icon: React.ReactNode;
   label: string;
   disabled?: boolean;
+  badgeCount?: number;
 }) {
   const sharedStyle: React.CSSProperties = {
     minHeight: 120,
@@ -90,9 +140,11 @@ function AppTile({
         placeItems: "center",
         backgroundColor: disabled ? "rgba(148, 163, 184, 0.12)" : "rgba(59, 130, 246, 0.12)",
         color: disabled ? "#cbd5e1" : "#dbeafe",
+        position: "relative",
       }}
     >
       {icon}
+      <NotificationBadge count={badgeCount} style={{ position: "absolute", top: -6, right: -6 }} />
     </div>
   );
 
@@ -233,6 +285,9 @@ export default function HomePage() {
   const [authWarning, setAuthWarning] = useState("");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [submittingEmergencyRide, setSubmittingEmergencyRide] = useState(false);
+  const [latestInboxPosts, setLatestInboxPosts] = useState<InboxPost[]>([]);
+  const [inboxReadVersion, setInboxReadVersion] = useState(0);
+  const [driverOpenRideBadgeRecords, setDriverOpenRideBadgeRecords] = useState<OpenRideBadgeRecord[]>([]);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
@@ -293,6 +348,56 @@ export default function HomePage() {
   }, [profileMenuOpen]);
 
   useEffect(() => {
+    const refreshReadState = () => setInboxReadVersion((current) => current + 1);
+
+    window.addEventListener("storage", refreshReadState);
+    window.addEventListener(INBOX_READ_EVENT, refreshReadState as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", refreshReadState);
+      window.removeEventListener(INBOX_READ_EVENT, refreshReadState as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setLatestInboxPosts([]);
+      return;
+    }
+
+    const inboxPostsQuery = query(collection(db, "inboxPosts"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(inboxPostsQuery, (snapshot) => {
+      setLatestInboxPosts(
+        snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<InboxPost, "id">),
+        }))
+      );
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !profile?.available || !canDrive(profile)) {
+      setDriverOpenRideBadgeRecords([]);
+      return;
+    }
+
+    const openRidesQuery = query(collection(db, "rides"), where("status", "==", "open"));
+    const unsubscribe = onSnapshot(openRidesQuery, (snapshot) => {
+      setDriverOpenRideBadgeRecords(
+        snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<OpenRideBadgeRecord, "id">),
+        }))
+      );
+    });
+
+    return () => unsubscribe();
+  }, [profile, profile?.available, user]);
+
+  useEffect(() => {
     if (!user || activeRideLoading) return;
 
     if (driverActiveRide) {
@@ -314,6 +419,22 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
+  const inboxUnreadCount = getInboxUnreadCount(latestInboxPosts, loadInboxReadState());
+  void inboxReadVersion;
+  const visibleDriverRequestCount =
+    profile?.available && driverReady
+      ? driverOpenRideBadgeRecords.filter(
+          (ride) =>
+            !ride.isTestRide &&
+            canDriverSeeRideDuringDispatchWindow({
+              mode: ride.dispatchMode,
+              rideFlight: ride.dispatchFlight || ride.riderFlight,
+              driverFlight: profile?.flight,
+              createdAt: ride.createdAt,
+              expandedAt: ride.dispatchExpandedAt,
+            })
+        ).length
+      : 0;
   const emergencyRideBlockers = [
     !emergencyRideEnabled ? "One-tap emergency ride is off until you accept the App Permissions emergency ride setting." : null,
     profile?.locationServicesEnabled === false
@@ -532,6 +653,7 @@ export default function HomePage() {
                 background: "transparent",
                 border: "none",
                 boxShadow: "none",
+                position: "relative",
               }}
             >
               {profile?.driverPhotoUrl || profile?.riderPhotoUrl ? (
@@ -567,6 +689,7 @@ export default function HomePage() {
                   {(profile?.firstName || profile?.name || user.email || "?").charAt(0).toUpperCase()}
                 </div>
               )}
+              <NotificationBadge count={inboxUnreadCount} style={{ position: "absolute", top: -4, right: -4 }} />
             </button>
 
             <div
@@ -613,9 +736,11 @@ export default function HomePage() {
                     textDecoration: "none",
                     color: "#e5edf7",
                     backgroundColor: "rgba(15, 23, 42, 0.72)",
+                    position: "relative",
                   }}
                 >
                   Inbox
+                  <NotificationBadge count={inboxUnreadCount} style={{ position: "absolute", top: 8, right: 8 }} />
                 </Link>
               </div>
               <div className="profile-menu-item-wrap">
@@ -851,7 +976,7 @@ export default function HomePage() {
                     marginTop: 14,
                   }}
                 >
-                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" />
+                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" badgeCount={visibleDriverRequestCount} />
                   <AppTile href="/messages/direct" icon={<MessagesIcon />} label="Messages" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
                   {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
