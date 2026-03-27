@@ -90,7 +90,8 @@ service cloud.firestore {
         "notificationsUpdatedAt",
         "available",
         "updatedAt",
-        "emergencyRideAddressConsent"
+        "emergencyRideAddressConsent",
+        "emergencyRideDispatchMode"
       ];
     }
 
@@ -142,11 +143,15 @@ service cloud.firestore {
           "riderPhotoUrl",
           "riderRank",
           "riderLastName",
+          "riderFlight",
           "pickup",
           "pickupLocationName",
           "pickupLocationAddress",
           "destination",
           "riderLocation",
+          "dispatchMode",
+          "dispatchFlight",
+          "dispatchExpandedAt",
           "status",
           "createdAt",
           "isEmergencyRide",

@@ -5,11 +5,18 @@ import { useEffect, useState } from "react";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
+import {
+  DEFAULT_RIDE_DISPATCH_MODE,
+  type EmergencyRideDispatchMode,
+  RIDE_DISPATCH_OPTIONS,
+  normalizeRideDispatchMode,
+} from "../../../lib/ride-dispatch";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 type UserProfile = {
   emergencyRideAddressConsent?: boolean;
+  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
 };
 
 export default function AccountPermissionsPage() {
@@ -18,6 +25,8 @@ export default function AccountPermissionsPage() {
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [emergencyRideAddressConsent, setEmergencyRideAddressConsent] = useState(false);
+  const [emergencyRideDispatchMode, setEmergencyRideDispatchMode] =
+    useState<EmergencyRideDispatchMode>(DEFAULT_RIDE_DISPATCH_MODE);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -32,6 +41,7 @@ export default function AccountPermissionsPage() {
         const snap = await getDoc(doc(db, "users", currentUser.uid));
         const data = snap.exists() ? (snap.data() as UserProfile) : null;
         setEmergencyRideAddressConsent(Boolean(data?.emergencyRideAddressConsent));
+        setEmergencyRideDispatchMode(normalizeRideDispatchMode(data?.emergencyRideDispatchMode));
       } catch (error) {
         console.error(error);
         setStatusMessage("Could not load app permissions.");
@@ -51,6 +61,7 @@ export default function AccountPermissionsPage() {
       setStatusMessage("Saving app permissions...");
       await updateDoc(doc(db, "users", user.uid), {
         emergencyRideAddressConsent,
+        emergencyRideDispatchMode,
       });
       setStatusMessage("App permissions updated.");
     } catch (error) {
@@ -115,6 +126,32 @@ export default function AccountPermissionsPage() {
           If this is turned on, the home screen Emergency Ride button becomes a one-tap request using your saved
           address. If it is turned off, the button opens the normal request screen instead.
         </p>
+
+        <div style={{ marginTop: 22 }}>
+          <h2 style={{ marginBottom: 8 }}>Emergency Ride Driver Routing</h2>
+          <p style={{ marginTop: 0, color: "#94a3b8" }}>
+            Choose who gets your emergency ride request first. If the first group does not accept within 5 minutes,
+            the request expands to the rest of the active driver pool.
+          </p>
+
+          <label style={{ display: "grid", gap: 8, maxWidth: 520 }}>
+            <span>Initial driver audience</span>
+            <select
+              value={emergencyRideDispatchMode}
+              onChange={(event) => setEmergencyRideDispatchMode(normalizeRideDispatchMode(event.target.value))}
+            >
+              {RIDE_DISPATCH_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <p style={{ marginTop: 10, color: "#94a3b8" }}>
+            {RIDE_DISPATCH_OPTIONS.find((option) => option.value === emergencyRideDispatchMode)?.description}
+          </p>
+        </div>
 
         <div style={{ marginTop: 18, display: "flex", gap: 12, flexWrap: "wrap" }}>
           <button type="button" onClick={savePermissions} disabled={saving}>

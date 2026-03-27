@@ -9,6 +9,7 @@ import HomeIconLink from "../components/HomeIconLink";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { formatEtaLabel } from "../../lib/eta";
 import { auth, db } from "../../lib/firebase";
+import { DEFAULT_RIDE_DISPATCH_MODE, isRideDispatchExpanded, type EmergencyRideDispatchMode, rideDispatchWindowEndsAt } from "../../lib/ride-dispatch";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, doc, getDoc, onSnapshot, query, runTransaction, setDoc, where } from "firebase/firestore";
@@ -46,6 +47,11 @@ type Ride = {
     seconds?: number;
     nanoseconds?: number;
   };
+  dispatchMode?: EmergencyRideDispatchMode;
+  dispatchExpandedAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  } | null;
   acceptedAt?: {
     seconds?: number;
     nanoseconds?: number;
@@ -367,6 +373,60 @@ export default function RideStatusPage() {
 
     return () => window.clearInterval(intervalId);
   }, [activeRide, riderLocationServicesEnabled, user, liveRideState, refreshRiderLocation]);
+
+  useEffect(() => {
+    if (!user || !activeRide || activeRide.status !== "open") {
+      return;
+    }
+
+    const dispatchMode = activeRide.dispatchMode ?? DEFAULT_RIDE_DISPATCH_MODE;
+
+    if (
+      dispatchMode === "all_drivers" ||
+      isRideDispatchExpanded({
+        mode: dispatchMode,
+        createdAt: activeRide.createdAt,
+        expandedAt: activeRide.dispatchExpandedAt,
+      })
+    ) {
+      return;
+    }
+
+    const windowEndsAt = rideDispatchWindowEndsAt(activeRide.createdAt);
+
+    if (windowEndsAt == null) {
+      return;
+    }
+
+    const delayMs = Math.max(0, windowEndsAt - Date.now());
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const idToken = await auth.currentUser?.getIdToken();
+
+          if (!idToken) {
+            return;
+          }
+
+          await fetch("/api/notifications/ride-request", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              rideId: activeRide.id,
+              phase: "expand",
+            }),
+          });
+        } catch (error) {
+          console.error("Ride request expansion failed", error);
+        }
+      })();
+    }, delayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeRide, user]);
 
   const cancelRide = async () => {
     if (!activeRide || !user) return;

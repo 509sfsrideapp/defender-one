@@ -20,6 +20,7 @@ export type FirestoreUserDoc = {
   available?: boolean;
   name?: string;
   email?: string;
+  flight?: string;
   notificationTokens?: string[];
   notificationTokenMap?: Record<string, string>;
 };
@@ -30,12 +31,17 @@ export type FirestoreRideDoc = {
   acceptedBy?: string;
   status?: string;
   riderName?: string;
+  riderFlight?: string;
   pickup?: string;
   driverName?: string;
   carYear?: string;
   carMake?: string;
   carModel?: string;
   carColor?: string;
+  createdAt?: string;
+  dispatchMode?: string;
+  dispatchFlight?: string;
+  dispatchExpandedAt?: string;
 };
 
 const projectId = "ride-app-dd741";
@@ -66,6 +72,7 @@ function parseDocument(document: FirestoreDocument): FirestoreUserDoc {
     available: parseValue(fields.available) as boolean | undefined,
     name: parseValue(fields.name) as string | undefined,
     email: parseValue(fields.email) as string | undefined,
+    flight: parseValue(fields.flight) as string | undefined,
     notificationTokens: (parseValue(fields.notificationTokens) as string[] | undefined) || [],
     notificationTokenMap: (parseValue(fields.notificationTokenMap) as Record<string, string> | undefined) || {},
   };
@@ -81,7 +88,10 @@ function getPreferredNotificationTokens(user: FirestoreUserDoc) {
   return Array.from(new Set((user.notificationTokens || []).filter(Boolean)));
 }
 
-export async function getAvailableDriverNotificationTokens() {
+export async function getAvailableDriverNotificationTokens(options?: {
+  includeFlight?: string | null;
+  excludeFlight?: string | null;
+}) {
   const accessToken = await getGoogleAccessToken();
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`,
@@ -115,6 +125,21 @@ export async function getAvailableDriverNotificationTokens() {
   return data
     .map((entry) => (entry.document ? parseDocument(entry.document) : null))
     .filter((entry): entry is FirestoreUserDoc => Boolean(entry))
+    .filter((entry) => {
+      const entryFlight = entry.flight?.trim() || null;
+      const includeFlight = options?.includeFlight?.trim() || null;
+      const excludeFlight = options?.excludeFlight?.trim() || null;
+
+      if (includeFlight && entryFlight !== includeFlight) {
+        return false;
+      }
+
+      if (excludeFlight && entryFlight === excludeFlight) {
+        return false;
+      }
+
+      return true;
+    })
     .flatMap((entry) => getPreferredNotificationTokens(entry));
 }
 
@@ -162,11 +187,16 @@ export async function getRideDoc(rideId: string) {
     acceptedBy: parseValue(fields.acceptedBy) as string | undefined,
     status: parseValue(fields.status) as string | undefined,
     riderName: parseValue(fields.riderName) as string | undefined,
+    riderFlight: parseValue(fields.riderFlight) as string | undefined,
     pickup: parseValue(fields.pickup) as string | undefined,
     driverName: parseValue(fields.driverName) as string | undefined,
     carYear: parseValue(fields.carYear) as string | undefined,
     carMake: parseValue(fields.carMake) as string | undefined,
     carModel: parseValue(fields.carModel) as string | undefined,
     carColor: parseValue(fields.carColor) as string | undefined,
+    createdAt: parseValue(fields.createdAt) as string | undefined,
+    dispatchMode: parseValue(fields.dispatchMode) as string | undefined,
+    dispatchFlight: parseValue(fields.dispatchFlight) as string | undefined,
+    dispatchExpandedAt: parseValue(fields.dispatchExpandedAt) as string | undefined,
   } satisfies FirestoreRideDoc;
 }

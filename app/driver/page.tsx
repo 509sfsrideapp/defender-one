@@ -8,6 +8,7 @@ import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
 import { canDrive, getDriverReadinessIssues } from "../../lib/profile-readiness";
+import { canDriverSeeRideDuringDispatchWindow, type EmergencyRideDispatchMode } from "../../lib/ride-dispatch";
 import { getLatestActiveRideForDriver } from "../../lib/ride-state";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
@@ -35,6 +36,17 @@ type Ride = {
   pickupLocationAddress?: string;
   destination: string;
   status: string;
+  createdAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  };
+  riderFlight?: string;
+  dispatchMode?: EmergencyRideDispatchMode;
+  dispatchFlight?: string;
+  dispatchExpandedAt?: {
+    seconds?: number;
+    nanoseconds?: number;
+  } | null;
   acceptedBy?: string;
   driverName?: string;
   driverPhone?: string;
@@ -64,6 +76,7 @@ type UserProfile = {
   carModel?: string;
   carColor?: string;
   carPlate?: string;
+  flight?: string;
 };
 
 function renderPickupSummary(ride: Ride) {
@@ -136,6 +149,16 @@ export default function DriverPage() {
 
     return () => unsubscribe();
   }, [user]);
+
+  const visibleOpenRides = openRides.filter((ride) =>
+    canDriverSeeRideDuringDispatchWindow({
+      mode: ride.dispatchMode,
+      rideFlight: ride.dispatchFlight || ride.riderFlight,
+      driverFlight: profile?.flight,
+      createdAt: ride.createdAt,
+      expandedAt: ride.dispatchExpandedAt,
+    })
+  );
 
   useEffect(() => {
     if (acceptedRides.length > 0) {
@@ -466,10 +489,10 @@ export default function DriverPage() {
       <div style={{ marginTop: 30 }}>
         <h3>Open Ride Requests</h3>
 
-        {openRides.length === 0 ? (
+        {visibleOpenRides.length === 0 ? (
           <p>No open requests</p>
         ) : (
-          openRides.map((ride) => (
+          visibleOpenRides.map((ride) => (
             <div
               key={ride.id}
               style={{

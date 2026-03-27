@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { getRideDispatchTargeting, isRideDispatchExpanded, normalizeRideDispatchMode } from "../../../../lib/ride-dispatch";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { getAvailableDriverNotificationTokens, getRideDoc } from "../../../../lib/server/firestore-rest";
+import { patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { sendPushMessage } from "../../../../lib/server/fcm";
 
@@ -14,19 +16,51 @@ export async function POST(request: Request) {
     }
 
     const decoded = await verifyFirebaseIdToken(idToken);
-    const body = (await request.json()) as { rideId?: string };
+    const body = (await request.json()) as { rideId?: string; phase?: "initial" | "expand" };
 
     if (!body.rideId) {
       return NextResponse.json({ error: "Missing rideId" }, { status: 400 });
     }
 
     const ride = await getRideDoc(body.rideId);
+    const phase = body.phase === "expand" ? "expand" : "initial";
+    const normalizedMode = normalizeRideDispatchMode(ride.dispatchMode);
 
-    if (ride.riderId !== decoded.sub || ride.status !== "open") {
+    if (ride.status !== "open") {
+      return NextResponse.json({ error: "Ride is no longer open." }, { status: 409 });
+    }
+
+    if (phase === "initial" && ride.riderId !== decoded.sub) {
       return NextResponse.json({ error: "Unauthorized ride notification request." }, { status: 403 });
     }
 
-    const tokens = await getAvailableDriverNotificationTokens();
+    if (phase === "expand") {
+      if (ride.riderId !== decoded.sub) {
+        return NextResponse.json({ error: "Unauthorized ride expansion request." }, { status: 403 });
+      }
+
+      if (normalizedMode === "all_drivers") {
+        return NextResponse.json({ ok: true, skipped: "all_drivers" });
+      }
+
+      if (
+        !isRideDispatchExpanded({
+          mode: normalizedMode,
+          createdAt: ride.createdAt,
+          expandedAt: ride.dispatchExpandedAt,
+        })
+      ) {
+        return NextResponse.json({ ok: true, skipped: "not_due" });
+      }
+
+      if (ride.dispatchExpandedAt) {
+        return NextResponse.json({ ok: true, skipped: "already_expanded" });
+      }
+    }
+
+    const targeting = getRideDispatchTargeting(normalizedMode, ride.dispatchFlight || ride.riderFlight || null);
+    const tokenFilters = phase === "expand" ? targeting.expansion : targeting.initial;
+    const tokens = await getAvailableDriverNotificationTokens(tokenFilters);
 
     await sendPushMessage({
       tokens,
@@ -35,16 +69,29 @@ export async function POST(request: Request) {
       link: "/driver",
       origin: new URL(request.url).origin,
     });
+
+    if (phase === "expand" && !ride.dispatchExpandedAt) {
+      await patchFirestoreDocument(`rides/${ride.id}`, {
+        dispatchExpandedAt: new Date(),
+      });
+    }
+
     await writeAuditLog({
-      action: "notification.ride_request",
+      action: phase === "expand" ? "notification.ride_request_expand" : "notification.ride_request",
       actor: { uid: decoded.sub, email: decoded.email },
       targetType: "ride",
       targetId: ride.id,
       status: "success",
-      message: "Ride request notifications queued for available drivers.",
+      message:
+        phase === "expand"
+          ? "Ride request notifications expanded to the fallback driver audience."
+          : "Ride request notifications queued for the initial driver audience.",
       details: {
+        phase,
+        dispatchMode: normalizedMode,
         tokenCount: tokens.length,
         riderId: ride.riderId || null,
+        dispatchFlight: ride.dispatchFlight || ride.riderFlight || null,
       },
     });
 

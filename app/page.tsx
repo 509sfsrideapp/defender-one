@@ -9,6 +9,7 @@ import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
 import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
+import { DEFAULT_RIDE_DISPATCH_MODE, type EmergencyRideDispatchMode, normalizeRideDispatchMode } from "../lib/ride-dispatch";
 import { getLatestActiveRideForRider } from "../lib/ride-state";
 import { useActiveRides } from "../lib/use-active-rides";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -35,6 +36,7 @@ type UserProfile = {
   carColor?: string;
   locationServicesEnabled?: boolean;
   emergencyRideAddressConsent?: boolean;
+  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
 };
 
 type Coordinates = {
@@ -458,11 +460,15 @@ export default function HomePage() {
         riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
         riderRank: profile.rank?.trim() || null,
         riderLastName: profile.lastName?.trim() || null,
+        riderFlight: profile.flight?.trim() || null,
         pickup: resolvedPickup,
         pickupLocationName: geocodedPickup?.placeName || null,
         pickupLocationAddress: resolvedPickupAddress,
         destination: "Destination to be confirmed with rider",
         riderLocation,
+        dispatchMode: normalizeRideDispatchMode(profile.emergencyRideDispatchMode ?? DEFAULT_RIDE_DISPATCH_MODE),
+        dispatchFlight: profile.flight?.trim() || null,
+        dispatchExpandedAt: null,
         emergencySavedAddress: pickupAddress || null,
         status: "open",
         isEmergencyRide: true,
@@ -481,6 +487,7 @@ export default function HomePage() {
           keepalive: true,
           body: JSON.stringify({
             rideId: rideRef.id,
+            phase: "initial",
           }),
         }).catch((error) => {
           console.error("Driver notification request failed", error);

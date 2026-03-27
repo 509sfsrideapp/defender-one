@@ -7,12 +7,17 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
-    commit: "c64004b",
+    commit: "v153",
+    title: "Flight-Based Emergency Ride Routing",
+    summary: "Added an App Permissions setting that can send emergency ride requests to the rider’s own flight first or to everyone except that flight first for 5 minutes before expanding to the rest of the active driver pool.",
+  },
+  {
+    commit: "c7ec3fb",
     title: "Defender One Rebrand",
     summary: "Renamed the user-facing app branding to Defender One across the homepage, startup screen, install name, and notification fallback labels.",
   },
   {
-    commit: "280f8ef",
+    commit: "6d59171",
     title: "Timed Live Ride Tracking Return",
     summary: "Brought live ride tracking back in a lower-risk way with slower timed location updates and manual refresh buttons for both rider and driver, instead of constant location syncing.",
   },

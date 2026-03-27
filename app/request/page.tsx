@@ -6,6 +6,7 @@ import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { canRequestRide, getRideReadinessIssues } from "../../lib/profile-readiness";
+import { DEFAULT_RIDE_DISPATCH_MODE, type EmergencyRideDispatchMode, normalizeRideDispatchMode } from "../../lib/ride-dispatch";
 import { getLatestActiveRideForRider } from "../../lib/ride-state";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -27,6 +28,7 @@ type UserProfile = {
   firstName?: string;
   lastName?: string;
   rank?: string;
+  flight?: string;
   username?: string;
   phone: string;
   email: string;
@@ -36,6 +38,7 @@ type UserProfile = {
   riderPhotoUrl?: string;
   driverPhotoUrl?: string;
   locationServicesEnabled?: boolean;
+  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
 };
 
 export default function RequestPage() {
@@ -232,11 +235,15 @@ export default function RequestPage() {
         riderPhotoUrl: profile.driverPhotoUrl || profile.riderPhotoUrl || null,
         riderRank: profile.rank?.trim() || null,
         riderLastName: profile.lastName?.trim() || null,
+        riderFlight: profile.flight?.trim() || null,
         pickup: resolvedPickupLabel,
         pickupLocationName: geocodedPickup?.placeName || null,
         pickupLocationAddress: geocodedPickup?.address || geocodedPickup?.display || null,
         destination: resolvedDestination,
         riderLocation: coordinates,
+        dispatchMode: normalizeRideDispatchMode(profile.emergencyRideDispatchMode ?? DEFAULT_RIDE_DISPATCH_MODE),
+        dispatchFlight: profile.flight?.trim() || null,
+        dispatchExpandedAt: null,
         status: "open",
         createdAt: new Date(),
       });
@@ -253,6 +260,7 @@ export default function RequestPage() {
           keepalive: true,
           body: JSON.stringify({
             rideId: rideRef.id,
+            phase: "initial",
           }),
         })
           .then(async (response) => {
