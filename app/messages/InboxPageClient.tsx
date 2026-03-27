@@ -47,8 +47,8 @@ function ThreadIcon({ iconKey }: { iconKey: MessageThreadIconKey }) {
 
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4.5 8.5 8.5 12.1 4.5 15.5" />
-      <path d="M19.5 8.5 15.5 12.1 19.5 15.5" />
+      <path d="M8.5 8.5 4.5 12.1 8.5 15.5" />
+      <path d="M15.5 8.5 19.5 12.1 15.5 15.5" />
       <path d="M10.2 17.2 13.8 6.8" />
     </svg>
   );
