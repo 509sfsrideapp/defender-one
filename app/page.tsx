@@ -969,7 +969,6 @@ export default function HomePage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
                   <h2 style={{ margin: 0 }}>Applications</h2>
-                  <p style={{ margin: 0, color: "#94a3b8", fontSize: 13 }}>Operational tools and support modules</p>
                 </div>
                 <div
                   style={{
