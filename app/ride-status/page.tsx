@@ -467,6 +467,7 @@ export default function RideStatusPage() {
           canceledBy: user.uid,
         });
       });
+      router.replace("/");
     } catch (error) {
       console.error(error);
       alert(error instanceof Error ? error.message : "We could not cancel your ride.");

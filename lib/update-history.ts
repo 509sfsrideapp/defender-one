@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v169",
+    title: "Ride Cancel Redirect Fix",
+    summary: "Updated rider-side cancel behavior so a successful ride cancellation immediately returns the user to the home page instead of sometimes leaving them on the canceled ride screen while listeners catch up.",
+  },
+  {
     commit: "v168",
     title: "Account Settings Layout Cleanup",
     summary: "Reordered the Account Settings page into a cleaner flow, made phone and email display as fixed account info instead of editable fields, removed the unused profile photo URL box, and added a bottom-left Home button across the app.",
