@@ -73,6 +73,14 @@ export default function AccountPage() {
     carPlate: "",
   });
   const isAdminAccount = isAdminEmail(user?.email);
+  const infoDisplayStyle: React.CSSProperties = {
+    marginBottom: 10,
+    padding: "12px 14px",
+    borderRadius: 12,
+    border: "1px solid rgba(148, 163, 184, 0.18)",
+    backgroundColor: "rgba(15, 23, 42, 0.62)",
+    color: "#e5edf7",
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -362,28 +370,20 @@ export default function AccountPage() {
         <p style={{ marginTop: -2, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
           Username is only used for login.
         </p>
-        <input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} placeholder="Phone Number" style={{ marginBottom: 10 }} />
-        <input value={form.email} readOnly placeholder="Email" style={{ marginBottom: 4, opacity: 0.78, cursor: "not-allowed" }} />
-        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
-          Email is managed through your login account and cannot be changed here.
-        </p>
-        <h2 style={{ marginTop: 24 }}>Home Address</h2>
-        <input value={form.homeStreet} onChange={(e) => {
-          handleChange("homeStreet", e.target.value);
-        }} placeholder="Street Address" style={{ marginBottom: 10 }} />
-        <input value={form.homeCity} onChange={(e) => {
-          handleChange("homeCity", e.target.value);
-        }} placeholder="City" style={{ marginBottom: 10 }} />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 6, maxWidth: "28rem" }}>
-          <input value={form.homeState} onChange={(e) => {
-            handleChange("homeState", e.target.value.toUpperCase());
-          }} placeholder="State" maxLength={2} />
-          <input value={form.homeZip} onChange={(e) => {
-            handleChange("homeZip", e.target.value);
-          }} placeholder="ZIP Code" />
+        <div style={infoDisplayStyle}>
+          <strong style={{ display: "block", marginBottom: 4, color: "#94a3b8", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Phone Number
+          </strong>
+          <span>{form.phone || "No phone number on file"}</span>
+        </div>
+        <div style={infoDisplayStyle}>
+          <strong style={{ display: "block", marginBottom: 4, color: "#94a3b8", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Email
+          </strong>
+          <span>{form.email || "No email on file"}</span>
         </div>
         <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
-          Double-check that this information is correct so an accurate address is given to your driver.
+          Phone number and email are tied to your account and cannot be changed here.
         </p>
         <select
           value={form.rank}
@@ -403,15 +403,12 @@ export default function AccountPage() {
           style={{ display: "block", marginBottom: 6, width: "100%" }}
         >
           <option value="">Select Flight</option>
-          {flightOptions.map((flight) => (
-            <option key={flight} value={flight}>
-              {flight}
+          {flightOptions.map((flightOption) => (
+            <option key={flightOption} value={flightOption}>
+              {flightOption}
             </option>
           ))}
         </select>
-        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
-          Flight options: Alpha, Bravo, Charlie, Delta, Foxtrot, or Staff.
-        </p>
 
         <h2 style={{ marginTop: 24 }}>Profile Photo</h2>
         <div style={{ marginBottom: 14 }}>
@@ -439,12 +436,58 @@ export default function AccountPage() {
           />
         </div>
 
-        <input
-          value={form.profilePhotoUrl}
-          onChange={(e) => handleChange("profilePhotoUrl", e.target.value)}
-          placeholder="Profile photo URL or leave your uploaded photo"
-          style={{ marginBottom: 10 }}
-        />
+        <h2 style={{ marginTop: 24 }}>Home Address</h2>
+        <input value={form.homeStreet} onChange={(e) => {
+          handleChange("homeStreet", e.target.value);
+        }} placeholder="Street Address" style={{ marginBottom: 10 }} />
+        <input value={form.homeCity} onChange={(e) => {
+          handleChange("homeCity", e.target.value);
+        }} placeholder="City" style={{ marginBottom: 10 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 6, maxWidth: "28rem" }}>
+          <input value={form.homeState} onChange={(e) => {
+            handleChange("homeState", e.target.value.toUpperCase());
+          }} placeholder="State" maxLength={2} />
+          <input value={form.homeZip} onChange={(e) => {
+            handleChange("homeZip", e.target.value);
+          }} placeholder="ZIP Code" />
+        </div>
+        <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
+          Double-check that this information is correct so an accurate address is given to your driver.
+        </p>
+
+        <h2 style={{ marginTop: 24 }}>Vehicle Details</h2>
+        <input value={form.carYear} onChange={(e) => handleChange("carYear", e.target.value)} placeholder="Car year (optional)" style={{ marginBottom: 10 }} />
+        <input value={form.carMake} onChange={(e) => handleChange("carMake", e.target.value)} placeholder="Car make (optional)" style={{ marginBottom: 10 }} />
+        <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
+        <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
+        <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
+
+        <h2 style={{ marginTop: 24 }}>Readiness Alerts</h2>
+        <div
+          style={{
+            marginBottom: 18,
+            padding: 16,
+            borderRadius: 14,
+            border: "1px solid rgba(148, 163, 184, 0.18)",
+            backgroundColor: "rgba(7, 11, 18, 0.76)",
+          }}
+        >
+          <p style={{ marginTop: 0, color: form.profilePhotoUrl.trim() ? "#86efac" : "#fca5a5" }}>
+            {form.profilePhotoUrl.trim()
+              ? "Ready for identity photo checks."
+              : "Upload a clear profile picture before requesting rides or driving."}
+          </p>
+          <p style={{ color: form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim() ? "#86efac" : "#fca5a5" }}>
+            {form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim()
+              ? "Home address is ready for rider use."
+              : "Add your home address before requesting rides."}
+          </p>
+          <p style={{ marginBottom: 0, color: form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim() ? "#86efac" : "#fca5a5" }}>
+            {form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim()
+              ? "Vehicle details are ready for driver use."
+              : "Add your vehicle year, make, model, and color before driving."}
+          </p>
+        </div>
 
         <h2 style={{ marginTop: 24 }}>App Permissions</h2>
         <p style={{ marginTop: 0, marginBottom: 10, fontSize: 13, color: "#94a3b8" }}>
@@ -483,40 +526,6 @@ export default function AccountPage() {
         >
           Change Password
         </Link>
-
-        <h2 style={{ marginTop: 24 }}>Vehicle Details</h2>
-        <input value={form.carYear} onChange={(e) => handleChange("carYear", e.target.value)} placeholder="Car year (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.carMake} onChange={(e) => handleChange("carMake", e.target.value)} placeholder="Car make (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
-        <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
-
-        <h2 style={{ marginTop: 24 }}>Readiness Alerts</h2>
-        <div
-          style={{
-            marginBottom: 18,
-            padding: 16,
-            borderRadius: 14,
-            border: "1px solid rgba(148, 163, 184, 0.18)",
-            backgroundColor: "rgba(7, 11, 18, 0.76)",
-          }}
-        >
-          <p style={{ marginTop: 0, color: form.profilePhotoUrl.trim() ? "#86efac" : "#fca5a5" }}>
-            {form.profilePhotoUrl.trim()
-              ? "Ready for identity photo checks."
-              : "Upload a clear profile picture before requesting rides or driving."}
-          </p>
-          <p style={{ color: form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim() ? "#86efac" : "#fca5a5" }}>
-            {form.homeStreet.trim() && form.homeCity.trim() && form.homeState.trim() && form.homeZip.trim()
-              ? "Home address is ready for rider use."
-              : "Add your home address before requesting rides."}
-          </p>
-          <p style={{ marginBottom: 0, color: form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim() ? "#86efac" : "#fca5a5" }}>
-            {form.carYear.trim() && form.carMake.trim() && form.carModel.trim() && form.carColor.trim()
-              ? "Vehicle details are ready for driver use."
-              : "Add your vehicle year, make, model, and color before driving."}
-          </p>
-        </div>
 
         <h2 style={{ marginTop: 24 }}>History</h2>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>

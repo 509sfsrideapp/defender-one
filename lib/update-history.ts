@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v168",
+    title: "Account Settings Layout Cleanup",
+    summary: "Reordered the Account Settings page into a cleaner flow, made phone and email display as fixed account info instead of editable fields, removed the unused profile photo URL box, and added a bottom-left Home button across the app.",
+  },
+  {
     commit: "v167",
     title: "Signup Flow Cleanup",
     summary: "Reordered the required signup fields, removed the old Required Now and Complete Now or Later framing, added stronger password rules, and made signup problems appear clearly under the Continue to Terms button before users can proceed.",

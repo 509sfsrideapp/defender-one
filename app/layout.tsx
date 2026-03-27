@@ -1,5 +1,6 @@
 import ForegroundNotificationBridge from "./components/ForegroundNotificationBridge";
 import AccountAccessGate from "./components/AccountAccessGate";
+import BottomHomeButton from "./components/BottomHomeButton";
 import BottomUtilityNav from "./components/BottomUtilityNav";
 import DeveloperAccessCleaner from "./components/DeveloperAccessCleaner";
 import InitialAppSplash from "./components/InitialAppSplash";
@@ -63,6 +64,7 @@ export default function RootLayout({
         <AccountAccessGate />
         <ProfileCompletionGate />
         <div className="flex-1">{children}</div>
+        <BottomHomeButton />
         <BottomUtilityNav />
         <footer
           style={{
