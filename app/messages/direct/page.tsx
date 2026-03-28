@@ -11,8 +11,8 @@ const inboxNavButtonStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  minHeight: 38,
-  padding: "8px 13px",
+  minHeight: 32,
+  padding: "5px 13px",
   borderRadius: 10,
   textDecoration: "none",
   background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
@@ -22,7 +22,7 @@ const inboxNavButtonStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
   letterSpacing: "0.07em",
   textTransform: "uppercase",
-  fontSize: 11,
+  fontSize: 10.5,
 };
 
 export default function DirectMessagesPage() {
