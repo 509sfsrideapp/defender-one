@@ -682,6 +682,16 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const showPickupAddressLine =
     Boolean(pickupAddressLine) &&
     normalizeLocationLine(pickupPrimaryLine) !== normalizeLocationLine(pickupAddressLine);
+  const rideUnavailable =
+    !ride ||
+    !ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]) ||
+    ride.acceptedBy !== user?.uid;
+
+  useEffect(() => {
+    if (!loading && user && rideUnavailable) {
+      router.replace("/driver");
+    }
+  }, [loading, rideUnavailable, router, user]);
 
   if (loading) {
     return (
@@ -713,28 +723,10 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
     );
   }
 
-  if (
-    !ride ||
-    !ACTIVE_RIDE_STATUSES.includes(ride.status as (typeof ACTIVE_RIDE_STATUSES)[number]) ||
-    ride.acceptedBy !== user.uid
-  ) {
+  if (rideUnavailable) {
     return (
       <main style={{ padding: 20 }}>
-        <Link
-          href="/driver"
-          style={{
-            display: "inline-block",
-            marginBottom: 20,
-            padding: "8px 14px",
-            backgroundColor: "#1f2937",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 8,
-          }}
-        >
-          Driver Dashboard
-        </Link>
-        <p>This active ride is not available.</p>
+        <AppLoadingState title="Returning to Driver Dashboard" caption="This ride is no longer active for you, so we’re taking you back to the queue." />
       </main>
     );
   }

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v217",
+    title: "Driver Active Ride Redirect Fix",
+    summary: "Changed the driver active-ride screen so if the ride is no longer valid for that driver after a release or status change, the page now redirects straight back to the driver dashboard instead of leaving the driver on an empty unavailable screen.",
+  },
+  {
     commit: "v216",
     title: "Emergency Ride GPS Guardrail",
     summary: "Stopped one-tap emergency rides from going out without a captured live location, and added a rider-status safety cleanup that auto-cancels any emergency ride missing rider GPS before sending the rider back home to retry the request properly.",
