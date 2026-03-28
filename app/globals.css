@@ -188,6 +188,16 @@ select {
     0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background: #0d1218;
+  color: #eef4ff;
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #8ea1b8;

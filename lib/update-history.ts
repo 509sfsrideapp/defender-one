@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v225",
+    title: "Desktop Dropdown Contrast Fix",
+    summary: "Fixed the app's shared dropdown styling so desktop select option menus now use the same dark theme as the rest of the interface instead of opening with unreadable white backgrounds.",
+  },
+  {
     commit: "v224",
     title: "Verified Account Deletion",
     summary: "Added a red-tinted delete-account action under Account Settings that requires the current vehicle year, make, model, color, and the account password before permanently deleting the member's auth account, profile, and username record.",
