@@ -7,11 +7,6 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
-    commit: "v172",
-    title: "Military Console Styling Pass",
-    summary: "Pushed the app further into a military operations-console look with stronger command framing, colder steel-and-slate surfaces, sharper control styling, clearer section labels, and more visible visual hierarchy across the home, driver, admin, account, and shared control surfaces.",
-  },
-  {
     commit: "v171",
     title: "Operations Console Visual Refresh",
     summary: "Shifted the app toward a more military operations-console look with sharper typography, colder steel-and-slate surfaces, cleaner panel styling, and more consistent tactical button, tile, and dashboard treatment across the main user flows.",
