@@ -452,6 +452,12 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
+  const authTokenUserLabel =
+    profile?.lastName?.trim() && profile?.firstName?.trim()
+      ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
+      : profile?.name?.trim()
+        ? `${profile.name.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
+        : `${(user?.email?.split("@")[0] || "USER").toUpperCase()}${profile?.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`;
   const latestInboxPosts = [...globalInboxPosts, ...userInboxPosts]
     .filter((post) => isMessageThreadId(post.threadId))
     .sort((a, b) => {
@@ -682,6 +688,20 @@ export default function HomePage() {
           >
             509 SFS - Whiteman AFB, MO
           </p>
+          {user ? (
+            <p
+              style={{
+                margin: "0.32rem 0 0",
+                color: "#cbd5e1",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                fontSize: 11,
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              {`AUTH TOKEN VALIDATED//USER: ${authTokenUserLabel}`}
+            </p>
+          ) : null}
           <h1 style={{ margin: "0.4rem 0 0" }}>Defender One</h1>
         </div>
         {user ? (

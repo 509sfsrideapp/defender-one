@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v180",
+    title: "Homepage Auth Token Header",
+    summary: "Added a signed-in homepage header line under the 509 SFS location banner that shows an AUTH TOKEN VALIDATED user tag using the current member's name and rank.",
+  },
+  {
     commit: "v179",
     title: "Account Profile Detail Fields",
     summary: "Added a one-line job description field under Flight and a three-line bio section under the profile photo area in Account Settings, and updated the backend profile rules so both fields save normally.",
