@@ -69,34 +69,6 @@ body::after {
 
 body::before {
   background:
-    radial-gradient(
-      145% 92% at 14% 18%,
-      transparent 0 17%,
-      rgba(140, 154, 133, 0.075) 17.4% 17.8%,
-      transparent 18.2% 21%,
-      rgba(140, 154, 133, 0.06) 21.4% 21.8%,
-      transparent 22.2% 26.2%,
-      rgba(140, 154, 133, 0.055) 26.6% 27%,
-      transparent 27.4% 100%
-    ),
-    radial-gradient(
-      135% 88% at 86% 14%,
-      transparent 0 18%,
-      rgba(132, 148, 126, 0.06) 18.4% 18.8%,
-      transparent 19.2% 22.8%,
-      rgba(132, 148, 126, 0.05) 23.2% 23.6%,
-      transparent 24% 28%,
-      rgba(132, 148, 126, 0.045) 28.4% 28.8%,
-      transparent 29.2% 100%
-    ),
-    radial-gradient(
-      138% 96% at 50% 90%,
-      transparent 0 24%,
-      rgba(126, 142, 120, 0.05) 24.4% 24.8%,
-      transparent 25.2% 28.8%,
-      rgba(126, 142, 120, 0.04) 29.2% 29.6%,
-      transparent 30% 100%
-    ),
     repeating-linear-gradient(
       90deg,
       rgba(150, 158, 145, 0.055) 0,
@@ -131,23 +103,7 @@ body::after {
       rgba(145, 156, 145, 0.018) 58.1% 58.3%,
       transparent 58.4% 100%
     ),
-    linear-gradient(
-      118deg,
-      transparent 0 16%,
-      rgba(255, 255, 255, 0.02) 16.05% 16.12%,
-      transparent 16.18% 43%,
-      rgba(255, 255, 255, 0.014) 43.05% 43.1%,
-      transparent 43.16% 100%
-    ),
-    linear-gradient(
-      74deg,
-      transparent 0 32%,
-      rgba(255, 255, 255, 0.014) 32.05% 32.11%,
-      transparent 32.16% 68%,
-      rgba(255, 255, 255, 0.01) 68.05% 68.09%,
-      transparent 68.14% 100%
-    ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='0.8'/%3E%3Ccircle cx='52' cy='36' r='0.7'/%3E%3Ccircle cx='94' cy='18' r='0.8'/%3E%3Ccircle cx='138' cy='40' r='0.7'/%3E%3Ccircle cx='164' cy='26' r='0.9'/%3E%3Ccircle cx='32' cy='82' r='0.8'/%3E%3Ccircle cx='74' cy='70' r='0.6'/%3E%3Ccircle cx='118' cy='88' r='0.8'/%3E%3Ccircle cx='156' cy='76' r='0.7'/%3E%3Ccircle cx='24' cy='136' r='0.7'/%3E%3Ccircle cx='62' cy='118' r='0.8'/%3E%3Ccircle cx='102' cy='144' r='0.7'/%3E%3Ccircle cx='146' cy='132' r='0.8'/%3E%3Ccircle cx='170' cy='154' r='0.6'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-opacity='0.035' stroke-width='1'%3E%3Cpath d='M130 18l18 -14'/%3E%3Cpath d='M26 120l16 -10'/%3E%3Cpath d='M110 148l24 -16'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='0.8'/%3E%3Ccircle cx='52' cy='36' r='0.7'/%3E%3Ccircle cx='94' cy='18' r='0.8'/%3E%3Ccircle cx='138' cy='40' r='0.7'/%3E%3Ccircle cx='164' cy='26' r='0.9'/%3E%3Ccircle cx='32' cy='82' r='0.8'/%3E%3Ccircle cx='74' cy='70' r='0.6'/%3E%3Ccircle cx='118' cy='88' r='0.8'/%3E%3Ccircle cx='156' cy='76' r='0.7'/%3E%3Ccircle cx='24' cy='136' r='0.7'/%3E%3Ccircle cx='62' cy='118' r='0.8'/%3E%3Ccircle cx='102' cy='144' r='0.7'/%3E%3Ccircle cx='146' cy='132' r='0.8'/%3E%3Ccircle cx='170' cy='154' r='0.6'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(circle at center, transparent 52%, rgba(0, 0, 0, 0.12) 74%, rgba(0, 0, 0, 0.42) 100%);
   opacity: 0.78;
 }

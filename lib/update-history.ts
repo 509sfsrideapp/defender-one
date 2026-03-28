@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v192",
+    title: "Background Simplification Pass",
+    summary: "Removed the contour-line and scratch/wear layers from the global tactical background so the app keeps the darker grid, grain, scanline, and vignette treatment without the weirder map-and-metal artifacts.",
+  },
+  {
     commit: "v191",
     title: "Global Tactical Background System",
     summary: "Rebuilt the app-wide background into a darker military terminal stack with a matte black-to-charcoal base, faint grid and contour overlays, static grain and scratch texture, a subtle vignette, scanlines, and a matching rugged splash-screen palette so the whole app feels like one consistent tactical system.",
