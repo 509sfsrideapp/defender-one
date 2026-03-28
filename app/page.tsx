@@ -716,15 +716,20 @@ export default function HomePage() {
               })
               .catch(() => null)
           : null;
+
+      if (!riderLocation) {
+        throw new Error("Live location is required for Emergency Ride. Return to the home screen and try the request again once location access is available.");
+      }
+
       const resolvedPickup =
         geocodedPickup?.placeName ||
         geocodedPickup?.address ||
         geocodedPickup?.display ||
-        (riderLocation ? "Current GPS location" : pickupAddress);
+        "Current GPS location";
       const resolvedPickupAddress =
         geocodedPickup?.address ||
         geocodedPickup?.display ||
-        (riderLocation ? "Current GPS location" : pickupAddress);
+        "Current GPS location";
       const rideRef = await addDoc(collection(db, "rides"), {
         riderId: user.uid,
         riderName: riderDisplayName,

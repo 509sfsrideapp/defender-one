@@ -77,6 +77,7 @@ export async function POST(request: Request) {
       rideId?: string;
       actor?: "rider" | "driver";
       reason?: string;
+      skipFollowUp?: boolean;
     };
 
     if (!body.rideId || !body.actor) {
@@ -90,6 +91,8 @@ export async function POST(request: Request) {
     }
 
     if (body.actor === "rider") {
+      const riderCancelReason = body.reason?.trim() || null;
+
       if (ride.riderId !== decoded.sub) {
         return NextResponse.json({ error: "Unauthorized ride cancellation." }, { status: 403 });
       }
@@ -131,14 +134,16 @@ export async function POST(request: Request) {
         });
       }
 
-      await createUserNotificationPost({
-        userId: decoded.sub,
-        rideId: ride.id,
-        title: buildNotificationTitle("rider"),
-        body: buildNotificationBody("rider"),
-        requiresResponse: true,
-        responsePrompt: buildNotificationPrompt("rider"),
-      });
+      if (!body.skipFollowUp) {
+        await createUserNotificationPost({
+          userId: decoded.sub,
+          rideId: ride.id,
+          title: buildNotificationTitle("rider"),
+          body: buildNotificationBody("rider"),
+          requiresResponse: true,
+          responsePrompt: buildNotificationPrompt("rider"),
+        });
+      }
 
       await writeAuditLog({
         action: "ride.cancel_rider",
@@ -149,6 +154,8 @@ export async function POST(request: Request) {
         message: "Rider canceled a ride and follow-up notifications were queued.",
         details: {
           acceptedBy: ride.acceptedBy || null,
+          cancelReason: riderCancelReason,
+          followUpSkipped: body.skipFollowUp === true,
         },
       });
 

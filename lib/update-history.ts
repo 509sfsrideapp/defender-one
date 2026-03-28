@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v216",
+    title: "Emergency Ride GPS Guardrail",
+    summary: "Stopped one-tap emergency rides from going out without a captured live location, and added a rider-status safety cleanup that auto-cancels any emergency ride missing rider GPS before sending the rider back home to retry the request properly.",
+  },
+  {
     commit: "v215",
     title: "Inbox Button Theme Correction",
     summary: "Restored the inbox Return to Inbox and Open Inbox navigation buttons to the same blue gradient action style used across the rest of the app so those controls no longer feel visually off-theme.",

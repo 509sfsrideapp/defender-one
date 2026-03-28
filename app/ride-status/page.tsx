@@ -73,6 +73,7 @@ type Ride = {
     seconds?: number;
     nanoseconds?: number;
   };
+  isEmergencyRide?: boolean;
 };
 
 type RiderProfile = {
@@ -141,6 +142,7 @@ export default function RideStatusPage() {
   const [refreshingLocation, setRefreshingLocation] = useState(false);
   const [timelineExpanded, setTimelineExpanded] = useState(false);
   const [driverPhotoExpanded, setDriverPhotoExpanded] = useState(false);
+  const [cleaningInvalidEmergencyRide, setCleaningInvalidEmergencyRide] = useState(false);
   const riderRefreshInFlightRef = useRef(false);
 
   useEffect(() => {
@@ -260,38 +262,86 @@ export default function RideStatusPage() {
     return () => unsubscribe();
   }, [activeRide]);
 
-  const riderLocation: MapPoint | null =
-    liveRideState?.riderLocation?.latitude != null && liveRideState.riderLocation?.longitude != null
-      ? {
-          latitude: liveRideState.riderLocation.latitude,
-          longitude: liveRideState.riderLocation.longitude,
-        }
-      : activeRide?.riderLocation?.latitude != null && activeRide.riderLocation?.longitude != null
-      ? {
-          latitude: activeRide.riderLocation.latitude,
-          longitude: activeRide.riderLocation.longitude,
-        }
-      : null;
-  const driverLocation: MapPoint | null =
-    activeRide?.status === "open"
-      ? null
-      : liveRideState?.driverLocation?.latitude != null && liveRideState.driverLocation?.longitude != null
-      ? {
-          latitude: liveRideState.driverLocation.latitude,
-          longitude: liveRideState.driverLocation.longitude,
-        }
-      : activeRide?.driverLocation?.latitude != null && activeRide.driverLocation?.longitude != null
-      ? {
-          latitude: activeRide.driverLocation.latitude,
-          longitude: activeRide.driverLocation.longitude,
-        }
-      : null;
+  const riderLocation: MapPoint | null = useMemo(
+    () =>
+      liveRideState?.riderLocation?.latitude != null && liveRideState.riderLocation?.longitude != null
+        ? {
+            latitude: liveRideState.riderLocation.latitude,
+            longitude: liveRideState.riderLocation.longitude,
+          }
+        : activeRide?.riderLocation?.latitude != null && activeRide.riderLocation?.longitude != null
+          ? {
+              latitude: activeRide.riderLocation.latitude,
+              longitude: activeRide.riderLocation.longitude,
+            }
+          : null,
+    [activeRide?.riderLocation?.latitude, activeRide?.riderLocation?.longitude, liveRideState?.riderLocation?.latitude, liveRideState?.riderLocation?.longitude]
+  );
+  const driverLocation: MapPoint | null = useMemo(
+    () =>
+      activeRide?.status === "open"
+        ? null
+        : liveRideState?.driverLocation?.latitude != null && liveRideState.driverLocation?.longitude != null
+          ? {
+              latitude: liveRideState.driverLocation.latitude,
+              longitude: liveRideState.driverLocation.longitude,
+            }
+          : activeRide?.driverLocation?.latitude != null && activeRide?.driverLocation?.longitude != null
+            ? {
+                latitude: activeRide.driverLocation.latitude,
+                longitude: activeRide.driverLocation.longitude,
+              }
+            : null,
+    [activeRide?.driverLocation?.latitude, activeRide?.driverLocation?.longitude, activeRide?.status, liveRideState?.driverLocation?.latitude, liveRideState?.driverLocation?.longitude]
+  );
   const canCancelRide = activeRide?.status === "open" || activeRide?.status === "accepted" || activeRide?.status === "arrived";
   const lifecycleSteps = activeRide ? getRideLifecycleSteps(activeRide) : [];
   const eta = formatEtaLabel(driverLocation, riderLocation);
   const showDestination =
     Boolean(activeRide?.destination) &&
     activeRide?.destination !== "Destination to be confirmed with rider";
+
+  useEffect(() => {
+    if (
+      !user ||
+      !activeRide ||
+      cleaningInvalidEmergencyRide ||
+      !activeRide.isEmergencyRide ||
+      !ACTIVE_RIDE_STATUSES.includes(activeRide.status as (typeof ACTIVE_RIDE_STATUSES)[number]) ||
+      riderLocation
+    ) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        setCleaningInvalidEmergencyRide(true);
+        const idToken = await auth.currentUser?.getIdToken();
+
+        if (idToken) {
+          await fetch("/api/rides/cancel", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              rideId: activeRide.id,
+              actor: "rider",
+              reason: "Emergency ride auto-canceled because live location was unavailable during request setup.",
+              skipFollowUp: true,
+            }),
+          }).catch((error) => {
+            console.error("Emergency ride cleanup failed", error);
+          });
+        }
+
+        alert("Live pickup location was not captured, so this emergency ride was removed. Please return home and request again once location access is available.");
+      } finally {
+        router.replace("/");
+      }
+    })();
+  }, [activeRide, cleaningInvalidEmergencyRide, riderLocation, router, user]);
 
   const refreshRiderLocation = useCallback(async (manual = false) => {
     if (
