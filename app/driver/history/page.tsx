@@ -82,7 +82,7 @@ export default function DriverHistoryPage() {
           display: "inline-block",
           marginBottom: 20,
           padding: "8px 14px",
-          backgroundColor: "#243326",
+          backgroundColor: "#1f2937",
           color: "white",
           textDecoration: "none",
           borderRadius: 8,
@@ -101,7 +101,7 @@ export default function DriverHistoryPage() {
             key={ride.id}
             style={{
               border: "1px solid rgba(148, 163, 184, 0.18)",
-              backgroundColor: "rgba(11, 16, 10, 0.88)",
+              backgroundColor: "rgba(9, 15, 25, 0.88)",
               color: "#e5edf7",
               borderRadius: 12,
               padding: 14,

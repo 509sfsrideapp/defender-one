@@ -76,7 +76,7 @@ const homepageCardStyle: React.CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(126, 142, 160, 0.18)",
   background:
-    "linear-gradient(180deg, rgba(22, 26, 20, 0.96) 0%, rgba(10, 12, 9, 0.985) 100%)",
+    "linear-gradient(180deg, rgba(18, 23, 29, 0.96) 0%, rgba(9, 12, 17, 0.985) 100%)",
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
 };
 
@@ -110,7 +110,7 @@ function NotificationBadge({ count, style }: { count: number; style?: React.CSSP
         fontSize: 11,
         fontWeight: 700,
         lineHeight: 1,
-        border: "2px solid rgba(11, 16, 10, 0.98)",
+        border: "2px solid rgba(9, 15, 25, 0.98)",
         boxShadow: "0 6px 16px rgba(127, 29, 29, 0.28)",
         ...style,
       }}
@@ -153,11 +153,11 @@ function AppTile({
         display: "grid",
         placeItems: "center",
         background: disabled
-          ? "linear-gradient(180deg, rgba(64, 74, 61, 0.62) 0%, rgba(31, 40, 29, 0.72) 100%)"
-          : "linear-gradient(180deg, rgba(77, 105, 70, 0.78) 0%, rgba(34, 48, 31, 0.92) 100%)",
-        color: disabled ? "#c7d0c3" : "#e4f2dd",
+          ? "linear-gradient(180deg, rgba(56, 65, 77, 0.62) 0%, rgba(31, 41, 55, 0.72) 100%)"
+          : "linear-gradient(180deg, rgba(47, 60, 79, 0.72) 0%, rgba(24, 33, 45, 0.9) 100%)",
+        color: disabled ? "#c7d0db" : "#dceaf8",
         position: "relative",
-        border: "1px solid rgba(132, 177, 116, 0.24)",
+        border: "1px solid rgba(129, 145, 164, 0.24)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
       }}
     >
@@ -185,9 +185,9 @@ function AppTile({
       <div
         style={{
           ...sharedStyle,
-          color: "#9faa97",
-          background: "linear-gradient(180deg, rgba(31, 37, 29, 0.92) 0%, rgba(17, 22, 16, 0.96) 100%)",
-          border: "1px solid rgba(132, 177, 116, 0.16)",
+          color: "#93a0b0",
+          background: "linear-gradient(180deg, rgba(37, 44, 53, 0.92) 0%, rgba(21, 26, 33, 0.96) 100%)",
+          border: "1px solid rgba(126, 142, 160, 0.18)",
           opacity: 0.82,
         }}
       >
@@ -204,8 +204,8 @@ function AppTile({
         ...sharedStyle,
         textDecoration: "none",
         color: "#e5edf7",
-        background: "linear-gradient(180deg, rgba(20, 26, 18, 0.96) 0%, rgba(10, 13, 9, 0.99) 100%)",
-        border: "1px solid rgba(132, 177, 116, 0.22)",
+        background: "linear-gradient(180deg, rgba(20, 26, 33, 0.96) 0%, rgba(10, 13, 18, 0.99) 100%)",
+        border: "1px solid rgba(126, 142, 160, 0.22)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 30px rgba(0, 0, 0, 0.24)",
       }}
     >
@@ -721,7 +721,7 @@ export default function HomePage() {
           <p
             style={{
               margin: 0,
-              color: "#9fd28f",
+              color: "#7dd3fc",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               fontSize: 12,
@@ -775,7 +775,7 @@ export default function HomePage() {
               <span
                 style={{
                   fontSize: 12,
-                  color: "#b4d4a7",
+                  color: "#93c5fd",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   fontFamily: "var(--font-display)",
@@ -836,9 +836,9 @@ export default function HomePage() {
                     borderRadius: 999,
                     display: "grid",
                     placeItems: "center",
-                    backgroundColor: "rgba(24, 34, 22, 0.72)",
-                    color: "#e2f1dd",
-                    border: "1px solid rgba(132, 177, 116, 0.2)",
+                    backgroundColor: "rgba(18, 37, 63, 0.72)",
+                    color: "#dbeafe",
+                    border: "1px solid rgba(96, 165, 250, 0.2)",
                     fontFamily: "var(--font-display)",
                     fontSize: "1.1rem",
                   }}
@@ -874,7 +874,7 @@ export default function HomePage() {
                 padding: 8,
                 borderRadius: 14,
                 border: "1px solid rgba(148, 163, 184, 0.18)",
-                backgroundColor: "rgba(11, 16, 10, 0.96)",
+                backgroundColor: "rgba(9, 15, 25, 0.96)",
                 boxShadow: "0 18px 40px rgba(2, 6, 23, 0.32)",
                 display: "grid",
                 gap: 6,
@@ -891,7 +891,7 @@ export default function HomePage() {
                     borderRadius: 10,
                     textDecoration: "none",
                     color: "#e5edf7",
-                    backgroundColor: "rgba(18, 28, 16, 0.72)",
+                    backgroundColor: "rgba(15, 23, 42, 0.72)",
                   }}
                 >
                   Settings
@@ -907,7 +907,7 @@ export default function HomePage() {
                     borderRadius: 10,
                     textDecoration: "none",
                     color: "#e5edf7",
-                    backgroundColor: "rgba(18, 28, 16, 0.72)",
+                    backgroundColor: "rgba(15, 23, 42, 0.72)",
                     position: "relative",
                   }}
                 >
@@ -974,7 +974,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 180,
                   padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
+                  background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 12,
@@ -1008,11 +1008,11 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 160,
                   padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
+                  background: "linear-gradient(180deg, rgba(55, 72, 94, 0.98) 0%, rgba(23, 31, 42, 0.99) 100%)",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 12,
-                  border: "1px solid rgba(132, 177, 116, 0.24)",
+                  border: "1px solid rgba(126, 142, 160, 0.24)",
                 }}
               >
                 Admin Login
@@ -1127,7 +1127,7 @@ export default function HomePage() {
                       fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      boxShadow: "0 16px 38px rgba(18, 28, 16, 0.18)",
+                      boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
                       opacity: 0.82,
                     }}
                   >
@@ -1159,14 +1159,14 @@ export default function HomePage() {
                     borderRadius: 14,
                     border: "1px solid rgba(126, 142, 160, 0.16)",
                     background:
-                      "linear-gradient(180deg, rgba(20, 25, 18, 0.94) 0%, rgba(10, 14, 10, 0.98) 100%)",
+                      "linear-gradient(180deg, rgba(16, 22, 30, 0.94) 0%, rgba(9, 14, 20, 0.98) 100%)",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
                   <p
                     style={{
                       margin: 0,
-                      color: "#9fd28f",
+                      color: "#7dd3fc",
                       fontSize: 10,
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
@@ -1207,7 +1207,7 @@ export default function HomePage() {
                     marginTop: 14,
                   }}
                 >
-                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver" badgeCount={visibleDriverRequestCount} />
+                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" badgeCount={visibleDriverRequestCount} />
                   <AppTile href="/messages/direct" icon={<MessagesIcon />} label="Messages" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
                   {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
@@ -1230,9 +1230,9 @@ export default function HomePage() {
                 style={{
                   maxWidth: 840,
                   borderRadius: 16,
-                  border: "1px solid rgba(118, 148, 106, 0.26)",
+                  border: "1px solid rgba(86, 122, 168, 0.26)",
                   background:
-                    "linear-gradient(180deg, rgba(8, 14, 8, 0.98) 0%, rgba(4, 9, 4, 0.995) 100%)",
+                    "linear-gradient(180deg, rgba(8, 16, 28, 0.98) 0%, rgba(4, 10, 18, 0.995) 100%)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(2, 6, 23, 0.3)",
                   overflow: "hidden",
                 }}
@@ -1244,14 +1244,14 @@ export default function HomePage() {
                     justifyContent: "space-between",
                     gap: 12,
                     padding: "0.55rem 0.85rem",
-                    borderBottom: "1px solid rgba(118, 148, 106, 0.2)",
+                    borderBottom: "1px solid rgba(86, 122, 168, 0.2)",
                     background:
-                      "linear-gradient(180deg, rgba(20, 29, 18, 0.98) 0%, rgba(12, 18, 12, 0.98) 100%)",
+                      "linear-gradient(180deg, rgba(17, 28, 43, 0.98) 0%, rgba(11, 19, 31, 0.98) 100%)",
                   }}
                 >
                   <span
                     style={{
-                      color: "#b6d1ad",
+                      color: "#9cc2ee",
                       fontSize: 10,
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
@@ -1262,7 +1262,7 @@ export default function HomePage() {
                   </span>
                   <span
                     style={{
-                      color: "#9fd28f",
+                      color: "#7dd3fc",
                       fontSize: 10,
                       letterSpacing: "0.14em",
                       textTransform: "uppercase",
@@ -1278,7 +1278,7 @@ export default function HomePage() {
                     display: "grid",
                     gap: 10,
                     background:
-                      "linear-gradient(180deg, rgba(8, 12, 8, 0.98) 0%, rgba(3, 8, 3, 0.995) 100%)",
+                      "linear-gradient(180deg, rgba(8, 13, 22, 0.98) 0%, rgba(3, 9, 16, 0.995) 100%)",
                   }}
                 >
                   {typedAppStatusChecks.map((statusLine, index) => {
@@ -1293,7 +1293,7 @@ export default function HomePage() {
                           alignItems: "center",
                           gap: 10,
                           minHeight: 20,
-                          color: lineComplete ? "#9df6b3" : "#d9e6d3",
+                          color: lineComplete ? "#9df6b3" : "#d7e6f8",
                           fontSize: 12,
                           lineHeight: 1.4,
                           fontFamily: "var(--font-mono)",
@@ -1313,7 +1313,7 @@ export default function HomePage() {
                                 width: 8,
                                 height: 14,
                                 marginLeft: 4,
-                                backgroundColor: "#9fd28f",
+                                backgroundColor: "#7dd3fc",
                                 verticalAlign: "text-bottom",
                                 animation: "auth-status-pulse 1s ease-in-out infinite",
                               }}
@@ -1353,7 +1353,7 @@ export default function HomePage() {
                 style={{
                   display: "inline-block",
                   padding: "10px 16px",
-                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
+                  backgroundColor: "#7c3aed",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 8,

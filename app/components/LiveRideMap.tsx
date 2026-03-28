@@ -153,7 +153,7 @@ export default function LiveRideMap({
           riderMarkerRef.current.bindPopup("Pickup");
 
           if (driverLocation) {
-            const driverIcon = createMarkerIcon("#4d7a4f", "rgba(77,122,79,0.35)", L);
+            const driverIcon = createMarkerIcon("#2563eb", "rgba(30,64,175,0.35)", L);
             driverMarkerRef.current = L.marker([driverLocation.latitude, driverLocation.longitude], { icon: driverIcon }).addTo(map);
             driverMarkerRef.current.bindPopup("Driver");
           }
@@ -162,7 +162,7 @@ export default function LiveRideMap({
 
           if (driverLocation) {
             if (!driverMarkerRef.current) {
-              const driverIcon = createMarkerIcon("#4d7a4f", "rgba(77,122,79,0.35)", L);
+              const driverIcon = createMarkerIcon("#2563eb", "rgba(30,64,175,0.35)", L);
               driverMarkerRef.current = L.marker([driverLocation.latitude, driverLocation.longitude], { icon: driverIcon }).addTo(mapRef.current);
               driverMarkerRef.current.bindPopup("Driver");
             } else {
@@ -214,9 +214,9 @@ export default function LiveRideMap({
           marginTop: 16,
           borderRadius: 12,
           padding: 16,
-          backgroundColor: "#f7fbf5",
-          color: "#27402a",
-          border: "1px solid #c8ddc3",
+          backgroundColor: "#f8fafc",
+          color: "#334155",
+          border: "1px solid #cbd5e1",
           maxWidth,
         }}
       >
@@ -232,20 +232,20 @@ export default function LiveRideMap({
         maxWidth,
         borderRadius: 14,
         overflow: "hidden",
-        border: "1px solid #b7d7b0",
+        border: "1px solid #bfdbfe",
         backgroundColor: "#ffffff",
       }}
     >
-      <div style={{ padding: "12px 14px", color: "#19311b", backgroundColor: "#edf7eb" }}>
+      <div style={{ padding: "12px 14px", color: "#0f172a", backgroundColor: "#eff6ff" }}>
         <strong>{title}</strong>
       </div>
 
       <div ref={mapContainerRef} style={{ width: "100%", height: 320 }} />
 
-      <div style={{ padding: 14, color: "#213624", backgroundColor: "#f7fbf5" }}>
+      <div style={{ padding: 14, color: "#0f172a", backgroundColor: "#f8fafc" }}>
         {mapError ||
           footerLabel ||
-          (driverLocation ? "Green is the driver. Orange is the pickup spot." : "Waiting for driver location to appear.")}
+          (driverLocation ? "Blue is the driver. Orange is the pickup spot." : "Waiting for driver location to appear.")}
       </div>
     </div>
   );

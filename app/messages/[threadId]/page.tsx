@@ -29,7 +29,7 @@ export default function MessageThreadPage() {
   if (!user) {
     return (
       <main style={{ padding: 20 }}>
-        <Link href="/login" style={{ display: "inline-block", padding: "8px 14px", backgroundColor: "#243326", color: "white", textDecoration: "none", borderRadius: 8 }}>
+        <Link href="/login" style={{ display: "inline-block", padding: "8px 14px", backgroundColor: "#1f2937", color: "white", textDecoration: "none", borderRadius: 8 }}>
           Login
         </Link>
         <p style={{ marginTop: 20 }}>You need to log in first.</p>

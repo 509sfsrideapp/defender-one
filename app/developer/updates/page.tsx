@@ -12,7 +12,7 @@ const cardStyle: CSSProperties = {
   padding: 18,
   borderRadius: 16,
   border: "1px solid rgba(148, 163, 184, 0.18)",
-  backgroundColor: "rgba(11, 16, 10, 0.88)",
+  backgroundColor: "rgba(9, 15, 25, 0.88)",
   boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
 };
 
@@ -46,7 +46,7 @@ export default async function DeveloperUpdatesPage() {
         }}
       >
         <div>
-          <p style={{ margin: 0, color: "#b4d4a7", textTransform: "uppercase", letterSpacing: "0.12em", fontSize: 12 }}>
+          <p style={{ margin: 0, color: "#93c5fd", textTransform: "uppercase", letterSpacing: "0.12em", fontSize: 12 }}>
             Current Build
           </p>
           <p style={{ margin: "6px 0 0", fontSize: "1.5rem", fontFamily: "var(--font-display)" }}>Version {CURRENT_APP_VERSION}</p>
@@ -56,11 +56,11 @@ export default async function DeveloperUpdatesPage() {
           style={{
             display: "inline-block",
             padding: "10px 16px",
-            backgroundColor: "#182418",
+            backgroundColor: "#0f172a",
             color: "white",
             textDecoration: "none",
             borderRadius: 10,
-            border: "1px solid rgba(132, 177, 116, 0.18)",
+            border: "1px solid rgba(96, 165, 250, 0.18)",
           }}
         >
           Back to Developer Tools
@@ -72,7 +72,7 @@ export default async function DeveloperUpdatesPage() {
           <section key={entry.commit} style={cardStyle}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
               <h2 style={{ margin: 0 }}>{entry.title}</h2>
-              <p style={{ margin: 0, color: "#b4d4a7", fontSize: 13 }}>
+              <p style={{ margin: 0, color: "#93c5fd", fontSize: 13 }}>
                 #{UPDATE_HISTORY.length - index} • {entry.commit}
               </p>
             </div>

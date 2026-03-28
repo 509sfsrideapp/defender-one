@@ -118,7 +118,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
   if (!thread) {
     return (
       <main style={{ padding: 20 }}>
-        <Link href="/messages" style={{ display: "inline-block", marginBottom: 20, color: "#b4d4a7", textDecoration: "none" }}>Return to Inbox</Link>
+        <Link href="/messages" style={{ display: "inline-block", marginBottom: 20, color: "#93c5fd", textDecoration: "none" }}>Return to Inbox</Link>
         <h1>Thread Unavailable</h1>
         <p>That inbox thread could not be found.</p>
       </main>
@@ -127,7 +127,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
 
   return (
     <main style={{ padding: 20 }}>
-      <Link href="/messages" style={{ display: "inline-block", marginBottom: 18, color: "#b4d4a7", textDecoration: "none" }}>Return to Inbox</Link>
+      <Link href="/messages" style={{ display: "inline-block", marginBottom: 18, color: "#93c5fd", textDecoration: "none" }}>Return to Inbox</Link>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         <div style={{ width: 46, height: 46, borderRadius: 14, display: "grid", placeItems: "center", backgroundColor: thread.iconBackground, color: thread.iconColor, border: "1px solid rgba(148, 163, 184, 0.16)" }}>
           <ThreadIcon iconKey={thread.iconKey} />
@@ -137,14 +137,14 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
           <p style={{ margin: "4px 0 0", color: "#94a3b8" }}>{thread.subtitle}</p>
         </div>
       </div>
-      <div style={{ maxWidth: 820, border: "1px solid rgba(148, 163, 184, 0.18)", borderRadius: 16, backgroundColor: "rgba(11, 16, 10, 0.88)", boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)", overflow: "hidden" }}>
-        <div style={{ padding: 16, borderBottom: "1px solid rgba(148, 163, 184, 0.12)", backgroundColor: "rgba(18, 28, 16, 0.6)" }}>
+      <div style={{ maxWidth: 820, border: "1px solid rgba(148, 163, 184, 0.18)", borderRadius: 16, backgroundColor: "rgba(9, 15, 25, 0.88)", boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)", overflow: "hidden" }}>
+        <div style={{ padding: 16, borderBottom: "1px solid rgba(148, 163, 184, 0.12)", backgroundColor: "rgba(15, 23, 42, 0.6)" }}>
           <strong>{thread.channelLabel}</strong>
           <p style={{ margin: "8px 0 0", color: "#94a3b8" }}>{thread.description}</p>
         </div>
         <div style={{ padding: 16, display: "grid", gap: 12 }}>
           {posts.length > 0 ? posts.map((post) => (
-            <div key={post.id} style={{ maxWidth: "min(100%, 720px)", borderRadius: 14, backgroundColor: "rgba(18, 28, 16, 0.72)", border: "1px solid rgba(148, 163, 184, 0.14)", overflow: "hidden" }}>
+            <div key={post.id} style={{ maxWidth: "min(100%, 720px)", borderRadius: 14, backgroundColor: "rgba(15, 23, 42, 0.72)", border: "1px solid rgba(148, 163, 184, 0.14)", overflow: "hidden" }}>
               <button
                 type="button"
                 onClick={() => {
@@ -198,13 +198,13 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
                             marginTop: 14,
                             padding: 12,
                             borderRadius: 12,
-                            backgroundColor: "rgba(20, 52, 24, 0.38)",
-                            border: "1px solid rgba(132, 177, 116, 0.18)",
+                            backgroundColor: "rgba(8, 47, 73, 0.38)",
+                            border: "1px solid rgba(56, 189, 248, 0.18)",
                             display: "grid",
                             gap: 10,
                           }}
                         >
-                          <strong style={{ color: "#e4f7db" }}>
+                          <strong style={{ color: "#e0f2fe" }}>
                             {post.responseSubmittedAt ? "Response received" : "Response required"}
                           </strong>
                           <p style={{ margin: 0, color: "#cbd5e1" }}>
@@ -216,7 +216,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
                               style={{
                                 padding: "10px 12px",
                                 borderRadius: 10,
-                                backgroundColor: "rgba(18, 28, 16, 0.72)",
+                                backgroundColor: "rgba(15, 23, 42, 0.72)",
                                 border: "1px solid rgba(148, 163, 184, 0.14)",
                               }}
                             >
@@ -242,7 +242,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
                                   padding: 12,
                                   borderRadius: 10,
                                   border: "1px solid rgba(148, 163, 184, 0.18)",
-                                  backgroundColor: "rgba(18, 28, 16, 0.78)",
+                                  backgroundColor: "rgba(15, 23, 42, 0.78)",
                                   color: "#e5edf7",
                                   resize: "vertical",
                                 }}
@@ -276,7 +276,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
               ) : null}
             </div>
           )) : fallbackMessages.map((message) => (
-            <div key={message.id} style={{ maxWidth: "min(92%, 560px)", padding: "12px 14px", borderRadius: 14, backgroundColor: "rgba(18, 28, 16, 0.72)", border: "1px solid rgba(148, 163, 184, 0.14)" }}>
+            <div key={message.id} style={{ maxWidth: "min(92%, 560px)", padding: "12px 14px", borderRadius: 14, backgroundColor: "rgba(15, 23, 42, 0.72)", border: "1px solid rgba(148, 163, 184, 0.14)" }}>
               <div style={{ marginBottom: 6, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <strong>{message.senderLabel}</strong>
                 <span style={{ fontSize: 12, color: "#94a3b8" }}>{message.timestampLabel}</span>

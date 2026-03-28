@@ -98,7 +98,7 @@ const dashboardCardStyle: React.CSSProperties = {
   padding: 14,
   marginBottom: 12,
   borderRadius: 14,
-  background: "linear-gradient(180deg, rgba(22, 26, 20, 0.95) 0%, rgba(10, 12, 9, 0.99) 100%)",
+  background: "linear-gradient(180deg, rgba(18, 23, 29, 0.95) 0%, rgba(9, 12, 17, 0.99) 100%)",
   color: "#e5edf7",
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 34px rgba(0, 0, 0, 0.26)",
 };
@@ -426,7 +426,7 @@ export default function DriverPage() {
       }
     : {
         label: "Clocked Out",
-        background: "rgba(30, 37, 28, 0.72)",
+        background: "rgba(30, 41, 59, 0.72)",
         border: "1px solid rgba(148, 163, 184, 0.18)",
         color: "#cbd5e1",
       };
@@ -460,7 +460,7 @@ export default function DriverPage() {
                   height: 58,
                   objectFit: "cover",
                   borderRadius: 999,
-                  border: "1px solid rgba(132, 177, 116, 0.22)",
+                  border: "1px solid rgba(96, 165, 250, 0.22)",
                 }}
               />
             ) : (
@@ -471,9 +471,9 @@ export default function DriverPage() {
                   borderRadius: 999,
                   display: "grid",
                   placeItems: "center",
-                  backgroundColor: "rgba(24, 34, 22, 0.72)",
-                  color: "#e2f1dd",
-                  border: "1px solid rgba(132, 177, 116, 0.2)",
+                  backgroundColor: "rgba(18, 37, 63, 0.72)",
+                  color: "#dbeafe",
+                  border: "1px solid rgba(96, 165, 250, 0.2)",
                   fontFamily: "var(--font-display)",
                   fontSize: "1.35rem",
                 }}
@@ -558,7 +558,7 @@ export default function DriverPage() {
               style={{
                 borderRadius: 14,
                 padding: 14,
-                backgroundColor: "rgba(18, 28, 16, 0.72)",
+                backgroundColor: "rgba(15, 23, 42, 0.72)",
                 border: "1px solid rgba(148, 163, 184, 0.16)",
               }}
             >
@@ -627,7 +627,7 @@ export default function DriverPage() {
                       height: 68,
                       objectFit: "cover",
                       borderRadius: 999,
-                      border: "1px solid rgba(132, 177, 116, 0.22)",
+                      border: "1px solid rgba(96, 165, 250, 0.22)",
                     }}
                   />
                 ) : (
@@ -638,9 +638,9 @@ export default function DriverPage() {
                       borderRadius: 999,
                       display: "grid",
                       placeItems: "center",
-                      backgroundColor: "rgba(24, 34, 22, 0.72)",
-                      color: "#e2f1dd",
-                      border: "1px solid rgba(132, 177, 116, 0.2)",
+                      backgroundColor: "rgba(18, 37, 63, 0.72)",
+                      color: "#dbeafe",
+                      border: "1px solid rgba(96, 165, 250, 0.2)",
                       fontFamily: "var(--font-display)",
                       fontSize: "1.35rem",
                     }}

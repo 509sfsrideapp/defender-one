@@ -123,7 +123,7 @@ export default function LoginPage() {
           <p
             style={{
               marginBottom: 12,
-              color: statusMessage.startsWith("Login failed") ? "#b91c1c" : "#9fd28f",
+              color: statusMessage.startsWith("Login failed") ? "#b91c1c" : "#1d4ed8",
             }}
           >
             {statusMessage}
@@ -155,7 +155,7 @@ export default function LoginPage() {
             style={{
               display: "inline-block",
               padding: "10px 16px",
-              background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
+              backgroundColor: "#7c3aed",
               color: "white",
               textDecoration: "none",
               borderRadius: 8,

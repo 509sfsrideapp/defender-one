@@ -227,7 +227,7 @@ export default function AdminAccountsPage() {
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#243326",
+            backgroundColor: "#1f2937",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -259,7 +259,7 @@ export default function AdminAccountsPage() {
           style={{
             display: "inline-block",
             padding: "8px 14px",
-            backgroundColor: "#243326",
+            backgroundColor: "#1f2937",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -274,7 +274,7 @@ export default function AdminAccountsPage() {
         Search and manage all accounts here. Cards stay compact until you expand them for the full profile and account controls.
       </p>
       {accountActionMessage ? (
-        <p style={{ marginTop: 12, color: accountActionMessage.toLowerCase().includes("failed") || accountActionMessage.toLowerCase().includes("cannot") ? "#fca5a5" : "#dcead7" }}>
+        <p style={{ marginTop: 12, color: accountActionMessage.toLowerCase().includes("failed") || accountActionMessage.toLowerCase().includes("cannot") ? "#fca5a5" : "#bfdbfe" }}>
           {accountActionMessage}
         </p>
       ) : null}
@@ -286,7 +286,7 @@ export default function AdminAccountsPage() {
           padding: 16,
           borderRadius: 12,
           border: "1px solid rgba(148, 163, 184, 0.18)",
-          backgroundColor: "rgba(11, 16, 10, 0.88)",
+          backgroundColor: "rgba(9, 15, 25, 0.88)",
           display: "grid",
           gap: 10,
         }}
@@ -345,7 +345,7 @@ export default function AdminAccountsPage() {
                 key={appUser.id}
                 style={{
                   border: "1px solid rgba(148, 163, 184, 0.18)",
-                  backgroundColor: "rgba(11, 16, 10, 0.88)",
+                  backgroundColor: "rgba(9, 15, 25, 0.88)",
                   color: "#e5edf7",
                   borderRadius: 12,
                   padding: 16,
@@ -370,9 +370,9 @@ export default function AdminAccountsPage() {
                           borderRadius: 999,
                           display: "grid",
                           placeItems: "center",
-                          backgroundColor: "rgba(24, 34, 22, 0.72)",
-                          color: "#e2f1dd",
-                          border: "1px solid rgba(132, 177, 116, 0.2)",
+                          backgroundColor: "rgba(18, 37, 63, 0.72)",
+                          color: "#dbeafe",
+                          border: "1px solid rgba(96, 165, 250, 0.2)",
                           fontFamily: "var(--font-display)",
                           fontSize: "1.3rem",
                         }}
@@ -399,7 +399,7 @@ export default function AdminAccountsPage() {
                       display: "grid",
                       placeItems: "center",
                       padding: 0,
-                      backgroundColor: "rgba(18, 28, 16, 0.78)",
+                      backgroundColor: "rgba(15, 23, 42, 0.78)",
                       textTransform: "none",
                       letterSpacing: "normal",
                     }}

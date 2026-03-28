@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v197",
+    title: "Rollback to Pre-Green UI",
+    summary: "Rolled the app back to the earlier pre-green interface state from the background simplification build after reviewing the newer green-focused visual passes, while keeping the shipped version number moving forward for release tracking.",
+  },
+  {
     commit: "v196",
     title: "Green Theme Consistency Pass",
     summary: "Finished the remaining blue-to-green cleanup across the app by swapping leftover buttons, login/admin links, ride controls, shared shells, live-map driver accents, inbox utilities, and footer-linked surfaces so the shipped interface now reads consistently green instead of partially blue.",

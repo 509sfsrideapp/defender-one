@@ -101,7 +101,7 @@ export default function FullscreenImageViewer({
             borderRadius: 999,
             display: "grid",
             placeItems: "center",
-            backgroundColor: "rgba(18, 28, 16, 0.9)",
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
             color: "#e2e8f0",
             border: "1px solid rgba(148, 163, 184, 0.24)",
             fontSize: 24,

@@ -94,7 +94,7 @@ export default function SignupTermsPage() {
           padding: 18,
           borderRadius: 16,
           border: "1px solid rgba(148, 163, 184, 0.18)",
-          backgroundColor: "rgba(11, 16, 10, 0.88)",
+          backgroundColor: "rgba(9, 15, 25, 0.88)",
           boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
         }}
       >
@@ -138,7 +138,7 @@ export default function SignupTermsPage() {
             padding: "10px 16px",
             textDecoration: "none",
             borderRadius: 10,
-            backgroundColor: "#243326",
+            backgroundColor: "#1f2937",
             color: "white",
           }}
         >
