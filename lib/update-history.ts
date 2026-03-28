@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v244",
+    title: "Developer Loader Test Button",
+    summary: "Added a developer-only button that replays the full initial app loading screen and then returns straight to the Developer page for faster loader testing.",
+  },
+  {
     commit: "v243",
     title: "Developer PIN Alert Tuning",
     summary: "Changed the developer unlock display so incorrect PIN feedback turns the screen red, neutral standby stays non-green until validation starts, and the self-destruct countdown now runs for 3 seconds.",

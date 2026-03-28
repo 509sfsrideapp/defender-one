@@ -62,6 +62,14 @@ export default async function DeveloperPage() {
         </div>
 
         <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Initial Loader Test</h2>
+          <p style={{ maxWidth: 320 }}>Replay the app’s full loading screen, then jump straight back here when it finishes.</p>
+          <Link href="/developer/loading-test" style={featureLinkStyle}>
+            Run Loader Test
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>Update History</h2>
           <p style={{ maxWidth: 320 }}>Read the full plain-language release log from the start of the project up to the newest shipped build.</p>
           <Link href="/developer/updates" style={featureLinkStyle}>
