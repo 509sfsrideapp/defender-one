@@ -730,7 +730,7 @@ export default function HomePage() {
                 gap: 8,
               }}
             >
-              <span>Defender One</span>
+              <span style={{ textDecoration: "underline", textUnderlineOffset: "0.16em" }}>Defender One</span>
               <span
                 style={{
                   fontSize: 12,
