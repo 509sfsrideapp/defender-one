@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v233",
+    title: "Monthly Event Recurrence",
+    summary: "Expanded recurring event creation with a monthly cadence that supports first-through-fifth weekday patterns, so events can now be scheduled in formats like every third Monday while keeping one-time dates separate from recurring setup.",
+  },
+  {
     commit: "v232",
     title: "Event Description Placeholder Update",
     summary: "Updated the Add Event description field placeholder so it now calls out additional event details like required gear, uniform, and other important notes more directly.",

@@ -9,10 +9,16 @@ export type EventDateEntry = {
   timeText: string;
 };
 
+export type EventRecurringCadence = "weekly" | "biweekly" | "monthly";
+
+export type EventRecurringOrdinal = "first" | "second" | "third" | "fourth" | "fifth";
+
 export type EventRecurringRule = {
+  cadence?: EventRecurringCadence;
   weekday?: string;
   weekdays?: string[];
   intervalWeeks?: number | null;
+  monthlyOrdinal?: EventRecurringOrdinal | null;
   startDate: string;
   endDate?: string | null;
   timeText: string;
@@ -61,14 +67,24 @@ export const RECURRING_WEEKDAY_OPTIONS = [
   "Saturday",
 ] as const;
 
-export const RECURRING_INTERVAL_OPTIONS = [
-  { value: 1, label: "Every Week" },
-  { value: 2, label: "Every Other Week" },
-] as const;
+export const RECURRING_CADENCE_OPTIONS: Array<{ value: EventRecurringCadence; label: string }> = [
+  { value: "weekly", label: "Every Week" },
+  { value: "biweekly", label: "Every Other Week" },
+  { value: "monthly", label: "Monthly" },
+];
+
+export const RECURRING_MONTHLY_ORDINAL_OPTIONS: Array<{ value: EventRecurringOrdinal; label: string }> = [
+  { value: "first", label: "First" },
+  { value: "second", label: "Second" },
+  { value: "third", label: "Third" },
+  { value: "fourth", label: "Fourth" },
+  { value: "fifth", label: "Fifth" },
+];
 
 type NormalizedRecurringRule = {
+  cadence: EventRecurringCadence;
   weekdays: string[];
-  intervalWeeks: 1 | 2;
+  monthlyOrdinal: EventRecurringOrdinal;
   startDate: string;
   endDate: string;
   timeText: string;
@@ -115,8 +131,39 @@ function normalizeWeekdays(weekdays?: string[] | null, weekday?: string | null) 
   return Array.from(new Set(normalizedValues));
 }
 
-function normalizeIntervalWeeks(intervalWeeks?: number | null): 1 | 2 {
-  return intervalWeeks === 2 ? 2 : 1;
+function normalizeCadence(rule?: EventRecurringRule | null): EventRecurringCadence {
+  if (rule?.cadence === "monthly") {
+    return "monthly";
+  }
+
+  if (rule?.cadence === "biweekly" || rule?.intervalWeeks === 2) {
+    return "biweekly";
+  }
+
+  return "weekly";
+}
+
+function normalizeMonthlyOrdinal(value?: EventRecurringOrdinal | null): EventRecurringOrdinal {
+  if (value === "second" || value === "third" || value === "fourth" || value === "fifth") {
+    return value;
+  }
+
+  return "first";
+}
+
+function getOrdinalIndex(value: EventRecurringOrdinal) {
+  switch (value) {
+    case "first":
+      return 1;
+    case "second":
+      return 2;
+    case "third":
+      return 3;
+    case "fourth":
+      return 4;
+    case "fifth":
+      return 5;
+  }
 }
 
 export function normalizeRecurringRule(rule?: EventRecurringRule | null): NormalizedRecurringRule | null {
@@ -124,9 +171,13 @@ export function normalizeRecurringRule(rule?: EventRecurringRule | null): Normal
     return null;
   }
 
+  const cadence = normalizeCadence(rule);
+  const weekdays = normalizeWeekdays(rule.weekdays, rule.weekday);
+
   return {
-    weekdays: normalizeWeekdays(rule.weekdays, rule.weekday),
-    intervalWeeks: normalizeIntervalWeeks(rule.intervalWeeks),
+    cadence,
+    weekdays,
+    monthlyOrdinal: normalizeMonthlyOrdinal(rule.monthlyOrdinal),
     startDate: rule.startDate?.trim() || "",
     endDate: rule.endDate?.trim() || "",
     timeText: rule.timeText?.trim() || "",
@@ -167,7 +218,7 @@ export function formatEventDateEntry(entry: EventDateEntry) {
   const end = normalizeEndDate(entry.endDate, entry.startDate);
   const rangeLabel = end && end !== entry.startDate ? `${start} - ${formatDateText(end)}` : start;
 
-  return entry.timeText.trim() ? `${rangeLabel} • ${entry.timeText.trim()}` : rangeLabel;
+  return entry.timeText.trim() ? `${rangeLabel} | ${entry.timeText.trim()}` : rangeLabel;
 }
 
 export function formatRecurringRule(rule?: EventRecurringRule | null) {
@@ -177,14 +228,22 @@ export function formatRecurringRule(rule?: EventRecurringRule | null) {
     return "Recurring schedule";
   }
 
-  const cadenceLabel = normalizedRule.intervalWeeks === 2 ? "Every other" : "Every";
-  const dayLabel = formatWeekdayList(normalizedRule.weekdays);
+  const dayLabel =
+    normalizedRule.cadence === "monthly"
+      ? `${normalizeMonthlyOrdinal(normalizedRule.monthlyOrdinal)} ${normalizedRule.weekdays[0] || "day"}`
+      : formatWeekdayList(normalizedRule.weekdays);
+  const cadenceLabel =
+    normalizedRule.cadence === "monthly"
+      ? "Every"
+      : normalizedRule.cadence === "biweekly"
+        ? "Every other"
+        : "Every";
   const recurrenceWindow = normalizedRule.endDate
     ? `${formatDateText(normalizedRule.startDate)} - ${formatDateText(normalizedRule.endDate)}`
     : `Starting ${formatDateText(normalizedRule.startDate)}`;
-  const timeLabel = normalizedRule.timeText ? ` • ${normalizedRule.timeText}` : "";
+  const timeLabel = normalizedRule.timeText ? ` | ${normalizedRule.timeText}` : "";
 
-  return `${cadenceLabel} ${dayLabel}${timeLabel} • ${recurrenceWindow}`;
+  return `${cadenceLabel} ${dayLabel}${timeLabel} | ${recurrenceWindow}`;
 }
 
 export function formatEventScheduleSummary(event: EventDocument) {
@@ -200,6 +259,22 @@ export function formatEventScheduleSummary(event: EventDocument) {
 
   const firstEntry = formatEventDateEntry(validEntries[0]);
   return validEntries.length === 1 ? firstEntry : `${firstEntry} +${validEntries.length - 1} more`;
+}
+
+function isNthWeekdayOfMonth(candidateDate: Date, ordinal: EventRecurringOrdinal) {
+  const weekday = candidateDate.getDay();
+  const targetMonth = candidateDate.getMonth();
+  const targetYear = candidateDate.getFullYear();
+  let count = 0;
+
+  for (let day = 1; day <= candidateDate.getDate(); day += 1) {
+    const probe = new Date(targetYear, targetMonth, day, 12, 0, 0, 0);
+    if (probe.getDay() === weekday) {
+      count += 1;
+    }
+  }
+
+  return count === getOrdinalIndex(ordinal);
 }
 
 function matchesRecurringDate(rule: NormalizedRecurringRule, candidateDate: Date) {
@@ -222,11 +297,16 @@ function matchesRecurringDate(rule: NormalizedRecurringRule, candidateDate: Date
     return false;
   }
 
+  if (rule.cadence === "monthly") {
+    return isNthWeekdayOfMonth(candidateDate, rule.monthlyOrdinal);
+  }
+
+  const intervalWeeks = rule.cadence === "biweekly" ? 2 : 1;
   const startWeek = getStartOfWeek(asLocalDate(rule.startDate));
   const candidateWeek = getStartOfWeek(candidateDate);
   const weeksSinceStart = Math.floor((candidateWeek.getTime() - startWeek.getTime()) / (7 * 24 * 60 * 60 * 1000));
 
-  return weeksSinceStart >= 0 && weeksSinceStart % rule.intervalWeeks === 0;
+  return weeksSinceStart >= 0 && weeksSinceStart % intervalWeeks === 0;
 }
 
 function getNextRecurringDate(rule: EventRecurringRule, referenceDateText: string) {
@@ -240,7 +320,7 @@ function getNextRecurringDate(rule: EventRecurringRule, referenceDateText: strin
   const rangeStart = asLocalDate(referenceDateText);
   const searchStart = rangeStart > recurrenceStart ? rangeStart : recurrenceStart;
 
-  for (let dayOffset = 0; dayOffset <= 730; dayOffset += 1) {
+  for (let dayOffset = 0; dayOffset <= 1095; dayOffset += 1) {
     const next = new Date(searchStart);
     next.setDate(next.getDate() + dayOffset);
 

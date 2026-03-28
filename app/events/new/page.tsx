@@ -14,9 +14,12 @@ import {
   EVENT_TYPE_OPTIONS,
   formatEventTypeLabel,
   formatRecurringRule,
-  RECURRING_INTERVAL_OPTIONS,
+  RECURRING_CADENCE_OPTIONS,
+  RECURRING_MONTHLY_ORDINAL_OPTIONS,
   RECURRING_WEEKDAY_OPTIONS,
   type EventDateEntry,
+  type EventRecurringCadence,
+  type EventRecurringOrdinal,
   type EventRecurringRule,
   type EventType,
 } from "../../../lib/events";
@@ -47,6 +50,21 @@ const primaryButtonStyle: React.CSSProperties = {
   fontSize: 12,
 };
 
+const recurringPillStyle = (selected: boolean): React.CSSProperties => ({
+  minHeight: 38,
+  padding: "8px 12px",
+  borderRadius: 999,
+  background: selected
+    ? "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)"
+    : "linear-gradient(180deg, rgba(29, 36, 45, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%)",
+  border: selected
+    ? "1px solid rgba(147, 197, 253, 0.42)"
+    : "1px solid rgba(118, 132, 149, 0.26)",
+  boxShadow: selected
+    ? "inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 24px rgba(17, 24, 39, 0.24)"
+    : "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 18px rgba(0,0,0,0.22)",
+});
+
 export default function NewEventPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -63,8 +81,9 @@ export default function NewEventPage() {
   const [scheduleMode, setScheduleMode] = useState<"specific_dates" | "recurring">("specific_dates");
   const [scheduleEntries, setScheduleEntries] = useState<EventDateEntry[]>([createEmptyEventDateEntry()]);
   const [recurrence, setRecurrence] = useState<EventRecurringRule>({
+    cadence: "weekly",
     weekdays: ["Friday"],
-    intervalWeeks: 1,
+    monthlyOrdinal: "first",
     startDate: "",
     endDate: "",
     timeText: "",
@@ -79,18 +98,26 @@ export default function NewEventPage() {
     return () => unsubscribe();
   }, []);
 
+  const selectedCadence = recurrence.cadence || "weekly";
+  const selectedMonthlyWeekday = recurrence.weekdays?.[0] || "Monday";
+
   const schedulePreview = useMemo(() => {
     if (scheduleMode === "recurring") {
-      return recurrence.startDate.trim() && recurrence.weekdays?.length
+      const hasWeekdaySelection =
+        selectedCadence === "monthly"
+          ? Boolean(recurrence.weekdays?.[0])
+          : Boolean(recurrence.weekdays?.length);
+
+      return recurrence.startDate.trim() && hasWeekdaySelection
         ? formatRecurringRule(recurrence)
         : "Recurring schedule preview will appear here.";
     }
 
     const nextEntry = scheduleEntries.find((entry) => entry.startDate.trim() || entry.timeText.trim());
     return nextEntry
-      ? `${nextEntry.startDate || "Date TBD"}${nextEntry.endDate?.trim() ? ` to ${nextEntry.endDate}` : ""}${nextEntry.timeText.trim() ? ` • ${nextEntry.timeText.trim()}` : ""}`
+      ? `${nextEntry.startDate || "Date TBD"}${nextEntry.endDate?.trim() ? ` to ${nextEntry.endDate}` : ""}${nextEntry.timeText.trim() ? ` | ${nextEntry.timeText.trim()}` : ""}`
       : "Event date preview will appear here.";
-  }, [recurrence, scheduleEntries, scheduleMode]);
+  }, [recurrence, scheduleEntries, scheduleMode, selectedCadence]);
 
   const updateScheduleEntry = (entryId: string, patch: Partial<EventDateEntry>) => {
     setScheduleEntries((current) => current.map((entry) => (entry.id === entryId ? { ...entry, ...patch } : entry)));
@@ -112,6 +139,34 @@ export default function NewEventPage() {
         weekdays: nextWeekdays,
       };
     });
+  };
+
+  const setRecurringCadence = (cadence: EventRecurringCadence) => {
+    setRecurrence((current) => ({
+      ...current,
+      cadence,
+      weekdays:
+        cadence === "monthly"
+          ? [current.weekdays?.[0] || "Monday"]
+          : current.weekdays?.length
+            ? current.weekdays
+            : ["Friday"],
+      monthlyOrdinal: current.monthlyOrdinal || "first",
+    }));
+  };
+
+  const setMonthlyOrdinal = (monthlyOrdinal: EventRecurringOrdinal) => {
+    setRecurrence((current) => ({
+      ...current,
+      monthlyOrdinal,
+    }));
+  };
+
+  const setMonthlyWeekday = (weekday: string) => {
+    setRecurrence((current) => ({
+      ...current,
+      weekdays: [weekday],
+    }));
   };
 
   const submitEvent = async () => {
@@ -160,7 +215,12 @@ export default function NewEventPage() {
         return;
       }
 
-      if (!recurrence.weekdays?.length) {
+      if (selectedCadence === "monthly") {
+        if (!selectedMonthlyWeekday) {
+          setStatusMessage("Choose the weekday for the monthly repeat.");
+          return;
+        }
+      } else if (!recurrence.weekdays?.length) {
         setStatusMessage("Choose at least one recurring weekday.");
         return;
       }
@@ -188,8 +248,10 @@ export default function NewEventPage() {
         recurrence:
           scheduleMode === "recurring"
             ? {
-                weekdays: recurrence.weekdays || [],
-                intervalWeeks: recurrence.intervalWeeks === 2 ? 2 : 1,
+                cadence: selectedCadence,
+                weekdays: selectedCadence === "monthly" ? [selectedMonthlyWeekday] : recurrence.weekdays || [],
+                monthlyOrdinal: selectedCadence === "monthly" ? recurrence.monthlyOrdinal || "first" : null,
+                intervalWeeks: selectedCadence === "biweekly" ? 2 : selectedCadence === "weekly" ? 1 : null,
                 startDate: recurrence.startDate.trim(),
                 endDate: recurrence.endDate?.trim() || null,
                 timeText: recurrence.timeText.trim(),
@@ -384,22 +446,17 @@ export default function NewEventPage() {
               <div style={{ display: "grid", gap: 4 }}>
                 <strong>Recurring Pattern</strong>
                 <p style={{ margin: 0, color: "#94a3b8" }}>
-                  Choose one or more weekdays, then decide whether the event repeats every week or every other week.
+                  Weekly and biweekly repeats can use multiple weekdays. Monthly repeats can target patterns like every third Monday.
                 </p>
               </div>
 
-              <label style={{ display: "grid", gap: 6, maxWidth: 260 }}>
+              <label style={{ display: "grid", gap: 6, maxWidth: 280 }}>
                 <span>Repeat Cadence</span>
                 <select
-                  value={String(recurrence.intervalWeeks === 2 ? 2 : 1)}
-                  onChange={(event) =>
-                    setRecurrence((current) => ({
-                      ...current,
-                      intervalWeeks: Number(event.target.value) === 2 ? 2 : 1,
-                    }))
-                  }
+                  value={selectedCadence}
+                  onChange={(event) => setRecurringCadence(event.target.value as EventRecurringCadence)}
                 >
-                  {RECURRING_INTERVAL_OPTIONS.map((option) => (
+                  {RECURRING_CADENCE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -407,41 +464,60 @@ export default function NewEventPage() {
                 </select>
               </label>
 
-              <div style={{ display: "grid", gap: 8 }}>
-                <span>Recurring Weekdays</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {RECURRING_WEEKDAY_OPTIONS.map((weekday) => {
-                    const selected = Boolean(recurrence.weekdays?.includes(weekday));
+              {selectedCadence === "monthly" ? (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+                  <label style={{ display: "grid", gap: 6 }}>
+                    <span>Monthly Position</span>
+                    <select
+                      value={recurrence.monthlyOrdinal || "first"}
+                      onChange={(event) => setMonthlyOrdinal(event.target.value as EventRecurringOrdinal)}
+                    >
+                      {RECURRING_MONTHLY_ORDINAL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-                    return (
-                      <button
-                        key={weekday}
-                        type="button"
-                        onClick={() => toggleRecurringWeekday(weekday)}
-                        style={{
-                          minHeight: 38,
-                          padding: "8px 12px",
-                          borderRadius: 999,
-                          background: selected
-                            ? "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)"
-                            : "linear-gradient(180deg, rgba(29, 36, 45, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%)",
-                          border: selected
-                            ? "1px solid rgba(147, 197, 253, 0.42)"
-                            : "1px solid rgba(118, 132, 149, 0.26)",
-                          boxShadow: selected
-                            ? "inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 24px rgba(17, 24, 39, 0.24)"
-                            : "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 18px rgba(0,0,0,0.22)",
-                        }}
-                      >
-                        {weekday}
-                      </button>
-                    );
-                  })}
+                  <label style={{ display: "grid", gap: 6 }}>
+                    <span>Weekday</span>
+                    <select
+                      value={selectedMonthlyWeekday}
+                      onChange={(event) => setMonthlyWeekday(event.target.value)}
+                    >
+                      {RECURRING_WEEKDAY_OPTIONS.map((weekday) => (
+                        <option key={weekday} value={weekday}>
+                          {weekday}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-                <p style={{ margin: 0, color: "#94a3b8", fontSize: 13 }}>
-                  Examples: every Tuesday and Thursday, or every other Wednesday.
-                </p>
-              </div>
+              ) : (
+                <div style={{ display: "grid", gap: 8 }}>
+                  <span>Recurring Weekdays</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {RECURRING_WEEKDAY_OPTIONS.map((weekday) => {
+                      const selected = Boolean(recurrence.weekdays?.includes(weekday));
+
+                      return (
+                        <button
+                          key={weekday}
+                          type="button"
+                          onClick={() => toggleRecurringWeekday(weekday)}
+                          style={recurringPillStyle(selected)}
+                        >
+                          {weekday}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p style={{ margin: 0, color: "#94a3b8", fontSize: 13 }}>
+                    Examples: every Tuesday and Thursday, or every other Wednesday.
+                  </p>
+                </div>
+              )}
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                 <label style={{ display: "grid", gap: 6 }}>
