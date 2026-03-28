@@ -288,7 +288,7 @@ export default function AdminPage() {
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(62, 45, 20, 0.94) 0%, rgba(28, 21, 11, 0.99) 100%)", color: "#fef3c7", border: "1px solid rgba(153, 127, 82, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Open Rides:</strong> {openRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(36, 44, 58, 0.94) 0%, rgba(15, 20, 28, 0.99) 100%)", color: "#e2e8f0", border: "1px solid rgba(126, 142, 160, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(39, 45, 36, 0.94) 0%, rgba(16, 20, 14, 0.99) 100%)", color: "#e2e8f0", border: "1px solid rgba(126, 142, 160, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Accepted Rides:</strong> {acceptedRides.length}
         </div>
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(69, 40, 22, 0.94) 0%, rgba(29, 19, 11, 0.99) 100%)", color: "#ffedd5", border: "1px solid rgba(152, 103, 68, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
@@ -297,7 +297,7 @@ export default function AdminPage() {
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(28, 43, 59, 0.94) 0%, rgba(12, 18, 26, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(110, 133, 156, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Picked Up:</strong> {pickedUpRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(32, 37, 45, 0.94) 0%, rgba(15, 18, 24, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(35, 40, 33, 0.94) 0%, rgba(15, 18, 14, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Completed Rides:</strong> {completedRides.length}
         </div>
       </div>
@@ -308,7 +308,7 @@ export default function AdminPage() {
           style={{
             display: "inline-block",
             padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
+            background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
             color: "white",
             textDecoration: "none",
             borderRadius: 10,
@@ -373,7 +373,7 @@ export default function AdminPage() {
               key={driver.id}
               style={{
                 border: "1px solid rgba(132, 177, 116, 0.2)",
-                backgroundColor: "rgba(10, 16, 27, 0.86)",
+                backgroundColor: "rgba(11, 16, 10, 0.86)",
                 color: "#e5edf7",
                 borderRadius: 12,
                 padding: 14,
@@ -415,7 +415,7 @@ export default function AdminPage() {
               key={ride.id}
               style={{
                 border: "1px solid rgba(148, 163, 184, 0.18)",
-                backgroundColor: "rgba(9, 15, 25, 0.88)",
+                backgroundColor: "rgba(11, 16, 10, 0.88)",
                 color: "#e5edf7",
                 borderRadius: 12,
                 padding: 14,

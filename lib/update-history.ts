@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v195",
+    title: "Green Surface Tint Pass",
+    summary: "Shifted the remaining blue-tinted translucent box backgrounds to muted green across the homepage applications area, app status console, profile dropdown, driver surfaces, ride panels, admin shells, inbox threads, and shared utility overlays so the main interface boxes feel more consistent with the tactical green palette.",
+  },
+  {
     commit: "v194",
     title: "Driver Tile Label Cleanup",
     summary: "Renamed the homepage Driver Dashboard app tile to just Driver so it aligns more cleanly with the other application labels in the top row.",

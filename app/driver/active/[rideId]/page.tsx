@@ -749,7 +749,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           border: "1px solid rgba(45, 212, 191, 0.22)",
           padding: 16,
           borderRadius: 12,
-          backgroundColor: "rgba(9, 15, 25, 0.88)",
+          backgroundColor: "rgba(11, 16, 10, 0.88)",
           color: "#e5edf7",
           maxWidth: 640,
           margin: "0 auto",
@@ -790,7 +790,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
                   objectFit: "cover",
                   borderRadius: 999,
                   border: "1px solid rgba(132, 177, 116, 0.22)",
-                  background: "linear-gradient(180deg, rgba(24,39,66,0.95) 0%, rgba(12,20,35,0.98) 100%)",
+                  background: "linear-gradient(180deg, rgba(27,39,24,0.95) 0%, rgba(14,20,12,0.98) 100%)",
                 }}
               />
             </button>
@@ -802,9 +802,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
                 borderRadius: 999,
                 display: "grid",
                 placeItems: "center",
-                background: "linear-gradient(180deg, rgba(24,39,66,0.95) 0%, rgba(12,20,35,0.98) 100%)",
+                background: "linear-gradient(180deg, rgba(27,39,24,0.95) 0%, rgba(14,20,12,0.98) 100%)",
                 border: "1px solid rgba(132, 177, 116, 0.22)",
-                color: "#dbeafe",
+                color: "#e2f1dd",
                 fontSize: "1.8rem",
                 fontFamily: "var(--font-display)",
               }}
@@ -837,7 +837,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             marginBottom: 18,
             padding: 16,
             borderRadius: 14,
-            backgroundColor: "rgba(15, 23, 42, 0.5)",
+            backgroundColor: "rgba(18, 28, 16, 0.5)",
             border: "1px solid rgba(148, 163, 184, 0.12)",
           }}
         >
@@ -1045,7 +1045,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           marginInline: "auto",
           padding: 16,
           borderRadius: 14,
-          backgroundColor: "rgba(18, 37, 63, 0.4)",
+          backgroundColor: "rgba(24, 34, 22, 0.4)",
           border: "1px solid rgba(132, 177, 116, 0.12)",
         }}
       >
@@ -1100,7 +1100,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
                   style={{
                     padding: "10px 12px",
                     borderRadius: 10,
-                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(15, 23, 42, 0.68)",
+                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(18, 28, 16, 0.68)",
                     border: step.current
                       ? "1px solid rgba(45, 212, 191, 0.3)"
                       : "1px solid rgba(148, 163, 184, 0.14)",

@@ -76,7 +76,7 @@ const homepageCardStyle: React.CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(126, 142, 160, 0.18)",
   background:
-    "linear-gradient(180deg, rgba(18, 23, 29, 0.96) 0%, rgba(9, 12, 17, 0.985) 100%)",
+    "linear-gradient(180deg, rgba(22, 26, 20, 0.96) 0%, rgba(10, 12, 9, 0.985) 100%)",
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
 };
 
@@ -874,7 +874,7 @@ export default function HomePage() {
                 padding: 8,
                 borderRadius: 14,
                 border: "1px solid rgba(148, 163, 184, 0.18)",
-                backgroundColor: "rgba(9, 15, 25, 0.96)",
+                backgroundColor: "rgba(11, 16, 10, 0.96)",
                 boxShadow: "0 18px 40px rgba(2, 6, 23, 0.32)",
                 display: "grid",
                 gap: 6,
@@ -891,7 +891,7 @@ export default function HomePage() {
                     borderRadius: 10,
                     textDecoration: "none",
                     color: "#e5edf7",
-                    backgroundColor: "rgba(15, 23, 42, 0.72)",
+                    backgroundColor: "rgba(18, 28, 16, 0.72)",
                   }}
                 >
                   Settings
@@ -907,7 +907,7 @@ export default function HomePage() {
                     borderRadius: 10,
                     textDecoration: "none",
                     color: "#e5edf7",
-                    backgroundColor: "rgba(15, 23, 42, 0.72)",
+                    backgroundColor: "rgba(18, 28, 16, 0.72)",
                     position: "relative",
                   }}
                 >
@@ -974,7 +974,7 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 180,
                   padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
+                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 12,
@@ -1159,7 +1159,7 @@ export default function HomePage() {
                     borderRadius: 14,
                     border: "1px solid rgba(126, 142, 160, 0.16)",
                     background:
-                      "linear-gradient(180deg, rgba(16, 22, 30, 0.94) 0%, rgba(9, 14, 20, 0.98) 100%)",
+                      "linear-gradient(180deg, rgba(20, 25, 18, 0.94) 0%, rgba(10, 14, 10, 0.98) 100%)",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
@@ -1232,7 +1232,7 @@ export default function HomePage() {
                   borderRadius: 16,
                   border: "1px solid rgba(118, 148, 106, 0.26)",
                   background:
-                    "linear-gradient(180deg, rgba(8, 16, 28, 0.98) 0%, rgba(4, 10, 18, 0.995) 100%)",
+                    "linear-gradient(180deg, rgba(8, 14, 8, 0.98) 0%, rgba(4, 9, 4, 0.995) 100%)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(2, 6, 23, 0.3)",
                   overflow: "hidden",
                 }}
@@ -1278,7 +1278,7 @@ export default function HomePage() {
                     display: "grid",
                     gap: 10,
                     background:
-                      "linear-gradient(180deg, rgba(8, 13, 22, 0.98) 0%, rgba(3, 9, 16, 0.995) 100%)",
+                      "linear-gradient(180deg, rgba(8, 12, 8, 0.98) 0%, rgba(3, 8, 3, 0.995) 100%)",
                   }}
                 >
                   {typedAppStatusChecks.map((statusLine, index) => {
