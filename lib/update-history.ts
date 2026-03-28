@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v248",
+    title: "Developer Vault Theme Overhaul",
+    summary: "Restyled the developer PIN pad into a more intense military-tech anti-tamper device with heavier metal framing, exposed cable accents, warning hardware, and a bomb-disarm style control panel.",
+  },
+  {
     commit: "v247",
     title: "Developer Loader Test Correction",
     summary: "Fixed the developer loader test so it now replays the real first-open vault-door splash instead of the simpler minimal loading screen.",

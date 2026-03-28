@@ -141,8 +141,39 @@ export default function DeveloperUnlockPage() {
         </div>
 
         <div className="vault-panel">
+          <div className="vault-hardware-strip vault-hardware-strip-top" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="vault-hardware-strip vault-hardware-strip-bottom" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="vault-side-rail vault-side-rail-left" aria-hidden="true" />
+          <div className="vault-side-rail vault-side-rail-right" aria-hidden="true" />
+          <div className="vault-cable-bundle" aria-hidden="true">
+            <span className="vault-cable vault-cable-amber" />
+            <span className="vault-cable vault-cable-red" />
+            <span className="vault-cable vault-cable-blue" />
+            <span className="vault-cable vault-cable-green" />
+          </div>
+          <div className="vault-warning-tab" aria-hidden="true">Field Device</div>
+          <div className="vault-arming-module" aria-hidden="true">
+            <span className="vault-arming-label">Trigger Matrix</span>
+            <span className="vault-arming-light vault-arming-light-red" />
+            <span className="vault-arming-light vault-arming-light-amber" />
+            <span className="vault-arming-light vault-arming-light-green" />
+          </div>
+
           <p className="vault-kicker">Developer Vault</p>
           <h1>Access Terminal</h1>
+          <p className="vault-subcopy">
+            Improvised secure access node. Enter the authorization sequence before the anti-tamper routine escalates.
+          </p>
 
           <div className={`vault-digital-screen vault-digital-screen-${screenState}`} aria-live="polite">
             {digitalScreenLines.map((line, index) => (
@@ -162,6 +193,12 @@ export default function DeveloperUnlockPage() {
                 className={`vault-dot ${index < code.length ? "vault-dot-filled" : ""}`}
               />
             ))}
+          </div>
+
+          <div className="vault-status-row" aria-hidden="true">
+            <span className="vault-status-chip">ANTI-TAMPER</span>
+            <span className="vault-status-chip">FIELD-WIRED</span>
+            <span className="vault-status-chip">LIVE CIRCUIT</span>
           </div>
 
           <div className="vault-keypad">
