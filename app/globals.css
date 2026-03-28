@@ -286,6 +286,29 @@ button:disabled {
   box-shadow: 0 3px 10px rgba(2, 6, 23, 0.28);
 }
 
+.auth-status-light {
+  animation: auth-status-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes auth-status-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.94);
+    box-shadow:
+      0 0 0 2px rgba(34, 197, 94, 0.1),
+      0 0 8px rgba(34, 197, 94, 0.18);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow:
+      0 0 0 2px rgba(34, 197, 94, 0.22),
+      0 0 18px rgba(34, 197, 94, 0.42);
+  }
+}
+
 .loading-screen {
   min-height: calc(100svh - env(safe-area-inset-top));
   display: grid;

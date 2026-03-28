@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v187",
+    title: "Animated Auth Status Light",
+    summary: "Changed the homepage auth-token status light into a soft pulsing green indicator so it fades in and out like a live validated system signal instead of staying fully static.",
+  },
+  {
     commit: "v186",
     title: "Homepage App Status Header",
     summary: "Added an inline //APP_STATUS:READY tag beside the Defender One title and a smaller MOBILE_OPERATIONS_PLATFORM//FORM:APP line beneath it to make the homepage header read more like a live mission platform banner.",

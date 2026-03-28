@@ -704,6 +704,7 @@ export default function HomePage() {
             >
               <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <span
+                  className="auth-status-light"
                   aria-hidden="true"
                   style={{
                     width: 10,
