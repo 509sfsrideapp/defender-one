@@ -308,14 +308,14 @@ button:disabled {
 @keyframes emergency-ride-pulse {
   0%,
   100% {
-    transform: scale(1);
+    background: linear-gradient(180deg, #c01d1d 0%, #7f1212 100%);
     box-shadow: 0 20px 44px rgba(127, 18, 18, 0.34);
   }
 
   50% {
-    transform: scale(1.008);
+    background: linear-gradient(180deg, #ca2424 0%, #8f1717 100%);
     box-shadow:
-      0 22px 48px rgba(127, 18, 18, 0.4),
+      0 20px 46px rgba(127, 18, 18, 0.38),
       0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 }
