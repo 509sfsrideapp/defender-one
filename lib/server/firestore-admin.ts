@@ -100,14 +100,34 @@ function fromFirestoreValue(value: FirestoreValue | undefined): unknown {
   return null;
 }
 
+function encodeDocumentPath(documentPath: string) {
+  return documentPath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
+function toStructuredQueryValue(value: string | boolean | number | null): FirestoreValue {
+  if (value === null) {
+    return { nullValue: null };
+  }
+
+  if (typeof value === "string") {
+    return { stringValue: value };
+  }
+
+  if (typeof value === "boolean") {
+    return { booleanValue: value };
+  }
+
+  return Number.isInteger(value) ? { integerValue: String(value) } : { doubleValue: value };
+}
+
 export async function patchFirestoreDocument(documentPath: string, fields: Record<string, unknown>) {
   const accessToken = await getGoogleAccessToken();
   const fieldEntries = Object.entries(fields);
   const updateMask = fieldEntries.map(([field]) => `updateMask.fieldPaths=${encodeURIComponent(field)}`).join("&");
-  const encodedPath = documentPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const encodedPath = encodeDocumentPath(documentPath);
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}?${updateMask}`,
     {
@@ -131,10 +151,7 @@ export async function patchFirestoreDocument(documentPath: string, fields: Recor
 
 export async function createFirestoreDocument(collectionPath: string, fields: Record<string, unknown>, documentId?: string) {
   const accessToken = await getGoogleAccessToken();
-  const encodedPath = collectionPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const encodedPath = encodeDocumentPath(collectionPath);
   const documentIdQuery = documentId ? `?documentId=${encodeURIComponent(documentId)}` : "";
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}${documentIdQuery}`,
@@ -161,10 +178,7 @@ export async function createFirestoreDocument(collectionPath: string, fields: Re
 
 export async function deleteFirestoreDocument(documentPath: string) {
   const accessToken = await getGoogleAccessToken();
-  const encodedPath = documentPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const encodedPath = encodeDocumentPath(documentPath);
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}`,
     {
@@ -184,10 +198,7 @@ export async function deleteFirestoreDocument(documentPath: string) {
 
 export async function listFirestoreDocuments(collectionPath: string) {
   const accessToken = await getGoogleAccessToken();
-  const encodedPath = collectionPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const encodedPath = encodeDocumentPath(collectionPath);
 
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}`,
@@ -222,10 +233,7 @@ export async function listFirestoreDocuments(collectionPath: string) {
 
 export async function getFirestoreDocument<T extends Record<string, unknown>>(documentPath: string) {
   const accessToken = await getGoogleAccessToken();
-  const encodedPath = documentPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const encodedPath = encodeDocumentPath(documentPath);
 
   const response = await fetch(
     `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${encodedPath}`,
@@ -258,4 +266,60 @@ export async function getFirestoreDocument<T extends Record<string, unknown>>(do
       Object.entries(data.fields || {}).map(([field, value]) => [field, fromFirestoreValue(value)])
     ),
   } as { id: string } & T;
+}
+
+export async function listFirestoreDocumentsByField(
+  collectionPath: string,
+  fieldPath: string,
+  value: string | boolean | number | null
+) {
+  const accessToken = await getGoogleAccessToken();
+  const response = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: collectionPath }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath },
+              op: "EQUAL",
+              value: toStructuredQueryValue(value),
+            },
+          },
+        },
+      }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text().catch(() => "");
+    throw new Error(
+      `Could not query Firestore documents for ${collectionPath} by ${fieldPath}: ${details || response.statusText}`
+    );
+  }
+
+  const data = (await response.json()) as Array<{
+    document?: {
+      name: string;
+      fields?: Record<string, FirestoreValue>;
+    };
+  }>;
+
+  return data
+    .map((entry) => entry.document)
+    .filter((document): document is NonNullable<typeof document> => Boolean(document))
+    .map((document) => ({
+      id: document.name.split("/").pop() || "",
+      path: document.name.replace(/^projects\/[^/]+\/databases\/\(default\)\/documents\//, ""),
+      ...Object.fromEntries(
+        Object.entries(document.fields || {}).map(([field, fieldValue]) => [field, fromFirestoreValue(fieldValue)])
+      ),
+    }));
 }

@@ -3,6 +3,7 @@ import { isAdminEmail } from "../../../../lib/admin";
 import { verifyAdminRequest } from "../../../../lib/server/admin-access";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { deleteFirestoreDocument, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { deleteUserOwnedDocuments } from "../../../../lib/server/account-cleanup";
 import { deleteIdentityUser, setIdentityUserDisabled } from "../../../../lib/server/identity-toolkit";
 
 type AdminAccountAction = "freeze" | "unfreeze" | "delete";
@@ -84,6 +85,8 @@ export async function POST(request: NextRequest) {
         available: false,
       });
 
+      const cleanupResult = await deleteUserOwnedDocuments(userId);
+
       if (username) {
         await deleteFirestoreDocument(`usernames/${username.toLowerCase()}`);
       }
@@ -97,7 +100,13 @@ export async function POST(request: NextRequest) {
         targetId: userId,
         status: "success",
         message: `Deleted account ${targetEmail || userId}.`,
-        details: { email: targetEmail || null, username: username || null },
+        details: {
+          email: targetEmail || null,
+          username: username || null,
+          cleanupDeletedCount: cleanupResult.totalDeleted,
+          cleanupDeletedByCollection: cleanupResult.deletedByCollection,
+          preservedCollections: ["rides"],
+        },
       });
 
       return NextResponse.json({ ok: true });

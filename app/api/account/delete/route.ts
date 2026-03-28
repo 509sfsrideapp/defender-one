@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { deleteFirestoreDocument, getFirestoreDocument } from "../../../../lib/server/firestore-admin";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { deleteIdentityUser } from "../../../../lib/server/identity-toolkit";
+import { writeAuditLog } from "../../../../lib/server/audit-log";
+import { deleteUserOwnedDocuments } from "../../../../lib/server/account-cleanup";
 import { normalizeUsername } from "../../../../lib/username";
 
 type UserProfileRecord = {
@@ -49,6 +51,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Vehicle information did not match this account." }, { status: 400 });
     }
 
+    const cleanupResult = await deleteUserOwnedDocuments(decoded.sub);
+
     await deleteIdentityUser(decoded.sub);
 
     await deleteFirestoreDocument(`users/${decoded.sub}`);
@@ -58,9 +62,33 @@ export async function POST(request: Request) {
       await deleteFirestoreDocument(`usernames/${normalizedUsername}`);
     }
 
+    await writeAuditLog({
+      action: "account.self_delete",
+      actor: { uid: decoded.sub, email: decoded.email },
+      targetType: "user",
+      targetId: decoded.sub,
+      status: "success",
+      message: "User deleted their own account and associated owned data was cleaned up.",
+      details: {
+        username: normalizedUsername || null,
+        cleanupDeletedCount: cleanupResult.totalDeleted,
+        cleanupDeletedByCollection: cleanupResult.deletedByCollection,
+        preservedCollections: ["rides"],
+      },
+    }).catch((auditError) => {
+      console.error("Audit log write failed", auditError);
+    });
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error(error);
+    await writeAuditLog({
+      action: "account.self_delete",
+      status: "failure",
+      message: error instanceof Error ? error.message : "Could not delete this account.",
+    }).catch((auditError) => {
+      console.error("Audit log write failed", auditError);
+    });
     return NextResponse.json({ error: "Could not delete this account." }, { status: 500 });
   }
 }
