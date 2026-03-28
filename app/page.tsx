@@ -129,7 +129,7 @@ function AppTile({
 }: {
   href?: string;
   icon: React.ReactNode;
-  label: string;
+  label?: string;
   disabled?: boolean;
   badgeCount?: number;
 }) {
@@ -166,7 +166,7 @@ function AppTile({
     </div>
   );
 
-  const labelNode = (
+  const labelNode = label ? (
     <span
       style={{
         fontSize: 12,
@@ -178,7 +178,7 @@ function AppTile({
     >
       {label}
     </span>
-  );
+  ) : null;
 
   if (disabled || !href) {
     return (
@@ -319,6 +319,27 @@ function DevIcon() {
       <path d="m42 22 10 10-10 10" />
       <path d="M36 18 28 46" />
     </svg>
+  );
+}
+
+function NullStatusIcon({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        maxWidth: 140,
+        fontSize: 7,
+        lineHeight: 1.2,
+        letterSpacing: "0.08em",
+        fontFamily: "var(--font-mono)",
+        textTransform: "uppercase",
+        textAlign: "center",
+        wordBreak: "break-word",
+        overflowWrap: "anywhere",
+      }}
+    >
+      {text}
+    </div>
   );
 }
 
@@ -504,6 +525,21 @@ export default function HomePage() {
   const driverIssues = getDriverReadinessIssues(profile);
   const rideReady = canRequestRide(profile);
   const driverReady = canDrive(profile);
+  const hasProfilePhoto = Boolean(profile?.driverPhotoUrl?.trim() || profile?.riderPhotoUrl?.trim());
+  const hasHomeAddress = Boolean(profile?.homeAddress?.trim());
+  const hasVehicleInfo = Boolean(
+    profile?.carYear?.trim() && profile?.carMake?.trim() && profile?.carModel?.trim() && profile?.carColor?.trim()
+  );
+  const rideUnavailableLabel = !hasProfilePhoto && !hasHomeAddress
+    ? "RIDE_REQUEST:NULL//PFP-ADDRESS:MISSING"
+    : !hasHomeAddress
+      ? "RIDE_REQUEST:NULL//ADDRESS:MISSING"
+      : "RIDE_REQUEST:NULL//PFP:MISSING";
+  const driverUnavailableLabel = !hasProfilePhoto && !hasVehicleInfo
+    ? "DRIVER_DASHBOARD:NULL//PFP-VEHICLE:MISSING"
+    : !hasVehicleInfo
+      ? "DRIVER_DASHBOARD:NULL//VEHICLE:MISSING"
+      : "DRIVER_DASHBOARD:NULL//PFP:MISSING";
   const emergencyRideEnabled = Boolean(profile?.emergencyRideAddressConsent);
   const firstName = profile?.firstName?.trim() || "";
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
@@ -1172,32 +1208,28 @@ export default function HomePage() {
                   ) : null}
                 </>
               ) : (
-                <>
-                  <div
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      maxWidth: 680,
-                      padding: "20px 24px",
-                      background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
-                      color: "#cbd5e1",
-                      borderRadius: 14,
-                      textAlign: "center",
-                      fontSize: 20,
-                      fontFamily: "var(--font-display)",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
-                      opacity: 0.82,
-                    }}
-                  >
-                    Ride Request Unavailable
-                  </div>
-                  <p style={{ maxWidth: 680, marginTop: 10, color: "#94a3b8" }}>
-                    You must complete additional account information in order to use this feature.
-                  </p>
-                  {rideIssues[0] ? <p style={{ maxWidth: 680, marginTop: 0, color: "#fca5a5" }}>{rideIssues[0]}</p> : null}
-                </>
+                <div
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxWidth: 680,
+                    padding: "20px 24px",
+                    background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
+                    color: "#cbd5e1",
+                    borderRadius: 14,
+                    textAlign: "center",
+                    fontSize: 15,
+                    fontFamily: "var(--font-mono)",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
+                    opacity: 0.82,
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {rideUnavailableLabel}
+                </div>
               )}
 
               <section
@@ -1267,7 +1299,13 @@ export default function HomePage() {
                     marginTop: 14,
                   }}
                 >
-                  <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" badgeCount={visibleDriverRequestCount} />
+                  <AppTile
+                    href={driverReady ? "/driver" : undefined}
+                    disabled={!driverReady}
+                    icon={driverReady ? <SteeringWheelIcon /> : <NullStatusIcon text={driverUnavailableLabel} />}
+                    label={driverReady ? "Driver Dashboard" : undefined}
+                    badgeCount={visibleDriverRequestCount}
+                  />
                   <AppTile href="/messages/direct" icon={<MessagesIcon />} label="Messages" />
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
@@ -1275,17 +1313,6 @@ export default function HomePage() {
                     <PlaceholderTile key={index} />
                   ))}
                 </div>
-
-                {!driverReady ? (
-                  <>
-                    <p style={{ maxWidth: 540, marginTop: 12, color: "#94a3b8" }}>
-                      You must complete additional account information in order to use this feature.
-                    </p>
-                    {driverIssues[0] ? (
-                      <p style={{ maxWidth: 540, marginTop: 0, color: "#fca5a5" }}>{driverIssues[0]}</p>
-                    ) : null}
-                  </>
-                ) : null}
               </section>
               <section
                 style={{

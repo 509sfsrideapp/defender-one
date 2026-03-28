@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v210",
+    title: "Homepage Null Status Messaging",
+    summary: "Replaced the homepage ride-request and unavailable driver-dashboard warning copy with compact NULL status strings based on the exact missing profile requirements, and removed the extra helper and red instruction text beneath those unavailable states.",
+  },
+  {
     commit: "v209",
     title: "Signup Phone Verification Removal",
     summary: "Removed the SMS phone-verification step from account creation across the signup permissions flow and signup finalizer, so new accounts can be created directly after accepting permissions while still keeping entered signup details saved when navigating back.",
