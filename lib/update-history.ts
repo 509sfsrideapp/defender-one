@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v232",
+    title: "Event Description Placeholder Update",
+    summary: "Updated the Add Event description field placeholder so it now calls out additional event details like required gear, uniform, and other important notes more directly.",
+  },
+  {
     commit: "v231",
     title: "Official Event Type",
     summary: "Added Official as a first-class event type so it now appears alongside the other event categories throughout the event creator, filters, and shared event labeling.",

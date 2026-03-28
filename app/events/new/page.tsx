@@ -287,7 +287,7 @@ export default function NewEventPage() {
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Add the event details, what to bring, who it is for, and anything else participants should know."
+              placeholder="Description and additional information like required gear, uniform, etc."
               rows={7}
             />
           </label>
