@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v191",
+    title: "Global Tactical Background System",
+    summary: "Rebuilt the app-wide background into a darker military terminal stack with a matte black-to-charcoal base, faint grid and contour overlays, static grain and scratch texture, a subtle vignette, scanlines, and a matching rugged splash-screen palette so the whole app feels like one consistent tactical system.",
+  },
+  {
     commit: "v190",
     title: "Terminal-Style App Status Console",
     summary: "Moved the homepage status monitor below the full Applications card and redesigned it as a small PowerShell-style console that types out rotating fake operational checks three lines at a time.",
