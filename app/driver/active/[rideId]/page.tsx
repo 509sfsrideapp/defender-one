@@ -8,7 +8,7 @@ import AppLoadingState from "../../../components/AppLoadingState";
 import FullscreenImageViewer from "../../../components/FullscreenImageViewer";
 import LiveRideMap, { type MapPoint } from "../../../components/LiveRideMap";
 import { auth, db } from "../../../../lib/firebase";
-import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../../../lib/ride-lifecycle";
+import { formatRideTimestamp, getRideLifecycleSteps } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
 
@@ -180,9 +180,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const [loading, setLoading] = useState(true);
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(true);
   const [liveRideState, setLiveRideState] = useState<RideLiveState | null>(null);
-  const [copyStatus, setCopyStatus] = useState("");
   const [locationRefreshStatus, setLocationRefreshStatus] = useState("");
   const [refreshingDriverLocation, setRefreshingDriverLocation] = useState(false);
+  const [timelineExpanded, setTimelineExpanded] = useState(false);
   const [riderPhotoExpanded, setRiderPhotoExpanded] = useState(false);
   const launchedNavigationKeyRef = useRef<string | null>(null);
   const driverRefreshInFlightRef = useRef(false);
@@ -620,32 +620,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
     window.location.href = mapsUrl;
   };
 
-  const copyPickupAddress = async () => {
-    const value = ride?.pickupLocationAddress || ride?.pickupLocationName || ride?.pickup || "";
-
-    if (!value) {
-      setCopyStatus("No pickup address to copy.");
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopyStatus("Pickup copied.");
-      window.setTimeout(() => setCopyStatus(""), 1800);
-    } catch (error) {
-      console.error(error);
-      setCopyStatus("Could not copy pickup.");
-    }
-  };
-
   const riderPhone = ride?.riderPhone ?? null;
   const riderCallHref = riderPhone ? `tel:${riderPhone}` : null;
   const riderTextHref = riderPhone ? `sms:${riderPhone}` : null;
-  const displayedDriverLocationStatus = locationServicesEnabled
-    ? geolocationAvailable
-      ? "Driver location updates every 30 seconds during the active ride."
-      : "This browser cannot share live driver location."
-    : "Location services are turned off in Account Settings.";
 
   if (loading) {
     return (
@@ -792,9 +769,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             <p style={{ margin: "4px 0 0", fontSize: "2rem", lineHeight: 1.05, fontFamily: "var(--font-display)", color: "#f8fbff" }}>
               {ride.riderName || "N/A"}
             </p>
-            <p style={{ margin: "8px 0 0", color: "#cbd5e1" }}>
-              {ride.riderPhone || "No rider phone on file"}
-            </p>
           </div>
         </div>
 
@@ -807,9 +781,6 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           />
         ) : null}
 
-        <p>
-          <strong>Status:</strong> {getRideStatusLabel(ride.status)}
-        </p>
         <div
           style={{
             marginBottom: 18,
@@ -822,72 +793,15 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           <p style={{ margin: 0, fontSize: "0.95rem", color: "#8ea1b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Pickup Spot
           </p>
-          <p style={{ margin: "8px 0 0", color: "#facc15", fontSize: "0.95rem" }}>
-            Resolved pickup location may be slightly inaccurate. It&apos;s recommended you call your rider when getting near to verify the pickup location.
-          </p>
           <p style={{ margin: "8px 0 0", fontSize: "1.45rem", lineHeight: 1.1, fontFamily: "var(--font-display)", color: "#f8fbff" }}>
             {ride.pickupLocationName || ride.pickup || "Not resolved yet"}
           </p>
           <p style={{ margin: "8px 0 0", color: "#cbd5e1" }}>
             {ride.pickupLocationAddress || ride.pickup || "No address available yet"}
           </p>
-          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              type="button"
-              onClick={copyPickupAddress}
-              style={{
-                padding: "10px 14px",
-                backgroundColor: "#111827",
-                color: "white",
-                border: "1px solid rgba(148, 163, 184, 0.18)",
-                borderRadius: 10,
-                cursor: "pointer",
-              }}
-            >
-              Copy Address
-            </button>
-            {copyStatus ? <span style={{ color: "#cbd5e1", alignSelf: "center" }}>{copyStatus}</span> : null}
-          </div>
-        </div>
-        <p>
-          <strong>Driver Location:</strong>{" "}
-          {displayedDriverLocationStatus}
-        </p>
-
-        <div
-          style={{
-            marginTop: 18,
-            padding: 16,
-            borderRadius: 14,
-            backgroundColor: "rgba(18, 37, 63, 0.4)",
-            border: "1px solid rgba(96, 165, 250, 0.12)",
-          }}
-        >
-          <p style={{ margin: 0, fontSize: "0.95rem", color: "#93c5fd", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Ride Timeline
+          <p style={{ margin: "12px 0 0", color: "#cbd5e1", fontSize: "0.95rem", lineHeight: 1.5 }}>
+            Resolved pickup location may be slightly inaccurate. It&apos;s recommended you call your rider when getting near to verify the pickup location.
           </p>
-          <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-            {lifecycleSteps
-              .filter((step) => step.complete || step.current)
-              .map((step) => (
-                <div
-                  key={step.key}
-                  style={{
-                    padding: "10px 12px",
-                    borderRadius: 10,
-                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(15, 23, 42, 0.68)",
-                    border: step.current
-                      ? "1px solid rgba(45, 212, 191, 0.3)"
-                      : "1px solid rgba(148, 163, 184, 0.14)",
-                  }}
-                >
-                  <strong>{step.label}</strong>
-                  <span style={{ marginLeft: 8, color: "#cbd5e1" }}>
-                    {step.at ? formatRideTimestamp(step.at) : "In progress"}
-                  </span>
-                </div>
-              ))}
-          </div>
         </div>
       </div>
 
@@ -1047,6 +961,84 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           {refreshingDriverLocation ? "Refreshing Driver Location..." : "Refresh Driver Location"}
         </button>
         {locationRefreshStatus ? <span style={{ color: "#cbd5e1" }}>{locationRefreshStatus}</span> : null}
+      </div>
+
+      <div
+        style={{
+          marginTop: 18,
+          maxWidth: 640,
+          marginInline: "auto",
+          padding: 16,
+          borderRadius: 14,
+          backgroundColor: "rgba(18, 37, 63, 0.4)",
+          border: "1px solid rgba(96, 165, 250, 0.12)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setTimelineExpanded((current) => !current)}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: 0,
+            background: "transparent",
+            border: "none",
+            boxShadow: "none",
+            textAlign: "left",
+            color: "#f8fbff",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "0.95rem",
+              color: "#93c5fd",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            Ride Timeline
+          </span>
+          <span
+            style={{
+              color: "#cbd5e1",
+              fontFamily: "var(--font-display)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontSize: "0.82rem",
+            }}
+          >
+            {timelineExpanded ? "Hide" : "Show"}
+          </span>
+        </button>
+
+        {timelineExpanded ? (
+          <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+            {lifecycleSteps
+              .filter((step) => step.complete || step.current)
+              .map((step) => (
+                <div
+                  key={step.key}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(15, 23, 42, 0.68)",
+                    border: step.current
+                      ? "1px solid rgba(45, 212, 191, 0.3)"
+                      : "1px solid rgba(148, 163, 184, 0.14)",
+                  }}
+                >
+                  <strong>{step.label}</strong>
+                  <span style={{ marginLeft: 8, color: "#cbd5e1" }}>
+                    {step.at ? formatRideTimestamp(step.at) : "In progress"}
+                  </span>
+                </div>
+              ))}
+          </div>
+        ) : null}
       </div>
     </main>
   );
