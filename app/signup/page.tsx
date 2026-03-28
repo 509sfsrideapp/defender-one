@@ -246,8 +246,29 @@ export default function SignupPage() {
         />
 
         <p style={{ marginTop: 0, marginBottom: 12, color: "#94a3b8" }}>
-          A profile photo is required for account creation. Address and vehicle details below can still be added later for ride and driver readiness.
+          A profile photo is required for account creation.
         </p>
+        <div style={{ marginBottom: 16 }}>
+          <ImageCropField
+            value={profilePhotoUrl}
+            onChange={(nextValue) => {
+              setProfilePhotoUrl(nextValue);
+              setStatusMessage(nextValue ? "Profile photo is ready and will be saved with your account." : "");
+            }}
+            cropShape="circle"
+            previewSize={96}
+            outputSize={480}
+            maxEncodedLength={180000}
+            disabled={uploadingPhoto}
+            helperText="Use a clear photo that shows what you look like. This is required before your account can be created."
+            statusMessage={uploadingPhoto ? "Preparing profile photo..." : ""}
+            onStatusMessageChange={(message) => {
+              setUploadingPhoto(message.includes("Preparing") || message.includes("Saving"));
+              setStatusMessage(message);
+            }}
+          />
+        </div>
+
         <div
           style={{
             marginBottom: 16,
@@ -296,29 +317,8 @@ export default function SignupPage() {
             />
           </div>
           <p style={{ marginTop: 0, marginBottom: 12, fontSize: 13, color: "#94a3b8" }}>
-            Double-check that this information is correct so an accurate address is given to your driver.
+            Address and vehicle details below are optional for account creation, but adding them later helps with ride and driver readiness.
           </p>
-
-          <div style={{ marginBottom: 12 }}>
-            <ImageCropField
-              value={profilePhotoUrl}
-              onChange={(nextValue) => {
-                setProfilePhotoUrl(nextValue);
-                setStatusMessage(nextValue ? "Profile photo is ready and will be saved with your account." : "");
-              }}
-              cropShape="circle"
-              previewSize={96}
-              outputSize={480}
-              maxEncodedLength={180000}
-              disabled={uploadingPhoto}
-              helperText="Use a clear photo that shows what you look like. This is required before your account can be created."
-              statusMessage={uploadingPhoto ? "Preparing profile photo..." : ""}
-              onStatusMessageChange={(message) => {
-                setUploadingPhoto(message.includes("Preparing") || message.includes("Saving"));
-                setStatusMessage(message);
-              }}
-            />
-          </div>
 
           <input
             value={carYear}

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v245",
+    title: "Signup Photo Placement Cleanup",
+    summary: "Moved the required profile-photo upload to sit directly under Verify Password so the optional address and vehicle fields stay grouped together below it.",
+  },
+  {
     commit: "v244",
     title: "Developer Loader Test Button",
     summary: "Added a developer-only button that replays the full initial app loading screen and then returns straight to the Developer page for faster loader testing.",
