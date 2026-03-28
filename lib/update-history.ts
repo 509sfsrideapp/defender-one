@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v184",
+    title: "Profile Asset Label Wrap Fix",
+    summary: "Adjusted the homepage profile asset tag so it always breaks cleanly after ASSET_LOADED: and keeps the full PFP//0-1 value together on the second line on mobile.",
+  },
+  {
     commit: "v183",
     title: "Homepage Auth Strip Layout Fix",
     summary: "Moved the homepage validation status light to the front of the auth strip and reformatted the text into a clean two-line layout so it always breaks at USER: before the member's last name on mobile.",

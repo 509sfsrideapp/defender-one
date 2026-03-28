@@ -779,9 +779,12 @@ export default function HomePage() {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 fontFamily: "var(--font-display)",
+                display: "grid",
+                gap: 1,
               }}
             >
-              ASSET_LOADED:PFP//0-1
+              <span>ASSET_LOADED:</span>
+              <span>PFP//0-1</span>
             </span>
 
             <div
