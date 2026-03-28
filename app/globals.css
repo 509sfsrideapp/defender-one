@@ -858,53 +858,117 @@ button:disabled {
   z-index: 1200;
   overflow: hidden;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255, 241, 214, 0.2), rgba(17, 24, 39, 0.05) 38%, rgba(2, 6, 23, 0.78) 100%);
+  background: radial-gradient(circle at center, rgba(255, 241, 214, 0.14), rgba(17, 24, 39, 0.04) 36%, rgba(2, 6, 23, 0.78) 100%);
 }
 
+.self-destruct-backdrop,
 .self-destruct-flash,
+.self-destruct-shockwave,
 .self-destruct-fireball,
+.self-destruct-plume,
+.self-destruct-heat,
 .self-destruct-smoke,
+.self-destruct-haze,
 .self-destruct-embers {
   position: absolute;
   inset: 0;
 }
 
+.self-destruct-backdrop {
+  background:
+    radial-gradient(circle at center, rgba(255, 205, 96, 0.24), rgba(234, 88, 12, 0.08) 24%, rgba(2, 6, 23, 0) 54%),
+    radial-gradient(circle at center, rgba(2, 6, 23, 0.05), rgba(2, 6, 23, 0.68) 74%);
+  animation: self-destruct-backdrop 2400ms ease-out forwards;
+}
+
 .self-destruct-flash {
   background:
-    radial-gradient(circle at center, rgba(255, 253, 244, 1) 0%, rgba(255, 225, 168, 0.95) 16%, rgba(251, 146, 60, 0.82) 32%, rgba(220, 38, 38, 0.22) 54%, transparent 74%);
-  animation: self-destruct-flash 640ms ease-out forwards;
+    radial-gradient(circle at center, rgba(255, 253, 244, 1) 0%, rgba(255, 243, 201, 0.98) 12%, rgba(255, 210, 122, 0.96) 24%, rgba(251, 146, 60, 0.72) 42%, rgba(220, 38, 38, 0.18) 58%, transparent 74%);
+  mix-blend-mode: screen;
+  animation: self-destruct-flash 780ms ease-out forwards;
+}
+
+.self-destruct-shockwave {
+  background:
+    radial-gradient(circle at center, transparent 0 14%, rgba(255, 248, 220, 0.92) 16%, rgba(255, 224, 163, 0.7) 19%, rgba(255, 191, 90, 0.18) 24%, transparent 29%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: self-destruct-shockwave 1200ms cubic-bezier(0.12, 0.78, 0.22, 1) forwards;
 }
 
 .self-destruct-fireball {
-  background:
-    radial-gradient(circle at 50% 58%, rgba(255, 253, 244, 0.98) 0%, rgba(255, 216, 122, 0.95) 12%, rgba(249, 115, 22, 0.96) 24%, rgba(220, 38, 38, 0.82) 36%, rgba(17, 24, 39, 0.3) 58%, transparent 72%);
-  transform: scale(0.25);
   opacity: 0;
-  animation: self-destruct-fireball 1400ms cubic-bezier(0.16, 0.84, 0.22, 1) forwards;
+  transform-origin: center;
+}
+
+.self-destruct-fireball-core {
+  background:
+    radial-gradient(circle at 50% 58%, rgba(255, 255, 245, 1) 0%, rgba(255, 236, 178, 0.98) 9%, rgba(255, 195, 102, 0.95) 17%, rgba(249, 115, 22, 0.92) 28%, rgba(220, 38, 38, 0.76) 40%, rgba(35, 12, 8, 0.18) 55%, transparent 72%);
+  filter: blur(2px);
+  animation: self-destruct-fireball-core 1700ms cubic-bezier(0.16, 0.84, 0.22, 1) forwards;
+}
+
+.self-destruct-fireball-crown {
+  background:
+    radial-gradient(circle at 50% 58%, rgba(255, 214, 117, 0.12) 0%, rgba(255, 187, 85, 0.62) 15%, rgba(249, 115, 22, 0.86) 24%, rgba(220, 38, 38, 0.5) 36%, rgba(17, 24, 39, 0.12) 52%, transparent 70%);
+  filter: blur(14px);
+  animation: self-destruct-fireball-crown 1950ms cubic-bezier(0.12, 0.78, 0.18, 1) forwards;
+}
+
+.self-destruct-plume {
+  background:
+    radial-gradient(ellipse at center 65%, rgba(255, 220, 145, 0.16) 0%, rgba(249, 115, 22, 0.74) 16%, rgba(124, 45, 18, 0.68) 28%, rgba(17, 24, 39, 0.12) 46%, transparent 62%);
+  transform-origin: center 62%;
+  filter: blur(10px);
+  opacity: 0;
+  animation: self-destruct-plume 2100ms cubic-bezier(0.14, 0.78, 0.22, 1) forwards;
+}
+
+.self-destruct-heat {
+  background:
+    radial-gradient(circle at center, rgba(255, 244, 214, 0.3), rgba(251, 146, 60, 0.2) 22%, rgba(17, 24, 39, 0.04) 42%, transparent 62%);
+  filter: blur(22px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: self-destruct-heat 1900ms ease-out forwards;
 }
 
 .self-destruct-smoke {
   opacity: 0;
   background-repeat: no-repeat;
-  filter: blur(18px);
+  filter: blur(22px);
 }
 
 .self-destruct-smoke-a {
   background:
-    radial-gradient(circle at 44% 58%, rgba(31, 41, 55, 0.92) 0%, rgba(51, 65, 85, 0.82) 18%, rgba(100, 116, 139, 0.3) 34%, transparent 58%);
-  animation: self-destruct-smoke-a 1700ms ease-out forwards;
+    radial-gradient(circle at 44% 60%, rgba(15, 23, 42, 0.94) 0%, rgba(31, 41, 55, 0.88) 16%, rgba(71, 85, 105, 0.44) 34%, transparent 60%);
+  animation: self-destruct-smoke-a 2300ms cubic-bezier(0.18, 0.72, 0.2, 1) forwards;
 }
 
 .self-destruct-smoke-b {
   background:
-    radial-gradient(circle at 60% 50%, rgba(17, 24, 39, 0.92) 0%, rgba(51, 65, 85, 0.8) 16%, rgba(100, 116, 139, 0.28) 32%, transparent 56%);
-  animation: self-destruct-smoke-b 1900ms ease-out forwards;
+    radial-gradient(circle at 60% 51%, rgba(17, 24, 39, 0.94) 0%, rgba(51, 65, 85, 0.84) 14%, rgba(100, 116, 139, 0.34) 30%, transparent 56%);
+  animation: self-destruct-smoke-b 2450ms cubic-bezier(0.16, 0.74, 0.2, 1) forwards;
 }
 
 .self-destruct-smoke-c {
   background:
-    radial-gradient(circle at 50% 64%, rgba(17, 24, 39, 0.86) 0%, rgba(71, 85, 105, 0.74) 14%, rgba(148, 163, 184, 0.2) 30%, transparent 52%);
-  animation: self-destruct-smoke-c 1800ms ease-out forwards;
+    radial-gradient(circle at 50% 66%, rgba(17, 24, 39, 0.86) 0%, rgba(71, 85, 105, 0.76) 14%, rgba(148, 163, 184, 0.22) 30%, transparent 52%);
+  animation: self-destruct-smoke-c 2350ms cubic-bezier(0.16, 0.74, 0.2, 1) forwards;
+}
+
+.self-destruct-smoke-d {
+  background:
+    radial-gradient(circle at 52% 56%, rgba(2, 6, 23, 0.92) 0%, rgba(51, 65, 85, 0.8) 18%, rgba(100, 116, 139, 0.28) 36%, transparent 58%);
+  animation: self-destruct-smoke-d 2550ms cubic-bezier(0.16, 0.74, 0.2, 1) forwards;
+}
+
+.self-destruct-haze {
+  background:
+    radial-gradient(circle at center, rgba(255, 236, 197, 0.12) 0%, rgba(125, 211, 252, 0.05) 28%, rgba(15, 23, 42, 0.26) 54%, transparent 76%);
+  filter: blur(28px);
+  opacity: 0;
+  animation: self-destruct-haze 2600ms ease-out forwards;
 }
 
 .self-destruct-embers {
@@ -913,97 +977,209 @@ button:disabled {
     radial-gradient(circle at 53% 44%, rgba(253, 186, 116, 0.9) 0 0.14rem, transparent 0.18rem),
     radial-gradient(circle at 58% 60%, rgba(251, 146, 60, 0.9) 0 0.13rem, transparent 0.18rem),
     radial-gradient(circle at 39% 57%, rgba(254, 215, 170, 0.88) 0 0.12rem, transparent 0.18rem),
-    radial-gradient(circle at 62% 52%, rgba(251, 146, 60, 0.88) 0 0.14rem, transparent 0.18rem);
-  animation: self-destruct-embers 1600ms ease-out forwards;
+    radial-gradient(circle at 62% 52%, rgba(251, 146, 60, 0.88) 0 0.14rem, transparent 0.18rem),
+    radial-gradient(circle at 49% 48%, rgba(254, 215, 170, 0.92) 0 0.12rem, transparent 0.18rem),
+    radial-gradient(circle at 56% 57%, rgba(253, 186, 116, 0.86) 0 0.12rem, transparent 0.18rem);
+  animation: self-destruct-embers 2100ms ease-out forwards;
+}
+
+@keyframes self-destruct-backdrop {
+  0% {
+    opacity: 0;
+    filter: brightness(1);
+  }
+  22% {
+    opacity: 1;
+    filter: brightness(1.16);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(1);
+  }
 }
 
 @keyframes self-destruct-flash {
   0% {
     opacity: 0;
-    transform: scale(0.6);
+    transform: scale(0.54);
   }
-  18% {
+  14% {
     opacity: 1;
-    transform: scale(1.08);
+    transform: scale(1.02);
   }
   100% {
     opacity: 0;
-    transform: scale(1.32);
+    transform: scale(1.48);
   }
 }
 
-@keyframes self-destruct-fireball {
+@keyframes self-destruct-shockwave {
   0% {
     opacity: 0;
-    transform: scale(0.22);
+    transform: scale(0.24);
+    filter: blur(2px);
   }
   16% {
-    opacity: 1;
-    transform: scale(0.72);
-  }
-  48% {
-    opacity: 0.96;
-    transform: scale(1.28);
+    opacity: 0.95;
   }
   100% {
     opacity: 0;
-    transform: scale(1.92);
+    transform: scale(2.24);
+    filter: blur(10px);
+  }
+}
+
+@keyframes self-destruct-fireball-core {
+  0% {
+    opacity: 0;
+    transform: scale(0.18);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(0.64);
+  }
+  34% {
+    opacity: 0.98;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.82);
+  }
+}
+
+@keyframes self-destruct-fireball-crown {
+  0% {
+    opacity: 0;
+    transform: scale(0.16);
+  }
+  18% {
+    opacity: 0.94;
+    transform: scale(0.92);
+  }
+  42% {
+    opacity: 0.88;
+    transform: scale(1.36);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.14);
+  }
+}
+
+@keyframes self-destruct-plume {
+  0% {
+    opacity: 0;
+    transform: scale(0.22) translateY(16%);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.74;
+    transform: scale(1.18) translateY(-2%);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.92) translateY(-14%);
+  }
+}
+
+@keyframes self-destruct-heat {
+  0% {
+    opacity: 0;
+    transform: scale(0.46);
+  }
+  18% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
   }
 }
 
 @keyframes self-destruct-smoke-a {
   0% {
     opacity: 0;
-    transform: scale(0.5) translateY(10%);
+    transform: scale(0.42) translateY(14%);
   }
-  28% {
-    opacity: 0.82;
+  24% {
+    opacity: 0.86;
   }
   100% {
     opacity: 0;
-    transform: scale(1.58) translateY(-12%);
+    transform: scale(1.9) translateY(-22%);
   }
 }
 
 @keyframes self-destruct-smoke-b {
   0% {
     opacity: 0;
-    transform: scale(0.48) translateY(16%);
+    transform: scale(0.38) translateY(20%);
   }
   24% {
-    opacity: 0.75;
+    opacity: 0.8;
   }
   100% {
     opacity: 0;
-    transform: scale(1.72) translateY(-18%);
+    transform: scale(2.02) translateY(-24%);
   }
 }
 
 @keyframes self-destruct-smoke-c {
   0% {
     opacity: 0;
-    transform: scale(0.42) translateY(18%);
+    transform: scale(0.4) translateY(22%);
   }
   30% {
-    opacity: 0.7;
+    opacity: 0.76;
   }
   100% {
     opacity: 0;
-    transform: scale(1.64) translateY(-8%);
+    transform: scale(1.84) translateY(-14%);
+  }
+}
+
+@keyframes self-destruct-smoke-d {
+  0% {
+    opacity: 0;
+    transform: scale(0.32) translateY(10%);
+  }
+  26% {
+    opacity: 0.66;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.08) translateY(-20%);
+  }
+}
+
+@keyframes self-destruct-haze {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  20% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
   }
 }
 
 @keyframes self-destruct-embers {
   0% {
     opacity: 0;
-    transform: scale(0.7);
+    transform: scale(0.78) translateY(0);
   }
-  20% {
+  16% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: scale(1.45) translateY(-10%);
+    transform: scale(1.85) translateY(-22%);
   }
 }
 

@@ -22,7 +22,7 @@ export default function SelfDestructOverlay() {
 
     const timer = window.setTimeout(() => {
       setActive(false);
-    }, 1800);
+    }, 2500);
 
     return () => window.clearTimeout(timer);
   }, [active]);
@@ -33,11 +33,18 @@ export default function SelfDestructOverlay() {
 
   return (
     <div className="self-destruct-overlay" aria-hidden="true">
+      <div className="self-destruct-backdrop" />
       <div className="self-destruct-flash" />
-      <div className="self-destruct-fireball" />
+      <div className="self-destruct-shockwave" />
+      <div className="self-destruct-fireball self-destruct-fireball-core" />
+      <div className="self-destruct-fireball self-destruct-fireball-crown" />
+      <div className="self-destruct-plume" />
+      <div className="self-destruct-heat" />
       <div className="self-destruct-smoke self-destruct-smoke-a" />
       <div className="self-destruct-smoke self-destruct-smoke-b" />
       <div className="self-destruct-smoke self-destruct-smoke-c" />
+      <div className="self-destruct-smoke self-destruct-smoke-d" />
+      <div className="self-destruct-haze" />
       <div className="self-destruct-embers" />
     </div>
   );
