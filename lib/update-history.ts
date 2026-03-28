@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v204",
+    title: "Compact Profile Header Module",
+    summary: "Trimmed down the homepage profile asset box so it takes less horizontal space in the header, while keeping the profile photo size intact and ensuring the Defender One title stays on one line with the status tag wrapping separately when needed.",
+  },
+  {
     commit: "v203",
     title: "Background Grayscale Shift",
     summary: "Removed the remaining olive-green tint from the shared app background by shifting the base glow and grid layers fully into neutral grayscale tones while keeping the same overall background structure.",

@@ -771,7 +771,7 @@ export default function HomePage() {
                 gap: 8,
               }}
             >
-              <span style={{ textDecoration: "underline", textUnderlineOffset: "0.16em" }}>Defender One</span>
+              <span style={{ textDecoration: "underline", textUnderlineOffset: "0.16em", whiteSpace: "nowrap" }}>Defender One</span>
               <span
                 style={{
                   fontSize: 12,
@@ -805,14 +805,14 @@ export default function HomePage() {
                 position: "relative",
                 display: "grid",
                 justifyItems: "center",
-                gap: 6,
-                minWidth: 108,
-                padding: "0.68rem 0.72rem 0.62rem",
-                borderRadius: 16,
+                gap: 4,
+                minWidth: 92,
+                padding: "0.5rem 0.52rem 0.46rem",
+                borderRadius: 14,
                 border: "1px solid rgba(148, 163, 184, 0.14)",
                 background:
                   "linear-gradient(180deg, rgba(16, 20, 27, 0.92) 0%, rgba(9, 12, 17, 0.97) 100%)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 12px 24px rgba(0, 0, 0, 0.2)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 10px 20px rgba(0, 0, 0, 0.18)",
                 overflow: "hidden",
               }}
             >
@@ -820,8 +820,8 @@ export default function HomePage() {
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  inset: 6,
-                  borderRadius: 12,
+                  inset: 5,
+                  borderRadius: 10,
                   border: "1px solid rgba(148, 163, 184, 0.06)",
                   pointerEvents: "none",
                 }}
@@ -832,15 +832,15 @@ export default function HomePage() {
                 aria-expanded={profileMenuOpen}
                 onClick={() => setProfileMenuOpen((current) => !current)}
                 style={{
-                  width: 68,
-                  height: 68,
-                  padding: 6,
+                  width: 62,
+                  height: 62,
+                  padding: 4,
                   display: "grid",
                   placeItems: "center",
                   borderRadius: 999,
                   background: "linear-gradient(180deg, rgba(25, 31, 40, 0.98) 0%, rgba(13, 17, 24, 0.98) 100%)",
                   border: "1px solid rgba(148, 163, 184, 0.16)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 18px rgba(0, 0, 0, 0.22)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 7px 15px rgba(0, 0, 0, 0.2)",
                   position: "relative",
                   zIndex: 1,
                 }}
@@ -883,8 +883,8 @@ export default function HomePage() {
               <span
                 style={{
                   color: "#8f9caf",
-                  fontSize: 10,
-                  letterSpacing: "0.1em",
+                  fontSize: 9,
+                  letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   fontFamily: "var(--font-display)",
                   display: "grid",
