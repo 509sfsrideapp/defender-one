@@ -80,6 +80,17 @@ const homepageCardStyle: React.CSSProperties = {
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
 };
 
+const HOMEPAGE_STATUS_CHECKS = [
+  "AUTH TOKEN VALIDATED",
+  "RIDE STATUS AUTH GOOD",
+  "DISPATCH WINDOW ONLINE",
+  "DRIVER GRID LINKED",
+  "GEO ROUTE AUTH TRUE",
+  "INBOX CHANNEL SYNCED",
+  "MOBILE OPS SHELL READY",
+  "NOTIFICATION STACK GREEN",
+];
+
 function NotificationBadge({ count, style }: { count: number; style?: React.CSSProperties }) {
   if (count <= 0) {
     return null;
@@ -298,6 +309,7 @@ export default function HomePage() {
   const [userInboxPosts, setUserInboxPosts] = useState<InboxPost[]>([]);
   const [inboxReadVersion, setInboxReadVersion] = useState(0);
   const [driverOpenRideBadgeRecords, setDriverOpenRideBadgeRecords] = useState<OpenRideBadgeRecord[]>([]);
+  const [appStatusOffset, setAppStatusOffset] = useState(0);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
@@ -367,6 +379,14 @@ export default function HomePage() {
       window.removeEventListener("storage", refreshReadState);
       window.removeEventListener(INBOX_READ_EVENT, refreshReadState as EventListener);
     };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setAppStatusOffset((current) => (current + 1) % HOMEPAGE_STATUS_CHECKS.length);
+    }, 1800);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -458,6 +478,9 @@ export default function HomePage() {
       : profile?.name?.trim()
         ? `${profile.name.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
         : `${(user?.email?.split("@")[0] || "USER").toUpperCase()}${profile?.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`;
+  const visibleAppStatusChecks = Array.from({ length: 3 }, (_, index) => {
+    return HOMEPAGE_STATUS_CHECKS[(appStatusOffset + index) % HOMEPAGE_STATUS_CHECKS.length];
+  });
   const latestInboxPosts = [...globalInboxPosts, ...userInboxPosts]
     .filter((post) => isMessageThreadId(post.threadId))
     .sort((a, b) => {
@@ -1108,6 +1131,54 @@ export default function HomePage() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
                   <h2 style={{ margin: 0 }}>Applications</h2>
+                </div>
+                <div
+                  style={{
+                    marginTop: 14,
+                    maxWidth: 360,
+                    padding: "0.8rem 0.9rem",
+                    borderRadius: 14,
+                    border: "1px solid rgba(126, 142, 160, 0.16)",
+                    background:
+                      "linear-gradient(180deg, rgba(16, 22, 30, 0.94) 0%, rgba(9, 14, 20, 0.98) 100%)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "#7dd3fc",
+                      fontSize: 10,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    App Status Monitor
+                  </p>
+                  <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                    {visibleAppStatusChecks.map((statusLine, index) => (
+                      <div
+                        key={`${statusLine}-${index}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          color: index === 0 ? "#e2e8f0" : "#cbd5e1",
+                          opacity: index === 0 ? 1 : 0.78,
+                          fontSize: 11,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          fontFamily: "var(--font-display)",
+                        }}
+                      >
+                        <span aria-hidden="true" style={{ color: "#22c55e", fontSize: 12 }}>
+                          ✓
+                        </span>
+                        <span>{statusLine}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div
                   style={{
