@@ -68,21 +68,11 @@ body::after {
 }
 
 body::before {
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(150, 158, 145, 0.055) 0,
-      rgba(150, 158, 145, 0.055) 1px,
-      transparent 1px,
-      transparent 76px
-    ),
-    repeating-linear-gradient(
-      180deg,
-      rgba(150, 158, 145, 0.05) 0,
-      rgba(150, 158, 145, 0.05) 1px,
-      transparent 1px,
-      transparent 76px
-    );
+  background-image:
+    linear-gradient(rgba(150, 158, 145, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 158, 145, 0.055) 1px, transparent 1px);
+  background-position: center;
+  background-size: 76px 76px;
   opacity: 0.5;
 }
 
@@ -94,14 +84,6 @@ body::after {
       rgba(255, 255, 255, 0.015) 1px,
       transparent 1px,
       transparent 4px
-    ),
-    linear-gradient(
-      90deg,
-      transparent 0 8%,
-      rgba(108, 255, 108, 0.02) 8.1% 8.4%,
-      transparent 8.5% 58%,
-      rgba(145, 156, 145, 0.018) 58.1% 58.3%,
-      transparent 58.4% 100%
     ),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='18' cy='24' r='0.8'/%3E%3Ccircle cx='52' cy='36' r='0.7'/%3E%3Ccircle cx='94' cy='18' r='0.8'/%3E%3Ccircle cx='138' cy='40' r='0.7'/%3E%3Ccircle cx='164' cy='26' r='0.9'/%3E%3Ccircle cx='32' cy='82' r='0.8'/%3E%3Ccircle cx='74' cy='70' r='0.6'/%3E%3Ccircle cx='118' cy='88' r='0.8'/%3E%3Ccircle cx='156' cy='76' r='0.7'/%3E%3Ccircle cx='24' cy='136' r='0.7'/%3E%3Ccircle cx='62' cy='118' r='0.8'/%3E%3Ccircle cx='102' cy='144' r='0.7'/%3E%3Ccircle cx='146' cy='132' r='0.8'/%3E%3Ccircle cx='170' cy='154' r='0.6'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(circle at center, transparent 52%, rgba(0, 0, 0, 0.12) 74%, rgba(0, 0, 0, 0.42) 100%);

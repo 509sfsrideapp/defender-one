@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v202",
+    title: "Background Grid Alignment Fix",
+    summary: "Cleaned up the shared background grid so the line spacing stays visually even across the app by switching to a fixed-size centered grid layer and removing the off-pattern accent bands that were making some gaps look wider than others.",
+  },
+  {
     commit: "v201",
     title: "Profile Frame Tone-Down",
     summary: "Retuned the homepage profile asset panel away from the green tint into a lower-key neutral slate frame with softer borders and shadows, while keeping the profile photo itself the same size.",
