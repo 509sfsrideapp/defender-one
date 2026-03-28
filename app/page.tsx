@@ -1186,6 +1186,7 @@ export default function HomePage() {
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
                       boxShadow: "0 20px 44px rgba(127, 18, 18, 0.34)",
+                      animation: submittingEmergencyRide ? undefined : "emergency-ride-pulse 3.8s ease-in-out infinite",
                     }}
                   >
                     <span style={{ display: "grid", gap: 6 }}>

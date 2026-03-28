@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v213",
+    title: "Emergency Ride Button Pulse",
+    summary: "Added a very slight pulse animation to the homepage emergency ride request button while it is idle so the primary action draws attention without feeling flashy or distracting.",
+  },
+  {
     commit: "v212",
     title: "Signup Profile Photo Requirement",
     summary: "Made the profile photo mandatory during account creation by blocking signup until a photo is uploaded and updating the signup form copy so that requirement is clear before the account is submitted.",

@@ -305,6 +305,21 @@ button:disabled {
   }
 }
 
+@keyframes emergency-ride-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 20px 44px rgba(127, 18, 18, 0.34);
+  }
+
+  50% {
+    transform: scale(1.008);
+    box-shadow:
+      0 22px 48px rgba(127, 18, 18, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+}
+
 .loading-screen {
   min-height: calc(100svh - env(safe-area-inset-top));
   display: grid;
