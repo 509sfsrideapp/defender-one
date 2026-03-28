@@ -334,7 +334,7 @@ export default function AccountPage() {
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -531,7 +531,7 @@ export default function AccountPage() {
           style={{
             display: "inline-block",
             padding: "10px 16px",
-            backgroundColor: "#111827",
+            backgroundColor: "#162115",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -550,7 +550,7 @@ export default function AccountPage() {
           style={{
             display: "inline-block",
             padding: "10px 16px",
-            backgroundColor: "#111827",
+            backgroundColor: "#162115",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -567,7 +567,7 @@ export default function AccountPage() {
             style={{
               display: "inline-block",
               padding: "10px 16px",
-              backgroundColor: hasRideHistory ? "#111827" : "rgba(15, 23, 42, 0.72)",
+              backgroundColor: hasRideHistory ? "#162115" : "rgba(18, 28, 16, 0.72)",
               color: "white",
               textDecoration: "none",
               borderRadius: 8,
@@ -581,7 +581,7 @@ export default function AccountPage() {
             style={{
               display: "inline-block",
               padding: "10px 16px",
-              backgroundColor: hasDriverHistory ? "#111827" : "rgba(15, 23, 42, 0.72)",
+              backgroundColor: hasDriverHistory ? "#162115" : "rgba(18, 28, 16, 0.72)",
               color: "white",
               textDecoration: "none",
               borderRadius: 8,

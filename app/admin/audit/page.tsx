@@ -82,7 +82,7 @@ export default function AdminAuditPage() {
           style={{
             display: "inline-block",
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -108,7 +108,7 @@ export default function AdminAuditPage() {
               key={record.id}
               style={{
                 border: "1px solid rgba(148, 163, 184, 0.18)",
-                backgroundColor: "rgba(9, 15, 25, 0.88)",
+                backgroundColor: "rgba(11, 16, 10, 0.88)",
                 color: "#e5edf7",
                 borderRadius: 12,
                 padding: 14,
@@ -127,7 +127,7 @@ export default function AdminAuditPage() {
                     marginTop: 10,
                     padding: 12,
                     borderRadius: 10,
-                    backgroundColor: "rgba(15, 23, 42, 0.72)",
+                    backgroundColor: "rgba(18, 28, 16, 0.72)",
                     overflowX: "auto",
                     whiteSpace: "pre-wrap",
                   }}

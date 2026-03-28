@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v196",
+    title: "Green Theme Consistency Pass",
+    summary: "Finished the remaining blue-to-green cleanup across the app by swapping leftover buttons, login/admin links, ride controls, shared shells, live-map driver accents, inbox utilities, and footer-linked surfaces so the shipped interface now reads consistently green instead of partially blue.",
+  },
+  {
     commit: "v195",
     title: "Green Surface Tint Pass",
     summary: "Shifted the remaining blue-tinted translucent box backgrounds to muted green across the homepage applications area, app status console, profile dropdown, driver surfaces, ride panels, admin shells, inbox threads, and shared utility overlays so the main interface boxes feel more consistent with the tactical green palette.",

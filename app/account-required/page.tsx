@@ -85,7 +85,7 @@ export default function AccountRequiredPage() {
             marginTop: 10,
             padding: "10px 16px",
             borderRadius: 10,
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "#fff",
             textDecoration: "none",
           }}

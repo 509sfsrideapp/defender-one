@@ -12,7 +12,7 @@ const baseStyle: React.CSSProperties = {
   padding: "10px 14px",
   borderRadius: 999,
   border: "1px solid rgba(132, 177, 116, 0.18)",
-  backgroundColor: "rgba(15, 23, 42, 0.92)",
+  backgroundColor: "rgba(18, 28, 16, 0.92)",
   color: "white",
   textDecoration: "none",
   boxShadow: "0 10px 28px rgba(2, 6, 23, 0.28)",

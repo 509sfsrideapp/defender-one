@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
           display: "inline-block",
           marginBottom: 20,
           padding: "8px 14px",
-          backgroundColor: "#1f2937",
+          backgroundColor: "#243326",
           color: "white",
           textDecoration: "none",
           borderRadius: 8,
@@ -97,7 +97,7 @@ export default function AdminLoginPage() {
 
       <div style={{ marginTop: 20, maxWidth: 400 }}>
         {statusMessage ? (
-          <p style={{ marginBottom: 12, color: statusMessage.includes("failed") || statusMessage.includes("not authorized") ? "#b91c1c" : "#1d4ed8" }}>
+          <p style={{ marginBottom: 12, color: statusMessage.includes("failed") || statusMessage.includes("not authorized") ? "#b91c1c" : "#9fd28f" }}>
             {statusMessage}
           </p>
         ) : null}
@@ -123,7 +123,7 @@ export default function AdminLoginPage() {
           disabled={submitting}
           style={{
             padding: "10px 16px",
-            backgroundColor: "#7c3aed",
+            background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
             color: "white",
             border: "none",
             borderRadius: 8,

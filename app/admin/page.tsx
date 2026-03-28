@@ -213,7 +213,7 @@ export default function AdminPage() {
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -279,7 +279,7 @@ export default function AdminPage() {
       </p>
 
       <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(27, 35, 45, 0.96) 0%, rgba(13, 18, 24, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(126, 142, 160, 0.18)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(35, 48, 32, 0.96) 0%, rgba(14, 22, 13, 0.99) 100%)", color: "#dcead7", border: "1px solid rgba(132, 177, 116, 0.18)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Total Users:</strong> {users.length}
         </div>
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(18, 47, 49, 0.94) 0%, rgba(8, 23, 24, 0.99) 100%)", color: "#ccfbf1", border: "1px solid rgba(87, 125, 122, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
@@ -294,7 +294,7 @@ export default function AdminPage() {
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(69, 40, 22, 0.94) 0%, rgba(29, 19, 11, 0.99) 100%)", color: "#ffedd5", border: "1px solid rgba(152, 103, 68, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Arrived:</strong> {arrivedRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(28, 43, 59, 0.94) 0%, rgba(12, 18, 26, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(110, 133, 156, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(48, 66, 44, 0.94) 0%, rgba(19, 26, 17, 0.99) 100%)", color: "#dcead7", border: "1px solid rgba(132, 177, 116, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Picked Up:</strong> {pickedUpRides.length}
         </div>
         <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(35, 40, 33, 0.94) 0%, rgba(15, 18, 14, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
@@ -336,7 +336,7 @@ export default function AdminPage() {
             display: "inline-block",
             marginLeft: 12,
             padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(52, 63, 79, 0.96) 0%, rgba(23, 31, 42, 0.98) 100%)",
+            background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
             color: "white",
             textDecoration: "none",
             borderRadius: 10,
@@ -569,7 +569,7 @@ export default function AdminPage() {
                   }
                   title="Dispatch Map"
                   emptyLabel="No rider coordinates have been shared for this active ride yet."
-                  footerLabel="Blue is the driver. Orange is the pickup spot."
+                  footerLabel="Green is the driver. Orange is the pickup spot."
                   maxWidth={700}
                 />
               ) : null}

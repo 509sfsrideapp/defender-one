@@ -692,7 +692,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -718,7 +718,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -746,7 +746,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
 
       <div
         style={{
-          border: "1px solid rgba(45, 212, 191, 0.22)",
+          border: "1px solid rgba(132, 177, 116, 0.22)",
           padding: 16,
           borderRadius: 12,
           backgroundColor: "rgba(11, 16, 10, 0.88)",
@@ -864,7 +864,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           style={{
             width: "100%",
             padding: "18px 20px",
-            backgroundColor: "#0f766e",
+            backgroundColor: "#587b5b",
             color: "white",
             border: "none",
             borderRadius: 12,
@@ -893,7 +893,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             style={{
               display: "inline-block",
               padding: "16px 16px",
-              backgroundColor: "#1d4ed8",
+              backgroundColor: "#435d46",
               color: "white",
               textDecoration: "none",
               borderRadius: 10,
@@ -912,7 +912,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             style={{
               display: "inline-block",
               padding: "16px 16px",
-              backgroundColor: "#0f766e",
+              backgroundColor: "#587b5b",
               color: "white",
               textDecoration: "none",
               borderRadius: 10,
@@ -941,7 +941,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             onClick={handleStatusAction}
             style={{
               padding: "16px 16px",
-              backgroundColor: ride.status === "arrived" ? "#1d4ed8" : "#b45309",
+              backgroundColor: ride.status === "arrived" ? "#435d46" : "#b45309",
               color: "white",
               border: "none",
               borderRadius: 10,
@@ -1000,7 +1000,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
         emptyLabel="Pickup coordinates are not available yet, so the live map cannot be drawn."
         footerLabel={
           liveDriverLocation
-            ? "Blue is your live driver location. Orange is the rider pickup spot."
+            ? "Green is your live driver location. Orange is the rider pickup spot."
             : "Waiting for driver location to appear on the live map."
         }
         maxWidth={640}
@@ -1023,7 +1023,7 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
           disabled={refreshingDriverLocation || !locationServicesEnabled || !geolocationAvailable}
           style={{
             padding: "10px 14px",
-            backgroundColor: "#1d4ed8",
+            backgroundColor: "#435d46",
             color: "white",
             border: "none",
             borderRadius: 10,
@@ -1100,9 +1100,9 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
                   style={{
                     padding: "10px 12px",
                     borderRadius: 10,
-                    backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(18, 28, 16, 0.68)",
+                    backgroundColor: step.current ? "rgba(18, 28, 16, 0.82)" : "rgba(18, 28, 16, 0.68)",
                     border: step.current
-                      ? "1px solid rgba(45, 212, 191, 0.3)"
+                      ? "1px solid rgba(132, 177, 116, 0.3)"
                       : "1px solid rgba(148, 163, 184, 0.14)",
                   }}
                 >

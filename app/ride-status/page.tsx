@@ -501,7 +501,7 @@ export default function RideStatusPage() {
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -528,7 +528,7 @@ export default function RideStatusPage() {
 
           <div
             style={{
-              border: "1px solid rgba(45, 212, 191, 0.22)",
+              border: "1px solid rgba(132, 177, 116, 0.22)",
               backgroundColor: "rgba(11, 16, 10, 0.88)",
               color: "#e5edf7",
               borderRadius: 16,
@@ -620,14 +620,14 @@ export default function RideStatusPage() {
                       gap: 10,
                       padding: "10px 14px",
                       borderRadius: 999,
-                      backgroundColor: "rgba(15, 118, 110, 0.2)",
-                      border: "1px solid rgba(45, 212, 191, 0.25)",
-                      color: "#ccfbf1",
+                      backgroundColor: "rgba(18, 28, 16, 0.82)",
+                      border: "1px solid rgba(132, 177, 116, 0.28)",
+                      color: "#dff0d8",
                       fontWeight: 700,
                     }}
                   >
                     <span>{eta.summary}</span>
-                    <span style={{ color: "#99f6e4", fontWeight: 500 }}>{eta.miles.toFixed(1)} mi</span>
+                    <span style={{ color: "#bde0b5", fontWeight: 500 }}>{eta.miles.toFixed(1)} mi</span>
                   </div>
                 ) : null}
               </div>
@@ -664,7 +664,7 @@ export default function RideStatusPage() {
                   style={{
                     display: "block",
                     padding: "14px 20px",
-                    backgroundColor: "#1d4ed8",
+                    backgroundColor: "#435d46",
                     color: "white",
                     textDecoration: "none",
                     borderRadius: 12,
@@ -682,7 +682,7 @@ export default function RideStatusPage() {
                   style={{
                     display: "block",
                     padding: "14px 20px",
-                    backgroundColor: "#0f766e",
+                    backgroundColor: "#587b5b",
                     color: "white",
                     textDecoration: "none",
                     borderRadius: 12,
@@ -751,7 +751,7 @@ export default function RideStatusPage() {
               disabled={refreshingLocation || !riderLocationServicesEnabled}
               style={{
                 padding: "10px 14px",
-                backgroundColor: "#1d4ed8",
+                backgroundColor: "#435d46",
                 color: "white",
                 border: "none",
                 borderRadius: 10,
@@ -847,9 +847,9 @@ export default function RideStatusPage() {
                       style={{
                         padding: "10px 12px",
                         borderRadius: 10,
-                        backgroundColor: step.current ? "rgba(15, 118, 110, 0.22)" : "rgba(18, 28, 16, 0.68)",
+                        backgroundColor: step.current ? "rgba(18, 28, 16, 0.82)" : "rgba(18, 28, 16, 0.68)",
                         border: step.current
-                          ? "1px solid rgba(45, 212, 191, 0.3)"
+                          ? "1px solid rgba(132, 177, 116, 0.3)"
                           : "1px solid rgba(148, 163, 184, 0.14)",
                       }}
                     >

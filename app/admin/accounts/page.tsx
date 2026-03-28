@@ -227,7 +227,7 @@ export default function AdminAccountsPage() {
             display: "inline-block",
             marginBottom: 20,
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -259,7 +259,7 @@ export default function AdminAccountsPage() {
           style={{
             display: "inline-block",
             padding: "8px 14px",
-            backgroundColor: "#1f2937",
+            backgroundColor: "#243326",
             color: "white",
             textDecoration: "none",
             borderRadius: 8,
@@ -274,7 +274,7 @@ export default function AdminAccountsPage() {
         Search and manage all accounts here. Cards stay compact until you expand them for the full profile and account controls.
       </p>
       {accountActionMessage ? (
-        <p style={{ marginTop: 12, color: accountActionMessage.toLowerCase().includes("failed") || accountActionMessage.toLowerCase().includes("cannot") ? "#fca5a5" : "#bfdbfe" }}>
+        <p style={{ marginTop: 12, color: accountActionMessage.toLowerCase().includes("failed") || accountActionMessage.toLowerCase().includes("cannot") ? "#fca5a5" : "#dcead7" }}>
           {accountActionMessage}
         </p>
       ) : null}

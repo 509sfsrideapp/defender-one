@@ -110,7 +110,7 @@ function NotificationBadge({ count, style }: { count: number; style?: React.CSSP
         fontSize: 11,
         fontWeight: 700,
         lineHeight: 1,
-        border: "2px solid rgba(9, 15, 25, 0.98)",
+        border: "2px solid rgba(11, 16, 10, 0.98)",
         boxShadow: "0 6px 16px rgba(127, 29, 29, 0.28)",
         ...style,
       }}
@@ -153,11 +153,11 @@ function AppTile({
         display: "grid",
         placeItems: "center",
         background: disabled
-          ? "linear-gradient(180deg, rgba(56, 65, 77, 0.62) 0%, rgba(31, 41, 55, 0.72) 100%)"
-          : "linear-gradient(180deg, rgba(47, 60, 79, 0.72) 0%, rgba(24, 33, 45, 0.9) 100%)",
-        color: disabled ? "#c7d0db" : "#dceaf8",
+          ? "linear-gradient(180deg, rgba(64, 74, 61, 0.62) 0%, rgba(31, 40, 29, 0.72) 100%)"
+          : "linear-gradient(180deg, rgba(77, 105, 70, 0.78) 0%, rgba(34, 48, 31, 0.92) 100%)",
+        color: disabled ? "#c7d0c3" : "#e4f2dd",
         position: "relative",
-        border: "1px solid rgba(129, 145, 164, 0.24)",
+        border: "1px solid rgba(132, 177, 116, 0.24)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
       }}
     >
@@ -185,9 +185,9 @@ function AppTile({
       <div
         style={{
           ...sharedStyle,
-          color: "#93a0b0",
-          background: "linear-gradient(180deg, rgba(37, 44, 53, 0.92) 0%, rgba(21, 26, 33, 0.96) 100%)",
-          border: "1px solid rgba(126, 142, 160, 0.18)",
+          color: "#9faa97",
+          background: "linear-gradient(180deg, rgba(31, 37, 29, 0.92) 0%, rgba(17, 22, 16, 0.96) 100%)",
+          border: "1px solid rgba(132, 177, 116, 0.16)",
           opacity: 0.82,
         }}
       >
@@ -204,8 +204,8 @@ function AppTile({
         ...sharedStyle,
         textDecoration: "none",
         color: "#e5edf7",
-        background: "linear-gradient(180deg, rgba(20, 26, 33, 0.96) 0%, rgba(10, 13, 18, 0.99) 100%)",
-        border: "1px solid rgba(126, 142, 160, 0.22)",
+        background: "linear-gradient(180deg, rgba(20, 26, 18, 0.96) 0%, rgba(10, 13, 9, 0.99) 100%)",
+        border: "1px solid rgba(132, 177, 116, 0.22)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 30px rgba(0, 0, 0, 0.24)",
       }}
     >
@@ -1008,11 +1008,11 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 160,
                   padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(55, 72, 94, 0.98) 0%, rgba(23, 31, 42, 0.99) 100%)",
+                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 12,
-                  border: "1px solid rgba(126, 142, 160, 0.24)",
+                  border: "1px solid rgba(132, 177, 116, 0.24)",
                 }}
               >
                 Admin Login
@@ -1127,7 +1127,7 @@ export default function HomePage() {
                       fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
+                      boxShadow: "0 16px 38px rgba(18, 28, 16, 0.18)",
                       opacity: 0.82,
                     }}
                   >
@@ -1353,7 +1353,7 @@ export default function HomePage() {
                 style={{
                   display: "inline-block",
                   padding: "10px 16px",
-                  backgroundColor: "#7c3aed",
+                  background: "linear-gradient(180deg, rgba(67, 96, 58, 0.96) 0%, rgba(30, 46, 24, 0.98) 100%)",
                   color: "white",
                   textDecoration: "none",
                   borderRadius: 8,
