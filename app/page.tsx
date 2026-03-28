@@ -1015,7 +1015,18 @@ export default function HomePage() {
                       boxShadow: "0 20px 44px rgba(127, 18, 18, 0.34)",
                     }}
                   >
-                    {submittingEmergencyRide ? "Requesting..." : "Request Emergency Ride"}
+                    <span style={{ display: "grid", gap: 6 }}>
+                      <span>{submittingEmergencyRide ? "Requesting..." : "Request Emergency Ride"}</span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          letterSpacing: "0.12em",
+                          color: "rgba(255, 255, 255, 0.8)",
+                        }}
+                      >
+                        RSPNS_PRTCL//IMMEDIATE - AUTO_ROUTE_AUTH//TRUE
+                      </span>
+                    </span>
                   </button>
                   {emergencyRideBlockers.length > 0 ? (
                     <p style={{ maxWidth: 680, marginTop: 10, marginBottom: 0, color: "#94a3b8", fontSize: 13 }}>
