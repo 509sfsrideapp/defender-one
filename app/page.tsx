@@ -71,7 +71,7 @@ type OpenRideBadgeRecord = {
   createdAt?: { seconds?: number; nanoseconds?: number } | null;
 };
 
-const appTilePlaceholderCount = 6;
+const appTilePlaceholderCount = 5;
 const homepageCardStyle: React.CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(126, 142, 160, 0.18)",
@@ -272,6 +272,35 @@ function MessagesIcon() {
       <path d="M12 16h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H28l-10 8v-8h-6a6 6 0 0 1-6-6V22a6 6 0 0 1 6-6Z" />
       <path d="M20 28h24" />
       <path d="M20 36h18" />
+    </svg>
+  );
+}
+
+function EventsIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      width="34"
+      height="34"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="10" y="12" width="44" height="42" rx="10" />
+      <path d="M10 24h44" />
+      <path d="M18 10v8" />
+      <path d="M27 10v8" />
+      <path d="M37 10v8" />
+      <path d="M46 10v8" />
+      <circle cx="32" cy="35.5" r="3.5" />
+      <path d="M25.6 45.5c1.6-3.2 3.7-4.8 6.4-4.8s4.8 1.6 6.4 4.8" />
+      <circle cx="21.5" cy="38" r="2.6" />
+      <path d="M17.2 46c1.1-2.2 2.5-3.4 4.3-3.4s3.3 1.2 4.3 3.4" />
+      <circle cx="42.5" cy="38" r="2.6" />
+      <path d="M38.2 46c1.1-2.2 2.5-3.4 4.3-3.4s3.3 1.2 4.3 3.4" />
     </svg>
   );
 }
@@ -1243,6 +1272,7 @@ export default function HomePage() {
                 >
                   <AppTile href={driverReady ? "/driver" : undefined} disabled={!driverReady} icon={<SteeringWheelIcon />} label="Driver Dashboard" badgeCount={visibleDriverRequestCount} />
                   <AppTile href="/messages/direct" icon={<MessagesIcon />} label="Messages" />
+                  <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
                   {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
                     <PlaceholderTile key={index} />

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v205",
+    title: "Events App Placeholder",
+    summary: "Added a new EVENTS app tile to the homepage with a custom calendar-and-people icon and wired it to a live placeholder page so the events section now has a real entry point for future scheduling features.",
+  },
+  {
     commit: "v204",
     title: "Compact Profile Header Module",
     summary: "Trimmed down the homepage profile asset box so it takes less horizontal space in the header, while keeping the profile photo size intact and ensuring the Defender One title stays on one line with the status tag wrapping separately when needed.",
