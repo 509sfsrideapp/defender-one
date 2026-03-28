@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v177",
+    title: "Pickup Address Deduping",
+    summary: "Updated the driver active ride pickup card so it only shows one line when the resolved pickup label and address are the same, while still showing a second line when there is a distinct place name and street address.",
+  },
+  {
     commit: "v176",
     title: "Driver Active Ride Cleanup",
     summary: "Removed redundant status and driver-location details from the driver active ride page, simplified the pickup guidance text, and moved the ride timeline into a collapsible section at the bottom of the screen.",

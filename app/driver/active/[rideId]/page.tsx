@@ -129,6 +129,10 @@ function resolveDestinationLabel(ride: Ride) {
   return ride.emergencySavedAddress?.trim() || "";
 }
 
+function normalizeLocationLine(value?: string | null) {
+  return value?.trim().replace(/\s+/g, " ").toLowerCase() || "";
+}
+
 function buildMapsUrl(ride: Ride, userAgent: string) {
   const isIPhone = /iPhone|iPad|iPod/i.test(userAgent);
   const isAndroid = /Android/i.test(userAgent);
@@ -623,6 +627,11 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
   const riderPhone = ride?.riderPhone ?? null;
   const riderCallHref = riderPhone ? `tel:${riderPhone}` : null;
   const riderTextHref = riderPhone ? `sms:${riderPhone}` : null;
+  const pickupPrimaryLine = ride?.pickupLocationName?.trim() || ride?.pickup?.trim() || "Not resolved yet";
+  const pickupAddressLine = ride?.pickupLocationAddress?.trim() || ride?.pickup?.trim() || "";
+  const showPickupAddressLine =
+    Boolean(pickupAddressLine) &&
+    normalizeLocationLine(pickupPrimaryLine) !== normalizeLocationLine(pickupAddressLine);
 
   if (loading) {
     return (
@@ -794,11 +803,13 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
             Pickup Spot
           </p>
           <p style={{ margin: "8px 0 0", fontSize: "1.45rem", lineHeight: 1.1, fontFamily: "var(--font-display)", color: "#f8fbff" }}>
-            {ride.pickupLocationName || ride.pickup || "Not resolved yet"}
+            {pickupPrimaryLine}
           </p>
-          <p style={{ margin: "8px 0 0", color: "#cbd5e1" }}>
-            {ride.pickupLocationAddress || ride.pickup || "No address available yet"}
-          </p>
+          {showPickupAddressLine ? (
+            <p style={{ margin: "8px 0 0", color: "#cbd5e1" }}>
+              {pickupAddressLine}
+            </p>
+          ) : null}
           <p style={{ margin: "12px 0 0", color: "#cbd5e1", fontSize: "0.95rem", lineHeight: 1.5 }}>
             Resolved pickup location may be slightly inaccurate. It&apos;s recommended you call your rider when getting near to verify the pickup location.
           </p>
