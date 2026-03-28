@@ -731,6 +731,35 @@ button:disabled {
   font-size: 0.78rem;
 }
 
+.vault-digital-screen {
+  margin: 1.1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(74, 222, 128, 0.18);
+  background:
+    linear-gradient(180deg, rgba(6, 14, 22, 0.98) 0%, rgba(3, 8, 14, 1) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(34, 197, 94, 0.14),
+    inset 0 0 24px rgba(34, 197, 94, 0.08);
+  display: grid;
+  gap: 0.28rem;
+}
+
+.vault-digital-screen-line {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9ae6b4;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.22);
+  line-height: 1.2;
+}
+
+.vault-digital-screen-line-secondary {
+  color: #c7f9cc;
+  font-size: 0.74rem;
+}
+
 .vault-display {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -792,6 +821,45 @@ button:disabled {
   border-radius: 1rem;
   border: 1px solid rgba(34, 197, 94, 0.24);
   background: linear-gradient(180deg, rgba(13, 148, 136, 0.92) 0%, rgba(8, 78, 59, 0.98) 100%);
+}
+
+.vault-screen-detonating .vault-panel {
+  animation: vault-self-destruct 700ms ease-in forwards;
+}
+
+.vault-screen-detonating .vault-digital-screen {
+  border-color: rgba(248, 113, 113, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 113, 113, 0.18),
+    inset 0 0 28px rgba(248, 113, 113, 0.16);
+}
+
+.vault-screen-detonating .vault-digital-screen-line,
+.vault-screen-detonating .vault-status {
+  color: #fecaca;
+  text-shadow: 0 0 14px rgba(248, 113, 113, 0.28);
+}
+
+@keyframes vault-self-destruct {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+  35% {
+    transform: scale(1.02) rotate(-0.6deg);
+    filter: brightness(1.25);
+  }
+  65% {
+    transform: scale(1.08) rotate(0.8deg);
+    filter: brightness(1.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.22);
+    filter: brightness(2.8) blur(10px);
+    opacity: 0;
+  }
 }
 
 .profile-menu-panel {
