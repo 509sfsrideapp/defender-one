@@ -719,7 +719,42 @@ export default function HomePage() {
               <span style={{ paddingLeft: 18 }}>{authTokenUserLabel}</span>
             </p>
           ) : null}
-          <h1 style={{ margin: "0.4rem 0 0" }}>Defender One</h1>
+          <div style={{ marginTop: "0.4rem", display: "grid", gap: 4 }}>
+            <h1
+              style={{
+                margin: 0,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "baseline",
+                gap: 8,
+              }}
+            >
+              <span>Defender One</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "#93c5fd",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                {"//APP_STATUS:READY"}
+              </span>
+            </h1>
+            <p
+              style={{
+                margin: 0,
+                color: "#94a3b8",
+                fontSize: 10,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              MOBILE_OPERATIONS_PLATFORM//FORM:APP
+            </p>
+          </div>
         </div>
         {user ? (
           <div ref={profileMenuRef} style={{ position: "relative", display: "grid", justifyItems: "end" }}>

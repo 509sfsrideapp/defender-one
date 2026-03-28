@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v186",
+    title: "Homepage App Status Header",
+    summary: "Added an inline //APP_STATUS:READY tag beside the Defender One title and a smaller MOBILE_OPERATIONS_PLATFORM//FORM:APP line beneath it to make the homepage header read more like a live mission platform banner.",
+  },
+  {
     commit: "v185",
     title: "Emergency Ride Protocol Tag",
     summary: "Added a smaller protocol/auth status line under the main emergency ride request button text so the homepage call-to-action reads more like an immediate-response command control button.",
