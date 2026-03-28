@@ -251,7 +251,7 @@ export default function AdminPage() {
   const availableDrivers = users.filter((appUser) => appUser.available);
 
   return (
-    <main style={{ padding: 20 }}>
+    <main className="ops-page" style={{ padding: 20 }}>
       <div style={{ marginBottom: 20 }}>
         <HomeIconLink style={{ marginRight: 12, marginBottom: 0 }} />
 
@@ -270,76 +270,72 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <h1>Admin Dashboard</h1>
-      <p style={{ maxWidth: 780, color: "#cbd5e1" }}>
-        Monitor live ride activity, driver availability, account operations, and system messaging from one administrative command view.
-      </p>
-      <p>
-        <strong>Signed in as:</strong> {user.email}
-      </p>
+      <section className="ops-header-block" style={{ padding: "1.15rem 1.2rem 1.3rem", marginBottom: 24 }}>
+        <div className="ops-section-stack">
+          <p className="ops-kicker">Administrative Oversight Console</p>
+          <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
+          <p className="ops-subcopy">
+            Monitor live ride activity, driver availability, account operations, and internal system communications from one command-level control surface.
+          </p>
+          <div className="ops-divider" />
+          <p className="ops-shell-note">
+            <strong>Signed in as:</strong> {user.email}
+          </p>
+        </div>
+      </section>
 
-      <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(27, 35, 45, 0.96) 0%, rgba(13, 18, 24, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(126, 142, 160, 0.18)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Total Users:</strong> {users.length}
+      <div className="ops-stat-grid" style={{ marginTop: 24 }}>
+        <div className="ops-stat-card" style={{ padding: 14, color: "#dbeafe" }}>
+          <p className="ops-stat-label">Total Users</p>
+          <p className="ops-stat-value">{users.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(18, 47, 49, 0.94) 0%, rgba(8, 23, 24, 0.99) 100%)", color: "#ccfbf1", border: "1px solid rgba(87, 125, 122, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Available Drivers:</strong> {availableDrivers.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#ccfbf1" }}>
+          <p className="ops-stat-label">Available Drivers</p>
+          <p className="ops-stat-value">{availableDrivers.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(62, 45, 20, 0.94) 0%, rgba(28, 21, 11, 0.99) 100%)", color: "#fef3c7", border: "1px solid rgba(153, 127, 82, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Open Rides:</strong> {openRides.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#fef3c7" }}>
+          <p className="ops-stat-label">Open Rides</p>
+          <p className="ops-stat-value">{openRides.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(36, 44, 58, 0.94) 0%, rgba(15, 20, 28, 0.99) 100%)", color: "#e2e8f0", border: "1px solid rgba(126, 142, 160, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Accepted Rides:</strong> {acceptedRides.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#e2e8f0" }}>
+          <p className="ops-stat-label">Accepted Rides</p>
+          <p className="ops-stat-value">{acceptedRides.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(69, 40, 22, 0.94) 0%, rgba(29, 19, 11, 0.99) 100%)", color: "#ffedd5", border: "1px solid rgba(152, 103, 68, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Arrived:</strong> {arrivedRides.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#ffedd5" }}>
+          <p className="ops-stat-label">Arrived</p>
+          <p className="ops-stat-value">{arrivedRides.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(28, 43, 59, 0.94) 0%, rgba(12, 18, 26, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(110, 133, 156, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Picked Up:</strong> {pickedUpRides.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#dbeafe" }}>
+          <p className="ops-stat-label">Picked Up</p>
+          <p className="ops-stat-value">{pickedUpRides.length}</p>
         </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(32, 37, 45, 0.94) 0%, rgba(15, 18, 24, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Completed Rides:</strong> {completedRides.length}
+        <div className="ops-stat-card" style={{ padding: 14, color: "#e5e7eb" }}>
+          <p className="ops-stat-label">Completed Rides</p>
+          <p className="ops-stat-value">{completedRides.length}</p>
         </div>
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      <div className="ops-command-row" style={{ marginTop: 20 }}>
         <Link
           href="/admin/history"
+          className="ops-command-link ops-command-link-highlight"
           style={{
-            display: "inline-block",
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
           }}
         >
           Open Ride History
         </Link>
         <Link
           href="/admin/accounts"
+          className="ops-command-link ops-command-link-teal"
           style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(28, 84, 81, 0.96) 0%, rgba(10, 49, 46, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
           }}
         >
           Open Accounts
         </Link>
         <Link
           href="/admin/audit"
+          className="ops-command-link ops-command-link-secondary"
           style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(52, 63, 79, 0.96) 0%, rgba(23, 31, 42, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
           }}
         >
           Open Audit Log
@@ -364,6 +360,9 @@ export default function AdminPage() {
       />
 
       <section style={{ marginTop: 32 }}>
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 8 }}>
+          Driver Readiness
+        </p>
         <h2>Available Drivers</h2>
         {availableDrivers.length === 0 ? (
           <p>No drivers are currently clocked in.</p>
@@ -403,6 +402,9 @@ export default function AdminPage() {
       </section>
 
       <section style={{ marginTop: 32 }}>
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 8 }}>
+          Active Operations
+        </p>
         <h2>Live Ride Board</h2>
         <p style={{ maxWidth: 720 }}>
           This board stays focused on open and active rides. Completed and canceled rides are kept on the separate ride history screen.

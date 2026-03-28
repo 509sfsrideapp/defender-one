@@ -344,25 +344,30 @@ export default function AccountPage() {
   }
 
   return (
-    <main style={{ padding: 20 }}>
+    <main className="ops-page" style={{ padding: 20 }}>
       <HomeIconLink />
 
-      <h1>Account Settings</h1>
-      <p style={{ maxWidth: 640 }}>
-        Update your basic info, one profile photo, and your vehicle details here.
-      </p>
+      <section className="ops-header-block" style={{ padding: "1.15rem 1.2rem 1.3rem", marginBottom: 24 }}>
+        <div className="ops-section-stack">
+          <p className="ops-kicker">Account Control and Readiness</p>
+          <h1 style={{ margin: 0 }}>Account Settings</h1>
+          <p className="ops-subcopy">
+            Maintain your identity details, ride-readiness information, permissions, and security settings from one controlled profile page.
+          </p>
+        </div>
+      </section>
 
       <div
+        className="ops-panel"
         style={{
           marginTop: 20,
           maxWidth: 700,
           padding: 20,
-          borderRadius: 16,
-          border: "1px solid rgba(126, 142, 160, 0.18)",
-          background: "linear-gradient(180deg, rgba(18, 23, 29, 0.95) 0%, rgba(9, 12, 17, 0.99) 100%)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 34px rgba(0,0,0,0.26)",
         }}
       >
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 10 }}>
+          Member Profile Record
+        </p>
         <h2 style={{ marginTop: 0 }}>Basic Info</h2>
         <input value={form.firstName} onChange={(e) => handleChange("firstName", e.target.value)} placeholder="First Name" style={{ marginBottom: 10 }} />
         <input value={form.lastName} onChange={(e) => handleChange("lastName", e.target.value)} placeholder="Last Name" style={{ marginBottom: 10 }} />
@@ -495,13 +500,8 @@ export default function AccountPage() {
         </p>
         <Link
           href="/account/permissions"
+          className="ops-command-link ops-command-link-secondary"
           style={{
-            display: "inline-block",
-            padding: "10px 16px",
-            backgroundColor: "#111827",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 8,
             marginBottom: 18,
           }}
         >
@@ -514,13 +514,8 @@ export default function AccountPage() {
         </p>
         <Link
           href="/account/change-password"
+          className="ops-command-link"
           style={{
-            display: "inline-block",
-            padding: "10px 16px",
-            backgroundColor: "#111827",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 8,
             marginBottom: 18,
           }}
         >

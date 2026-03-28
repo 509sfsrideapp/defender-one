@@ -95,13 +95,13 @@ function renderRiderName(ride: Ride) {
 }
 
 const dashboardCardStyle: React.CSSProperties = {
-  border: "1px solid rgba(126, 142, 160, 0.18)",
+  border: "1px solid rgba(126, 142, 160, 0.2)",
   padding: 14,
   marginBottom: 12,
-  borderRadius: 14,
-  background: "linear-gradient(180deg, rgba(18, 23, 29, 0.95) 0%, rgba(9, 12, 17, 0.99) 100%)",
+  borderRadius: 18,
+  background: "linear-gradient(180deg, rgba(18, 23, 29, 0.97) 0%, rgba(8, 11, 16, 0.995) 100%)",
   color: "#e5edf7",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 34px rgba(0, 0, 0, 0.26)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -16px 24px rgba(0,0,0,0.14), 0 22px 40px rgba(0, 0, 0, 0.3)",
 };
 
 export default function DriverPage() {
@@ -435,24 +435,25 @@ export default function DriverPage() {
       };
 
   return (
-    <main style={{ padding: 20 }}>
+    <main className="ops-page" style={{ padding: 20 }}>
       <HomeIconLink style={{ marginRight: 12 }} />
-      <h1 style={{ marginTop: 20, marginBottom: 8 }}>Driver Dashboard</h1>
-
-      <p style={{ maxWidth: 720, color: "#cbd5e1", marginTop: 0 }}>
-        Review your availability, active assignments, and open requests from one operational view.
-      </p>
+      <section className="ops-header-block" style={{ padding: "1.15rem 1.2rem 1.3rem", marginTop: 20, marginBottom: 24 }}>
+        <div className="ops-section-stack">
+          <p className="ops-kicker">Driver Operations Console</p>
+          <h1 style={{ margin: 0 }}>Driver Dashboard</h1>
+          <p className="ops-subcopy">
+            Review availability, manage live assignments, and respond to new dispatch requests from one driver-facing control screen.
+          </p>
+        </div>
+      </section>
 
       <section
-        style={{
-          ...dashboardCardStyle,
-          maxWidth: 920,
-          padding: 18,
-          borderRadius: 16,
-          display: "grid",
-          gap: 16,
-        }}
+        className="ops-panel"
+        style={{ ...dashboardCardStyle, maxWidth: 920, padding: 18, display: "grid", gap: 16 }}
       >
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: -2 }}>
+          Availability and Assignment Status
+        </p>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "start" }}>
           <div style={{ display: "grid", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -515,11 +516,7 @@ export default function DriverPage() {
         </div>
 
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-            gap: 12,
-          }}
+          className="ops-stat-grid"
         >
           {[
             { label: "Open Requests", value: visibleOpenRides.length, note: isClockedIn ? "Visible in your queue" : "Clock in to receive" },
@@ -528,16 +525,12 @@ export default function DriverPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              style={{
-                borderRadius: 14,
-                padding: 14,
-                backgroundColor: "rgba(15, 23, 42, 0.72)",
-                border: "1px solid rgba(148, 163, 184, 0.16)",
-              }}
+              className="ops-stat-card"
+              style={{ padding: 14 }}
             >
-              <p style={{ margin: 0, color: "#94a3b8", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.08em" }}>{stat.label}</p>
-              <p style={{ margin: "8px 0 4px", fontSize: "1.8rem", fontWeight: 700, lineHeight: 1 }}>{stat.value}</p>
-              <p style={{ margin: 0, color: "#94a3b8", fontSize: 13 }}>{stat.note}</p>
+              <p className="ops-stat-label">{stat.label}</p>
+              <p className="ops-stat-value">{stat.value}</p>
+              <p className="ops-stat-note">{stat.note}</p>
             </div>
           ))}
         </div>
@@ -574,6 +567,9 @@ export default function DriverPage() {
       ) : null}
 
       <div style={{ marginTop: 30 }}>
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 8 }}>
+          Accepted Missions
+        </p>
         <h3 style={{ marginBottom: 10 }}>Active Ride Assignments</h3>
 
         {acceptedRides.length === 0 ? (
@@ -657,6 +653,9 @@ export default function DriverPage() {
       </div>
 
       <div style={{ marginTop: 30 }}>
+        <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 8 }}>
+          Dispatch Queue
+        </p>
         <h3 style={{ marginBottom: 10 }}>Open Ride Requests</h3>
 
         {!isClockedIn ? (

@@ -122,17 +122,17 @@ export default function PushNotificationsCard() {
 
   return (
     <div
+      className="ops-panel"
       style={{
         marginTop: 20,
         padding: 16,
-        borderRadius: 14,
-        border: "1px solid rgba(126, 142, 160, 0.22)",
-        background: "linear-gradient(180deg, rgba(16, 20, 27, 0.94) 0%, rgba(8, 11, 16, 0.98) 100%)",
         color: "#e5edf7",
         maxWidth: 560,
-        boxShadow: "0 18px 36px rgba(0, 0, 0, 0.28)",
       }}
     >
+      <p className="ops-kicker ops-kicker-cool" style={{ marginBottom: 8 }}>
+        Device Link
+      </p>
       <h2 style={{ marginTop: 0, marginBottom: 10 }}>Notifications</h2>
       <p style={{ marginBottom: 14 }}>{statusMessage}</p>
       <div style={{ marginBottom: 14, fontSize: 14, color: "#cbd5e1" }}>

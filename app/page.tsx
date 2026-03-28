@@ -71,11 +71,11 @@ type OpenRideBadgeRecord = {
 
 const appTilePlaceholderCount = 6;
 const homepageCardStyle: React.CSSProperties = {
-  borderRadius: 18,
-  border: "1px solid rgba(126, 142, 160, 0.18)",
+  borderRadius: 20,
+  border: "1px solid rgba(126, 142, 160, 0.2)",
   background:
-    "linear-gradient(180deg, rgba(18, 23, 29, 0.96) 0%, rgba(9, 12, 17, 0.985) 100%)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
+    "linear-gradient(180deg, rgba(18, 23, 29, 0.97) 0%, rgba(8, 11, 16, 0.995) 100%)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -18px 26px rgba(0,0,0,0.16), 0 24px 46px rgba(0, 0, 0, 0.34)",
 };
 
 function NotificationBadge({ count, style }: { count: number; style?: React.CSSProperties }) {
@@ -123,7 +123,7 @@ function AppTile({
   const sharedStyle: React.CSSProperties = {
     minHeight: 120,
     padding: "16px 12px",
-    borderRadius: 16,
+    borderRadius: 18,
     display: "grid",
     justifyItems: "center",
     alignContent: "center",
@@ -134,20 +134,32 @@ function AppTile({
   const iconShell = (
     <div
       style={{
-        width: 56,
-        height: 56,
-        borderRadius: 16,
+        width: 62,
+        height: 62,
+        borderRadius: 18,
         display: "grid",
         placeItems: "center",
         background: disabled
-          ? "linear-gradient(180deg, rgba(56, 65, 77, 0.62) 0%, rgba(31, 41, 55, 0.72) 100%)"
-          : "linear-gradient(180deg, rgba(47, 60, 79, 0.72) 0%, rgba(24, 33, 45, 0.9) 100%)",
+          ? "linear-gradient(180deg, rgba(54, 63, 75, 0.72) 0%, rgba(24, 31, 40, 0.82) 100%)"
+          : "linear-gradient(180deg, rgba(47, 60, 79, 0.92) 0%, rgba(19, 28, 39, 1) 100%)",
         color: disabled ? "#c7d0db" : "#dceaf8",
         position: "relative",
         border: "1px solid rgba(129, 145, 164, 0.24)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 24px rgba(0,0,0,0.18)",
       }}
     >
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "0 auto auto 0",
+          width: "100%",
+          height: 2,
+          background: disabled
+            ? "linear-gradient(90deg, rgba(148, 163, 184, 0.42), transparent 78%)"
+            : "linear-gradient(90deg, rgba(240, 206, 114, 0.82), rgba(95, 136, 187, 0.42), transparent 78%)",
+        }}
+      />
       {icon}
       <NotificationBadge count={badgeCount} style={{ position: "absolute", top: -6, right: -6 }} />
     </div>
@@ -159,7 +171,7 @@ function AppTile({
         fontSize: 12,
         lineHeight: 1.3,
         fontFamily: "var(--font-display)",
-        letterSpacing: "0.08em",
+        letterSpacing: "0.11em",
         textTransform: "uppercase",
       }}
     >
@@ -173,8 +185,8 @@ function AppTile({
         style={{
           ...sharedStyle,
           color: "#93a0b0",
-          background: "linear-gradient(180deg, rgba(37, 44, 53, 0.92) 0%, rgba(21, 26, 33, 0.96) 100%)",
-          border: "1px solid rgba(126, 142, 160, 0.18)",
+          background: "linear-gradient(180deg, rgba(32, 37, 46, 0.94) 0%, rgba(16, 21, 27, 0.98) 100%)",
+          border: "1px solid rgba(126, 142, 160, 0.2)",
           opacity: 0.82,
         }}
       >
@@ -191,9 +203,9 @@ function AppTile({
         ...sharedStyle,
         textDecoration: "none",
         color: "#e5edf7",
-        background: "linear-gradient(180deg, rgba(20, 26, 33, 0.96) 0%, rgba(10, 13, 18, 0.99) 100%)",
-        border: "1px solid rgba(126, 142, 160, 0.22)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 30px rgba(0, 0, 0, 0.24)",
+        background: "linear-gradient(180deg, rgba(20, 26, 33, 0.98) 0%, rgba(8, 11, 16, 1) 100%)",
+        border: "1px solid rgba(126, 142, 160, 0.24)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -12px 20px rgba(0,0,0,0.12), 0 18px 34px rgba(0, 0, 0, 0.28)",
       }}
     >
       {iconShell}
@@ -208,10 +220,10 @@ function PlaceholderTile() {
       aria-hidden="true"
       style={{
         minHeight: 120,
-        borderRadius: 16,
+        borderRadius: 18,
         padding: "16px 12px",
-        background: "linear-gradient(180deg, rgba(26, 31, 39, 0.48) 0%, rgba(13, 17, 22, 0.72) 100%)",
-        border: "1px dashed rgba(126, 142, 160, 0.14)",
+        background: "linear-gradient(180deg, rgba(23, 29, 37, 0.58) 0%, rgba(10, 13, 18, 0.8) 100%)",
+        border: "1px dashed rgba(126, 142, 160, 0.16)",
         boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
       }}
     />
@@ -634,22 +646,30 @@ export default function HomePage() {
   };
 
   return (
-    <main style={{ padding: 20, maxWidth: 1180, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-        <div>
-          <p
-            style={{
-              margin: 0,
-              color: "#7dd3fc",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              fontSize: 12,
-            }}
-          >
-            509 SFS - Whiteman AFB, MO
-          </p>
-          <h1 style={{ margin: "0.4rem 0 0" }}>Defender One</h1>
-        </div>
+    <main className="ops-page" style={{ padding: 20, maxWidth: 1180, margin: "0 auto" }}>
+      <section className="ops-header-block" style={{ padding: "1.2rem 1.2rem 1.35rem" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ display: "grid", gap: 10 }}>
+            <p className="ops-kicker">Secure Mobility Operations Node</p>
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#a4b9d3",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  fontSize: 12,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                509 SFS - Whiteman AFB, MO
+              </p>
+              <h1 style={{ margin: "0.45rem 0 0" }}>Defender One</h1>
+            </div>
+            <p className="ops-subcopy">
+              Squadron ride coordination, driver response, and account-controlled support tools in one secure operational platform.
+            </p>
+          </div>
         {user ? (
           <div ref={profileMenuRef} style={{ position: "relative", display: "grid", justifyItems: "end" }}>
             <button
@@ -774,7 +794,8 @@ export default function HomePage() {
             </div>
           </div>
         ) : null}
-      </div>
+        </div>
+      </section>
       {checkingAuth ? (
         <AppLoadingState
           compact
@@ -789,6 +810,7 @@ export default function HomePage() {
       {!checkingAuth && !user ? (
         <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
           <section
+            className="ops-panel"
             style={{
               ...homepageCardStyle,
               padding: "clamp(1.2rem, 3vw, 2rem)",
@@ -796,60 +818,37 @@ export default function HomePage() {
               gap: 18,
             }}
           >
+            <p className="ops-kicker ops-kicker-cool">Entry and Authentication</p>
             <div style={{ maxWidth: 760 }}>
               <p style={{ margin: 0, color: "#cbd5e1", fontSize: "1.05rem" }}>
                 Emergency ride coordination for squadron personnel. Request support quickly, follow ride progress in real time, and keep accountability centralized through one shared operations platform.
               </p>
             </div>
 
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="ops-command-row">
               <Link
                 href="/signup"
+                className="ops-command-link ops-command-link-highlight"
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                   minWidth: 180,
-                  padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 12,
-                  boxShadow: "0 14px 34px rgba(17, 24, 39, 0.26)",
                 }}
               >
                 Create Account
               </Link>
               <Link
                 href="/login"
+                className="ops-command-link ops-command-link-secondary"
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                   minWidth: 140,
-                  padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(29, 36, 45, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%)",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 12,
-                  border: "1px solid rgba(126, 142, 160, 0.24)",
                 }}
               >
                 Login
               </Link>
               <Link
                 href="/admin/login"
+                className="ops-command-link"
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                   minWidth: 160,
-                  padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(55, 72, 94, 0.98) 0%, rgba(23, 31, 42, 0.99) 100%)",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 12,
-                  border: "1px solid rgba(126, 142, 160, 0.24)",
                 }}
               >
                 Admin Login
@@ -858,6 +857,7 @@ export default function HomePage() {
           </section>
 
           <section
+            className="ops-panel ops-panel-muted"
             style={{
               ...homepageCardStyle,
               padding: "1.1rem 1.2rem",
@@ -865,7 +865,9 @@ export default function HomePage() {
               gap: 10,
             }}
           >
+            <p className="ops-kicker">Capability Summary</p>
             <h2 style={{ margin: 0 }}>Core Capabilities</h2>
+            <div className="ops-divider" />
             <div style={{ display: "grid", gap: 8 }}>
               <p style={{ margin: 0, color: "#cbd5e1" }}>Rapid emergency ride requests with live driver response.</p>
               <p style={{ margin: 0, color: "#cbd5e1" }}>Driver availability, dispatch visibility, and active ride workflow.</p>
@@ -917,16 +919,17 @@ export default function HomePage() {
                       display: "block",
                       width: "100%",
                       maxWidth: 680,
-                      padding: "22px 24px",
-                    background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
-                    color: "white",
-                    borderRadius: 14,
-                    textAlign: "center",
-                    fontSize: 21,
-                    fontFamily: "var(--font-display)",
+                      padding: "24px 24px",
+                      background: "linear-gradient(180deg, #cf2d25 0%, #7f1212 100%)",
+                      color: "white",
+                      borderRadius: 18,
+                      textAlign: "center",
+                      fontSize: 22,
+                      fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      boxShadow: "0 20px 44px rgba(127, 18, 18, 0.34)",
+                      border: "1px solid rgba(255, 214, 214, 0.18)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 22px 46px rgba(127, 18, 18, 0.38)",
                     }}
                   >
                     {submittingEmergencyRide ? "Requesting..." : "Request Emergency Ride"}
@@ -945,15 +948,16 @@ export default function HomePage() {
                       width: "100%",
                       maxWidth: 680,
                       padding: "20px 24px",
-                      background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
+                      background: "linear-gradient(180deg, rgba(53, 61, 73, 0.94) 0%, rgba(25, 31, 39, 0.99) 100%)",
                       color: "#cbd5e1",
-                      borderRadius: 14,
+                      borderRadius: 18,
                       textAlign: "center",
                       fontSize: 20,
                       fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
-                      boxShadow: "0 16px 38px rgba(15, 23, 42, 0.18)",
+                      border: "1px solid rgba(126, 142, 160, 0.2)",
+                      boxShadow: "0 18px 40px rgba(15, 23, 42, 0.22)",
                       opacity: 0.82,
                     }}
                   >
@@ -967,6 +971,7 @@ export default function HomePage() {
               )}
 
               <section
+                className="ops-panel"
                 style={{
                   ...homepageCardStyle,
                   maxWidth: 840,
@@ -974,8 +979,12 @@ export default function HomePage() {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
-                  <h2 style={{ margin: 0 }}>Applications</h2>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    <p className="ops-kicker">Module Access Grid</p>
+                    <h2 style={{ margin: 0 }}>Applications</h2>
+                  </div>
                 </div>
+                <div className="ops-divider" style={{ marginTop: 12 }} />
                 <div
                   style={{
                     display: "grid",
@@ -1028,13 +1037,9 @@ export default function HomePage() {
             <div style={{ marginTop: 20 }}>
               <Link
                 href="/admin"
+                className="ops-command-link"
                 style={{
-                  display: "inline-block",
-                  padding: "10px 16px",
-                  backgroundColor: "#7c3aed",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 8,
+                  marginTop: 8,
                 }}
               >
                 Admin Dashboard
