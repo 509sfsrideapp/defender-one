@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v240",
+    title: "Signup Phone Confirmation",
+    summary: "Added a verify-phone field during account creation so users must enter their phone number twice before moving forward.",
+  },
+  {
     commit: "v239",
     title: "Permissions Copy Cleanup",
     summary: "Removed the extra helper sentence under App Permissions in account settings so that section stays cleaner.",

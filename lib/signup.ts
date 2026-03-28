@@ -12,6 +12,7 @@ export type SignupDraft = {
   rank: string;
   flight: string;
   phone: string;
+  confirmPhone: string;
   username: string;
   email: string;
   password: string;
@@ -91,6 +92,7 @@ function getMissingRequiredFieldMessage(draft: SignupDraft) {
     [draft.username, "Username is required."],
     [draft.email, "Email is required."],
     [draft.phone, "Phone number is required."],
+    [draft.confirmPhone, "Verify phone number is required."],
     [draft.password, "Password is required."],
     [draft.confirmPassword, "Verify password is required."],
   ];
@@ -109,16 +111,23 @@ export async function validateSignupDraft(draft: SignupDraft) {
     return { ok: false as const, message: "Password and verify password must match." };
   }
 
+  const normalizedPhone = getPhoneE164(draft.phone);
+  const normalizedConfirmPhone = getPhoneE164(draft.confirmPhone);
+
+  if (!normalizedPhone || !normalizedConfirmPhone) {
+    return { ok: false as const, message: "Enter a valid 10-digit phone number." };
+  }
+
+  if (normalizedPhone !== normalizedConfirmPhone) {
+    return { ok: false as const, message: "Phone number and verify phone number must match." };
+  }
+
   if (!passwordRule.test(draft.password)) {
     return {
       ok: false as const,
       message:
         "Password must be at least 8 characters and include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.",
     };
-  }
-
-  if (!getPhoneE164(draft.phone)) {
-    return { ok: false as const, message: "Enter a valid 10-digit phone number." };
   }
 
   if (!draft.profilePhotoUrl.trim()) {

@@ -36,6 +36,7 @@ export default function SignupPage() {
   const [rank, setRank] = useState(() => initialDraft?.rank || "");
   const [flight, setFlight] = useState(() => initialDraft?.flight || "");
   const [phone, setPhone] = useState(() => initialDraft?.phone || "");
+  const [confirmPhone, setConfirmPhone] = useState(() => initialDraft?.confirmPhone || "");
   const [username, setUsername] = useState(() => initialDraft?.username || "");
   const [email, setEmail] = useState(() => initialDraft?.email || "");
   const [password, setPassword] = useState(() => initialDraft?.password || "");
@@ -63,6 +64,7 @@ export default function SignupPage() {
       rank,
       flight,
       phone,
+      confirmPhone,
       username,
       email,
       password,
@@ -92,6 +94,7 @@ export default function SignupPage() {
     carModel,
     carYear,
     confirmPassword,
+    confirmPhone,
     email,
     firstName,
     flight,
@@ -115,6 +118,7 @@ export default function SignupPage() {
         rank,
         flight,
         phone,
+        confirmPhone,
         username,
         email,
         password,
@@ -211,6 +215,13 @@ export default function SignupPage() {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone Number"
+          style={{ display: "block", marginBottom: 10, width: "100%" }}
+        />
+
+        <input
+          value={confirmPhone}
+          onChange={(e) => setConfirmPhone(e.target.value)}
+          placeholder="Verify Phone Number"
           style={{ display: "block", marginBottom: 10, width: "100%" }}
         />
 
