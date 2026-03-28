@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v171",
+    title: "Operations Console Visual Refresh",
+    summary: "Shifted the app toward a more military operations-console look with sharper typography, colder steel-and-slate surfaces, cleaner panel styling, and more consistent tactical button, tile, and dashboard treatment across the main user flows.",
+  },
+  {
     commit: "v169",
     title: "Ride Cancel Redirect Fix",
     summary: "Updated rider-side cancel behavior so a successful ride cancellation immediately returns the user to the home page instead of sometimes leaving them on the canceled ride screen while listeners catch up.",

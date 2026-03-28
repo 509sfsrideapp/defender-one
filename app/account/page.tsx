@@ -77,8 +77,8 @@ export default function AccountPage() {
     marginBottom: 10,
     padding: "12px 14px",
     borderRadius: 12,
-    border: "1px solid rgba(148, 163, 184, 0.18)",
-    backgroundColor: "rgba(15, 23, 42, 0.62)",
+    border: "1px solid rgba(126, 142, 160, 0.18)",
+    background: "linear-gradient(180deg, rgba(21, 28, 36, 0.9) 0%, rgba(11, 15, 21, 0.96) 100%)",
     color: "#e5edf7",
   };
 
@@ -358,9 +358,9 @@ export default function AccountPage() {
           maxWidth: 700,
           padding: 20,
           borderRadius: 16,
-          border: "1px solid rgba(148, 163, 184, 0.18)",
-          backgroundColor: "rgba(9, 15, 25, 0.88)",
-          boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
+          border: "1px solid rgba(126, 142, 160, 0.18)",
+          background: "linear-gradient(180deg, rgba(18, 23, 29, 0.95) 0%, rgba(9, 12, 17, 0.99) 100%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 34px rgba(0,0,0,0.26)",
         }}
       >
         <h2 style={{ marginTop: 0 }}>Basic Info</h2>

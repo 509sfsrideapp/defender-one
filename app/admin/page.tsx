@@ -279,25 +279,25 @@ export default function AdminPage() {
       </p>
 
       <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(18, 37, 63, 0.86)", color: "#dbeafe", border: "1px solid rgba(96, 165, 250, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(27, 35, 45, 0.96) 0%, rgba(13, 18, 24, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(126, 142, 160, 0.18)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Total Users:</strong> {users.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(10, 51, 44, 0.88)", color: "#ccfbf1", border: "1px solid rgba(45, 212, 191, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(18, 47, 49, 0.94) 0%, rgba(8, 23, 24, 0.99) 100%)", color: "#ccfbf1", border: "1px solid rgba(87, 125, 122, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Available Drivers:</strong> {availableDrivers.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(77, 53, 15, 0.88)", color: "#fef3c7", border: "1px solid rgba(250, 204, 21, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(62, 45, 20, 0.94) 0%, rgba(28, 21, 11, 0.99) 100%)", color: "#fef3c7", border: "1px solid rgba(153, 127, 82, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Open Rides:</strong> {openRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(49, 27, 76, 0.88)", color: "#ede9fe", border: "1px solid rgba(167, 139, 250, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(36, 44, 58, 0.94) 0%, rgba(15, 20, 28, 0.99) 100%)", color: "#e2e8f0", border: "1px solid rgba(126, 142, 160, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Accepted Rides:</strong> {acceptedRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(86, 42, 19, 0.88)", color: "#ffedd5", border: "1px solid rgba(251, 146, 60, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(69, 40, 22, 0.94) 0%, rgba(29, 19, 11, 0.99) 100%)", color: "#ffedd5", border: "1px solid rgba(152, 103, 68, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Arrived:</strong> {arrivedRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(16, 44, 84, 0.88)", color: "#dbeafe", border: "1px solid rgba(96, 165, 250, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(28, 43, 59, 0.94) 0%, rgba(12, 18, 26, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(110, 133, 156, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Picked Up:</strong> {pickedUpRides.length}
         </div>
-        <div style={{ padding: 14, borderRadius: 10, backgroundColor: "rgba(31, 41, 55, 0.88)", color: "#e5e7eb", border: "1px solid rgba(148, 163, 184, 0.2)" }}>
+        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(32, 37, 45, 0.94) 0%, rgba(15, 18, 24, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
           <strong>Completed Rides:</strong> {completedRides.length}
         </div>
       </div>
@@ -308,10 +308,10 @@ export default function AdminPage() {
           style={{
             display: "inline-block",
             padding: "10px 16px",
-            backgroundColor: "#1d4ed8",
+            background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
             color: "white",
             textDecoration: "none",
-            borderRadius: 8,
+            borderRadius: 10,
           }}
         >
           Open Ride History
@@ -322,10 +322,10 @@ export default function AdminPage() {
             display: "inline-block",
             marginLeft: 12,
             padding: "10px 16px",
-            backgroundColor: "#0f766e",
+            background: "linear-gradient(180deg, rgba(28, 84, 81, 0.96) 0%, rgba(10, 49, 46, 0.98) 100%)",
             color: "white",
             textDecoration: "none",
-            borderRadius: 8,
+            borderRadius: 10,
           }}
         >
           Open Accounts
@@ -336,10 +336,10 @@ export default function AdminPage() {
             display: "inline-block",
             marginLeft: 12,
             padding: "10px 16px",
-            backgroundColor: "#7c3aed",
+            background: "linear-gradient(180deg, rgba(52, 63, 79, 0.96) 0%, rgba(23, 31, 42, 0.98) 100%)",
             color: "white",
             textDecoration: "none",
-            borderRadius: 8,
+            borderRadius: 10,
           }}
         >
           Open Audit Log

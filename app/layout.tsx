@@ -7,22 +7,30 @@ import InitialAppSplash from "./components/InitialAppSplash";
 import PullToRefresh from "./components/PullToRefresh";
 import SelfDestructOverlay from "./components/SelfDestructOverlay";
 import type { Metadata, Viewport } from "next";
-import { Manrope, Rajdhani } from "next/font/google";
+import { Barlow_Condensed, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import NotificationNavigationBridge from "./components/NotificationNavigationBridge";
 import ProfileCompletionGate from "./components/ProfileCompletionGate";
 import { CURRENT_APP_VERSION } from "../lib/app-version";
 import "./globals.css";
 
-const bodyFont = Manrope({
+const bodyFont = IBM_Plex_Sans({
   subsets: ["latin"],
   variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const displayFont = Rajdhani({
+const displayFont = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-display-face",
+  display: "swap",
+});
+
+const monoFont = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-mono-face",
   display: "swap",
 });
 
@@ -55,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}>
+    <html lang="en" className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <InitialAppSplash />
         <SelfDestructOverlay />

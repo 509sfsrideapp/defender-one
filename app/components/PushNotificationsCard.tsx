@@ -126,13 +126,14 @@ export default function PushNotificationsCard() {
         marginTop: 20,
         padding: 16,
         borderRadius: 14,
-        border: "1px solid rgba(96, 165, 250, 0.18)",
-        backgroundColor: "rgba(9, 15, 25, 0.88)",
+        border: "1px solid rgba(126, 142, 160, 0.22)",
+        background: "linear-gradient(180deg, rgba(16, 20, 27, 0.94) 0%, rgba(8, 11, 16, 0.98) 100%)",
         color: "#e5edf7",
         maxWidth: 560,
+        boxShadow: "0 18px 36px rgba(0, 0, 0, 0.28)",
       }}
     >
-      <h2 style={{ marginTop: 0 }}>Notifications</h2>
+      <h2 style={{ marginTop: 0, marginBottom: 10 }}>Notifications</h2>
       <p style={{ marginBottom: 14 }}>{statusMessage}</p>
       <div style={{ marginBottom: 14, fontSize: 14, color: "#cbd5e1" }}>
         <p style={{ margin: "0 0 6px" }}>
@@ -142,7 +143,7 @@ export default function PushNotificationsCard() {
           <strong>Saved device tokens:</strong> {tokenCount == null ? "Checking..." : tokenCount}
         </p>
       </div>
-      <p style={{ marginTop: 0, marginBottom: 14, color: "#cbd5e1", fontSize: 14 }}>
+      <p style={{ marginTop: 0, marginBottom: 14, color: "#b7c2cf", fontSize: 14 }}>
         On iPhone, open this site in Safari, tap Share, choose Add to Home Screen, then launch it from that Home Screen icon before enabling notifications.
       </p>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>

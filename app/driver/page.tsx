@@ -95,13 +95,13 @@ function renderRiderName(ride: Ride) {
 }
 
 const dashboardCardStyle: React.CSSProperties = {
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+  border: "1px solid rgba(126, 142, 160, 0.18)",
   padding: 14,
   marginBottom: 12,
-  borderRadius: 12,
-  backgroundColor: "rgba(9, 15, 25, 0.88)",
+  borderRadius: 14,
+  background: "linear-gradient(180deg, rgba(18, 23, 29, 0.95) 0%, rgba(9, 12, 17, 0.99) 100%)",
   color: "#e5edf7",
-  boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 34px rgba(0, 0, 0, 0.26)",
 };
 
 export default function DriverPage() {

@@ -13,12 +13,12 @@ const baseStyle: React.CSSProperties = {
   justifyContent: "center",
   width: 42,
   height: 42,
-  backgroundColor: "#1f2937",
-  color: "white",
+  background: "linear-gradient(180deg, rgba(33, 39, 47, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%)",
+  color: "#f8fafc",
   textDecoration: "none",
   borderRadius: 999,
-  border: "1px solid rgba(148, 163, 184, 0.16)",
-  boxShadow: "0 10px 24px rgba(2, 6, 23, 0.18)",
+  border: "1px solid rgba(126, 142, 160, 0.26)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 26px rgba(0, 0, 0, 0.28)",
 };
 
 export default function HomeIconLink({ href = "/", style }: HomeIconLinkProps) {

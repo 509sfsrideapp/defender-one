@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05070d;
-  --foreground: #e5edf7;
-  --surface: rgba(8, 14, 24, 0.78);
-  --surface-strong: rgba(12, 18, 31, 0.92);
-  --surface-soft: rgba(20, 30, 48, 0.72);
-  --border: rgba(129, 161, 193, 0.26);
-  --accent: #2a6df4;
-  --accent-soft: #12305f;
-  --accent-2: #0d9488;
-  --muted: #94a3b8;
+  --background: #05070a;
+  --foreground: #e2e8f0;
+  --surface: rgba(10, 13, 18, 0.84);
+  --surface-strong: rgba(13, 18, 23, 0.94);
+  --surface-soft: rgba(22, 28, 36, 0.74);
+  --border: rgba(130, 145, 161, 0.28);
+  --accent: #4b7cbf;
+  --accent-soft: #223654;
+  --accent-2: #2f6b88;
+  --muted: #97a4b5;
+  --panel-shadow: 0 22px 48px rgba(0, 0, 0, 0.34);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-body), "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
-  --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
+  --font-sans: var(--font-body), "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: var(--font-mono-face), "Consolas", "SFMono-Regular", "Menlo", monospace;
   --font-display: var(--font-display-face), var(--font-body), "Segoe UI", sans-serif;
 }
 
@@ -31,14 +32,15 @@
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(42, 109, 244, 0.14), transparent 30%),
-    radial-gradient(circle at 85% 18%, rgba(13, 148, 136, 0.12), transparent 22%),
-    linear-gradient(180deg, #08101a 0%, #06080f 40%, #030406 100%);
+    radial-gradient(circle at 50% 0%, rgba(70, 105, 150, 0.12), transparent 32%),
+    radial-gradient(circle at 100% 12%, rgba(63, 85, 107, 0.1), transparent 20%),
+    linear-gradient(180deg, #0a0d12 0%, #080b10 38%, #050608 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-weight: 500;
-  letter-spacing: 0.008em;
+  letter-spacing: 0.005em;
   text-rendering: optimizeLegibility;
+  position: relative;
 }
 
 html {
@@ -56,6 +58,42 @@ body {
   overscroll-behavior-y: contain;
 }
 
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.028) 0,
+      rgba(148, 163, 184, 0.028) 1px,
+      transparent 1px,
+      transparent 74px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(148, 163, 184, 0.024) 0,
+      rgba(148, 163, 184, 0.024) 1px,
+      transparent 1px,
+      transparent 58px
+    );
+  opacity: 0.42;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.38));
+}
+
+body::after {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.012)),
+    radial-gradient(circle at 50% 12%, rgba(120, 146, 173, 0.06), transparent 28%);
+  opacity: 0.9;
+}
+
 @supports (min-height: 100lvh) {
   body {
     min-height: 100lvh;
@@ -68,7 +106,7 @@ body {
 
 a {
   font-family: var(--font-display);
-  letter-spacing: 0.045em;
+  letter-spacing: 0.055em;
   transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
 
@@ -80,18 +118,18 @@ h5,
 h6 {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: 0.095em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #f4f8ff;
+  color: #f1f5f9;
 }
 
 h1 {
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  line-height: 1.05;
+  font-size: clamp(1.95rem, 3vw, 2.8rem);
+  line-height: 1;
 }
 
 h2 {
-  font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
 }
 
 h3 {
@@ -104,7 +142,7 @@ span,
 li {
   font-family: var(--font-sans);
   color: var(--foreground);
-  line-height: 1.58;
+  line-height: 1.56;
 }
 
 strong {
@@ -143,12 +181,15 @@ select {
   width: 100%;
   max-width: 28rem;
   padding: 0.75rem 0.875rem;
-  border: 1px solid rgba(148, 163, 184, 0.32);
-  border-radius: 0.75rem;
-  background: rgba(10, 16, 27, 0.92);
+  border: 1px solid rgba(123, 139, 158, 0.34);
+  border-radius: 0.7rem;
+  background:
+    linear-gradient(180deg, rgba(18, 23, 30, 0.98) 0%, rgba(8, 12, 17, 0.98) 100%);
   color: #eef4ff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px rgba(2, 6, 23, 0.2);
-  backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.22),
+    0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
 input::placeholder,
@@ -159,8 +200,8 @@ textarea::placeholder {
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 3px solid rgba(42, 109, 244, 0.18);
-  border-color: rgba(87, 139, 255, 0.92);
+  outline: 3px solid rgba(75, 124, 191, 0.16);
+  border-color: rgba(125, 165, 214, 0.76);
 }
 
 input[type="checkbox"]:focus,
@@ -173,20 +214,24 @@ input[type="radio"]:focus {
 button {
   font-family: var(--font-display);
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(133, 163, 255, 0.24);
-  border-radius: 0.75rem;
-  background: linear-gradient(180deg, rgba(24, 39, 66, 0.95) 0%, rgba(12, 20, 35, 0.98) 100%);
+  border: 1px solid rgba(118, 132, 149, 0.32);
+  border-radius: 0.7rem;
+  background:
+    linear-gradient(180deg, rgba(29, 36, 45, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%);
   color: #fff;
   font-weight: 700;
-  letter-spacing: 0.075em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.18),
+    0 12px 28px rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
 
 button:hover {
   transform: translateY(-1px);
-  border-color: rgba(96, 165, 250, 0.45);
+  border-color: rgba(125, 165, 214, 0.44);
 }
 
 button:disabled {
@@ -296,9 +341,9 @@ button:disabled {
   padding: 1rem;
   max-width: 18rem;
   border-radius: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: linear-gradient(180deg, rgba(10, 16, 27, 0.88) 0%, rgba(5, 8, 14, 0.92) 100%);
-  box-shadow: 0 14px 36px rgba(2, 6, 23, 0.24);
+  border: 1px solid rgba(126, 142, 160, 0.16);
+  background: linear-gradient(180deg, rgba(14, 19, 25, 0.92) 0%, rgba(7, 10, 14, 0.96) 100%);
+  box-shadow: var(--panel-shadow);
 }
 
 .loading-state-compact {

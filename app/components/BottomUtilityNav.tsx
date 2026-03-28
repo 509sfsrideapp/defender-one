@@ -4,9 +4,10 @@ import Link from "next/link";
 const linkStyle: CSSProperties = {
   display: "inline-block",
   textDecoration: "none",
-  color: "#94a3b8",
+  color: "#8ea0b3",
   fontSize: 12,
-  letterSpacing: "0.03em",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
 };
 
 export default function BottomUtilityNav() {

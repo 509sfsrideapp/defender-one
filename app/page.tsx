@@ -71,10 +71,11 @@ type OpenRideBadgeRecord = {
 
 const appTilePlaceholderCount = 6;
 const homepageCardStyle: React.CSSProperties = {
-  borderRadius: 24,
-  border: "1px solid rgba(148, 163, 184, 0.16)",
-  background: "linear-gradient(180deg, rgba(10, 16, 27, 0.92) 0%, rgba(5, 8, 14, 0.96) 100%)",
-  boxShadow: "0 18px 42px rgba(2, 6, 23, 0.22)",
+  borderRadius: 18,
+  border: "1px solid rgba(126, 142, 160, 0.18)",
+  background:
+    "linear-gradient(180deg, rgba(18, 23, 29, 0.96) 0%, rgba(9, 12, 17, 0.985) 100%)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
 };
 
 function NotificationBadge({ count, style }: { count: number; style?: React.CSSProperties }) {
@@ -122,7 +123,7 @@ function AppTile({
   const sharedStyle: React.CSSProperties = {
     minHeight: 120,
     padding: "16px 12px",
-    borderRadius: 20,
+    borderRadius: 16,
     display: "grid",
     justifyItems: "center",
     alignContent: "center",
@@ -135,12 +136,16 @@ function AppTile({
       style={{
         width: 56,
         height: 56,
-        borderRadius: 999,
+        borderRadius: 16,
         display: "grid",
         placeItems: "center",
-        backgroundColor: disabled ? "rgba(148, 163, 184, 0.12)" : "rgba(59, 130, 246, 0.12)",
-        color: disabled ? "#cbd5e1" : "#dbeafe",
+        background: disabled
+          ? "linear-gradient(180deg, rgba(56, 65, 77, 0.62) 0%, rgba(31, 41, 55, 0.72) 100%)"
+          : "linear-gradient(180deg, rgba(47, 60, 79, 0.72) 0%, rgba(24, 33, 45, 0.9) 100%)",
+        color: disabled ? "#c7d0db" : "#dceaf8",
         position: "relative",
+        border: "1px solid rgba(129, 145, 164, 0.24)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
       }}
     >
       {icon}
@@ -154,7 +159,7 @@ function AppTile({
         fontSize: 12,
         lineHeight: 1.3,
         fontFamily: "var(--font-display)",
-        letterSpacing: "0.05em",
+        letterSpacing: "0.08em",
         textTransform: "uppercase",
       }}
     >
@@ -167,9 +172,9 @@ function AppTile({
       <div
         style={{
           ...sharedStyle,
-          color: "#94a3b8",
-          background: "linear-gradient(180deg, rgba(51, 65, 85, 0.9) 0%, rgba(30, 41, 59, 0.94) 100%)",
-          border: "1px solid rgba(148, 163, 184, 0.16)",
+          color: "#93a0b0",
+          background: "linear-gradient(180deg, rgba(37, 44, 53, 0.92) 0%, rgba(21, 26, 33, 0.96) 100%)",
+          border: "1px solid rgba(126, 142, 160, 0.18)",
           opacity: 0.82,
         }}
       >
@@ -186,9 +191,9 @@ function AppTile({
         ...sharedStyle,
         textDecoration: "none",
         color: "#e5edf7",
-        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(9, 15, 25, 0.98) 100%)",
-        border: "1px solid rgba(96, 165, 250, 0.18)",
-        boxShadow: "0 14px 30px rgba(2, 6, 23, 0.2)",
+        background: "linear-gradient(180deg, rgba(20, 26, 33, 0.96) 0%, rgba(10, 13, 18, 0.99) 100%)",
+        border: "1px solid rgba(126, 142, 160, 0.22)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 30px rgba(0, 0, 0, 0.24)",
       }}
     >
       {iconShell}
@@ -203,11 +208,11 @@ function PlaceholderTile() {
       aria-hidden="true"
       style={{
         minHeight: 120,
-        borderRadius: 20,
+        borderRadius: 16,
         padding: "16px 12px",
-        background: "linear-gradient(180deg, rgba(15, 23, 42, 0.46) 0%, rgba(9, 15, 25, 0.7) 100%)",
-        border: "1px dashed rgba(148, 163, 184, 0.14)",
-        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.02)",
+        background: "linear-gradient(180deg, rgba(26, 31, 39, 0.48) 0%, rgba(13, 17, 22, 0.72) 100%)",
+        border: "1px dashed rgba(126, 142, 160, 0.14)",
+        boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
       }}
     />
   );
@@ -806,11 +811,11 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 180,
                   padding: "14px 18px",
-                  background: "linear-gradient(180deg, rgba(37, 99, 235, 0.96) 0%, rgba(30, 64, 175, 0.98) 100%)",
+                  background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
                   color: "white",
                   textDecoration: "none",
-                  borderRadius: 14,
-                  boxShadow: "0 14px 34px rgba(30, 64, 175, 0.28)",
+                  borderRadius: 12,
+                  boxShadow: "0 14px 34px rgba(17, 24, 39, 0.26)",
                 }}
               >
                 Create Account
@@ -823,11 +828,11 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 140,
                   padding: "14px 18px",
-                  backgroundColor: "#111827",
+                  background: "linear-gradient(180deg, rgba(29, 36, 45, 0.98) 0%, rgba(13, 18, 24, 0.99) 100%)",
                   color: "white",
                   textDecoration: "none",
-                  borderRadius: 14,
-                  border: "1px solid rgba(148, 163, 184, 0.18)",
+                  borderRadius: 12,
+                  border: "1px solid rgba(126, 142, 160, 0.24)",
                 }}
               >
                 Login
@@ -840,11 +845,11 @@ export default function HomePage() {
                   justifyContent: "center",
                   minWidth: 160,
                   padding: "14px 18px",
-                  backgroundColor: "rgba(91, 33, 182, 0.9)",
+                  background: "linear-gradient(180deg, rgba(55, 72, 94, 0.98) 0%, rgba(23, 31, 42, 0.99) 100%)",
                   color: "white",
                   textDecoration: "none",
-                  borderRadius: 14,
-                  border: "1px solid rgba(196, 181, 253, 0.18)",
+                  borderRadius: 12,
+                  border: "1px solid rgba(126, 142, 160, 0.24)",
                 }}
               >
                 Admin Login
@@ -913,12 +918,12 @@ export default function HomePage() {
                       width: "100%",
                       maxWidth: 680,
                       padding: "22px 24px",
-                      background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
-                      color: "white",
-                      borderRadius: 18,
-                      textAlign: "center",
-                      fontSize: 21,
-                      fontFamily: "var(--font-display)",
+                    background: "linear-gradient(180deg, #c01d1d 0%, #7f1212 100%)",
+                    color: "white",
+                    borderRadius: 14,
+                    textAlign: "center",
+                    fontSize: 21,
+                    fontFamily: "var(--font-display)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
                       boxShadow: "0 20px 44px rgba(127, 18, 18, 0.34)",
@@ -942,7 +947,7 @@ export default function HomePage() {
                       padding: "20px 24px",
                       background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
                       color: "#cbd5e1",
-                      borderRadius: 18,
+                      borderRadius: 14,
                       textAlign: "center",
                       fontSize: 20,
                       fontFamily: "var(--font-display)",
