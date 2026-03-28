@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v200",
+    title: "Global Tactical Background Rollback",
+    summary: "Reverted the root-level fixed tactical background and parallax system from v198 so the app returns to the earlier simpler global background treatment while keeping the newer homepage profile asset frame in place.",
+  },
+  {
     commit: "v199",
     title: "Homepage Profile Asset Frame",
     summary: "Wrapped the homepage profile photo and its asset-status label in a dedicated framed panel so the account module reads more clearly as a separate header element from the rest of the screen while keeping the same dropdown behavior.",
