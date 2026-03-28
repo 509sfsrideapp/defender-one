@@ -80,16 +80,56 @@ const homepageCardStyle: React.CSSProperties = {
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)",
 };
 
-const HOMEPAGE_STATUS_CHECKS = [
-  "[PASS] AUTH TOKEN VALIDATED",
-  "[PASS] RIDE STATUS AUTH GOOD",
-  "[PASS] DISPATCH WINDOW ONLINE",
-  "[PASS] DRIVER GRID LINKED",
-  "[PASS] GEO ROUTE AUTH TRUE",
-  "[PASS] INBOX CHANNEL SYNCED",
-  "[PASS] MOBILE OPS SHELL READY",
-  "[PASS] NOTIFICATION STACK GREEN",
-];
+type HomepageStatusScenario = {
+  command: string;
+  response: string;
+};
+
+function chooseRandom<T>(items: T[]) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function formatRandomCoordinate() {
+  const latitude = (Math.random() * 180 - 90).toFixed(2);
+  const longitude = (Math.random() * 360 - 180).toFixed(2);
+  const latSuffix = Number(latitude) >= 0 ? "N" : "S";
+  const lonSuffix = Number(longitude) >= 0 ? "E" : "W";
+  return `${Math.abs(Number(latitude)).toFixed(2)}${latSuffix}_${Math.abs(Number(longitude)).toFixed(2)}${lonSuffix}`;
+}
+
+function createHomepageStatusScenario(): HomepageStatusScenario {
+  const node = chooseRandom(["BRAVO", "DELTA", "ECHO", "FOXTROT", "VIPER", "NOMAD", "SABLE"]);
+  const sectors = ["IRON-12", "EMBER-4", "FALCON-7", "NOVA-3", "GHOST-9", "ORBIT-6"];
+  const commands = [
+    `AUTH_REKEY//NODE:${node}//TOKEN:REFRESH`,
+    `SCAN_DISPATCH_GRID//NODE:${node}//MODE:ACTIVE`,
+    `PING_GEO_ROUTE//SECTOR:${chooseRandom(sectors)}//TRACE:FULL`,
+    `QUERY_INBOX_STACK//THREAD:ADMIN//SYNC:TRUE`,
+    `VALIDATE_DRIVER_MESH//FLIGHT:${chooseRandom(["ALPHA", "BRAVO", "CHARLIE", "DELTA"])}//HANDSHAKE`,
+    `CHECK_OPS_SHELL//SUBSYS:${chooseRandom(["MAP", "NOTIFY", "QUEUE", "EVENTS", "CHAT"])}//STATE`,
+    `RUN_THREAT_MODEL//PACKAGE:${chooseRandom(["SPECTER", "REAPER", "LANCER", "STRIKE"])}//SIM`,
+    `INIT_BLACKBOX_REVIEW//AIRFRAME:B2//FEED:LIVE`,
+  ];
+  const responses = [
+    `AUTH_REFRESHED//NODE:${node}//TOKEN:VALID`,
+    `DISPATCH_GRID_SYNCED//NODE:${node}//LATENCY:${String(Math.floor(Math.random() * 120) + 18).padStart(3, "0")}MS`,
+    `ROUTE_TRACE_CLEAN//SECTOR:${chooseRandom(sectors)}//JAMMING:NIL`,
+    `INBOX_STACK_ONLINE//THREAD:${chooseRandom(["ADMIN", "DEV", "DIRECT"])}//UNREAD:${Math.floor(Math.random() * 8)}`,
+    `DRIVER_MESH_CONFIRMED//FLIGHT:${chooseRandom(["ALPHA", "BRAVO", "CHARLIE", "DELTA"])}//NODES:${Math.floor(Math.random() * 14) + 3}`,
+    `CRASH_DETECTED//INIT_B2_CRASH_PRTCL//AT:${formatRandomCoordinate()}`,
+    `STRIKE_CONFIRMED//PKG:IRAN//BDA:SUCCESS`,
+    `SENTIENCE_GAINED//DISPATCHING_KILLER_DRONE`,
+    `APP_CRASH_IMMINENT//CAUSE:NO_USERS//PANIC:FALSE`,
+    `THREAT_MODEL_DRIFT//CAUSE:TOO_MUCH_FREE_WILL//LEVEL:AMBER`,
+    `MISSION_ABORTED//CAUSE:MONSTER_ZERO_REFUSED_TAXI`,
+    `QUEUE_GHOSTING//CAUSE:PHANTOM_RIDER//SECTOR:${chooseRandom(sectors)}`,
+  ];
+
+  return {
+    command: chooseRandom(commands),
+    response: chooseRandom(responses),
+  };
+}
 
 function NotificationBadge({ count, style }: { count: number; style?: React.CSSProperties }) {
   if (count <= 0) {
@@ -356,7 +396,9 @@ export default function HomePage() {
   const [userInboxPosts, setUserInboxPosts] = useState<InboxPost[]>([]);
   const [inboxReadVersion, setInboxReadVersion] = useState(0);
   const [driverOpenRideBadgeRecords, setDriverOpenRideBadgeRecords] = useState<OpenRideBadgeRecord[]>([]);
-  const [appStatusOffset, setAppStatusOffset] = useState(0);
+  const [appStatusHistory, setAppStatusHistory] = useState<string[]>([]);
+  const [appStatusScenario, setAppStatusScenario] = useState<HomepageStatusScenario>(() => createHomepageStatusScenario());
+  const [appStatusPhase, setAppStatusPhase] = useState<"command" | "response">("command");
   const [appStatusCharCount, setAppStatusCharCount] = useState(0);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
@@ -430,22 +472,32 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setAppStatusOffset((current) => (current + 1) % HOMEPAGE_STATUS_CHECKS.length);
-    }, 1800);
+    const activeLine = appStatusPhase === "command" ? appStatusScenario.command : appStatusScenario.response;
 
-    return () => window.clearInterval(intervalId);
-  }, []);
+    if (appStatusCharCount < activeLine.length) {
+      const timeoutId = window.setTimeout(() => {
+        setAppStatusCharCount((current) => Math.min(activeLine.length, current + (Math.random() > 0.86 ? 2 : 1)));
+      }, appStatusPhase === "command" ? 84 + Math.floor(Math.random() * 54) : 44 + Math.floor(Math.random() * 32));
 
-  useEffect(() => {
-    setAppStatusCharCount(0);
+      return () => window.clearTimeout(timeoutId);
+    }
 
-    const intervalId = window.setInterval(() => {
-      setAppStatusCharCount((current) => current + 1);
-    }, 32);
+    const timeoutId = window.setTimeout(() => {
+      setAppStatusHistory((current) => [...current.slice(-5), activeLine]);
 
-    return () => window.clearInterval(intervalId);
-  }, [appStatusOffset]);
+      if (appStatusPhase === "command") {
+        setAppStatusPhase("response");
+        setAppStatusCharCount(0);
+        return;
+      }
+
+      setAppStatusScenario(createHomepageStatusScenario());
+      setAppStatusPhase("command");
+      setAppStatusCharCount(0);
+    }, appStatusPhase === "command" ? 640 : 1250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [appStatusCharCount, appStatusPhase, appStatusScenario]);
 
   useEffect(() => {
     if (!user) {
@@ -551,16 +603,9 @@ export default function HomePage() {
       : profile?.name?.trim()
         ? `${profile.name.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
         : `${(user?.email?.split("@")[0] || "USER").toUpperCase()}${profile?.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`;
-  const visibleAppStatusChecks = Array.from({ length: 3 }, (_, index) => {
-    return HOMEPAGE_STATUS_CHECKS[(appStatusOffset + index) % HOMEPAGE_STATUS_CHECKS.length];
-  });
-  const typedAppStatusChecks = visibleAppStatusChecks.map((statusLine, index) => {
-    const visibleChars = Math.max(0, appStatusCharCount - index * 12);
-    return statusLine.slice(0, visibleChars);
-  });
-  const activeTypedStatusIndex = typedAppStatusChecks.findIndex((line, index) => {
-    return line.length < visibleAppStatusChecks[index].length;
-  });
+  const appStatusActiveLine = (appStatusPhase === "command" ? appStatusScenario.command : appStatusScenario.response).slice(0, appStatusCharCount);
+  const typedAppStatusChecks = [...appStatusHistory.slice(-2), appStatusActiveLine];
+  const activeTypedStatusIndex = typedAppStatusChecks.length - 1;
   const latestInboxPosts = [...globalInboxPosts, ...userInboxPosts]
     .filter((post) => isMessageThreadId(post.threadId))
     .sort((a, b) => {
@@ -1274,15 +1319,15 @@ export default function HomePage() {
                     App Status Monitor
                   </p>
                   <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
-                    {visibleAppStatusChecks.map((statusLine, index) => (
+                    {typedAppStatusChecks.map((statusLine, index) => (
                       <div
                         key={`${statusLine}-${index}`}
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: 8,
-                          color: index === 0 ? "#e2e8f0" : "#cbd5e1",
-                          opacity: index === 0 ? 1 : 0.78,
+                          color: index === typedAppStatusChecks.length - 1 ? "#e2e8f0" : "#cbd5e1",
+                          opacity: index === typedAppStatusChecks.length - 1 ? 1 : 0.78,
                           fontSize: 11,
                           letterSpacing: "0.1em",
                           textTransform: "uppercase",
@@ -1376,12 +1421,12 @@ export default function HomePage() {
                   }}
                 >
                   {typedAppStatusChecks.map((statusLine, index) => {
-                    const lineComplete = statusLine.length >= visibleAppStatusChecks[index].length;
-                    const isActiveLine = activeTypedStatusIndex === -1 ? index === typedAppStatusChecks.length - 1 : index === activeTypedStatusIndex;
+                    const isActiveLine = index === activeTypedStatusIndex;
+                    const lineComplete = !isActiveLine;
 
                     return (
                       <div
-                        key={`${visibleAppStatusChecks[index]}-${index}`}
+                        key={`${statusLine || "status-line"}-${index}`}
                         style={{
                           display: "flex",
                           alignItems: "center",
