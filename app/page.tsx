@@ -805,14 +805,14 @@ export default function HomePage() {
                 position: "relative",
                 display: "grid",
                 justifyItems: "center",
-                gap: 8,
-                minWidth: 116,
-                padding: "0.8rem 0.85rem 0.72rem",
-                borderRadius: 18,
-                border: "1px solid rgba(112, 130, 109, 0.22)",
+                gap: 6,
+                minWidth: 108,
+                padding: "0.68rem 0.72rem 0.62rem",
+                borderRadius: 16,
+                border: "1px solid rgba(148, 163, 184, 0.14)",
                 background:
-                  "linear-gradient(180deg, rgba(17, 21, 18, 0.96) 0%, rgba(8, 10, 9, 0.99) 100%)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(0, 0, 0, 0.28)",
+                  "linear-gradient(180deg, rgba(16, 20, 27, 0.92) 0%, rgba(9, 12, 17, 0.97) 100%)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 12px 24px rgba(0, 0, 0, 0.2)",
                 overflow: "hidden",
               }}
             >
@@ -820,9 +820,9 @@ export default function HomePage() {
                 aria-hidden="true"
                 style={{
                   position: "absolute",
-                  inset: 7,
-                  borderRadius: 13,
-                  border: "1px solid rgba(167, 184, 158, 0.1)",
+                  inset: 6,
+                  borderRadius: 12,
+                  border: "1px solid rgba(148, 163, 184, 0.06)",
                   pointerEvents: "none",
                 }}
               />
@@ -838,9 +838,9 @@ export default function HomePage() {
                   display: "grid",
                   placeItems: "center",
                   borderRadius: 999,
-                  background: "linear-gradient(180deg, rgba(26, 34, 29, 0.98) 0%, rgba(11, 16, 13, 0.98) 100%)",
-                  border: "1px solid rgba(126, 145, 119, 0.22)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 24px rgba(0, 0, 0, 0.26)",
+                  background: "linear-gradient(180deg, rgba(25, 31, 40, 0.98) 0%, rgba(13, 17, 24, 0.98) 100%)",
+                  border: "1px solid rgba(148, 163, 184, 0.16)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 18px rgba(0, 0, 0, 0.22)",
                   position: "relative",
                   zIndex: 1,
                 }}
@@ -857,7 +857,7 @@ export default function HomePage() {
                       height: 52,
                       objectFit: "cover",
                       borderRadius: 999,
-                      border: "1px solid rgba(185, 201, 178, 0.24)",
+                      border: "1px solid rgba(203, 213, 225, 0.18)",
                     }}
                   />
                 ) : (
@@ -868,9 +868,9 @@ export default function HomePage() {
                       borderRadius: 999,
                       display: "grid",
                       placeItems: "center",
-                      backgroundColor: "rgba(32, 51, 35, 0.78)",
-                      color: "#e4efe4",
-                      border: "1px solid rgba(136, 167, 130, 0.24)",
+                      backgroundColor: "rgba(30, 41, 59, 0.78)",
+                      color: "#e2e8f0",
+                      border: "1px solid rgba(148, 163, 184, 0.18)",
                       fontFamily: "var(--font-display)",
                       fontSize: "1.1rem",
                     }}
@@ -882,9 +882,9 @@ export default function HomePage() {
               </button>
               <span
                 style={{
-                  color: "#94a3b8",
+                  color: "#8f9caf",
                   fontSize: 10,
-                  letterSpacing: "0.12em",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
                   fontFamily: "var(--font-display)",
                   display: "grid",
@@ -894,7 +894,7 @@ export default function HomePage() {
                 }}
               >
                 <span>ASSET_LOADED:</span>
-                <span style={{ color: "#c8d0c7" }}>PFP//0-1</span>
+                <span style={{ color: "#cbd5e1" }}>PFP//0-1</span>
               </span>
             </div>
 

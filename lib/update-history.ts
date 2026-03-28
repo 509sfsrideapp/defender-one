@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v201",
+    title: "Profile Frame Tone-Down",
+    summary: "Retuned the homepage profile asset panel away from the green tint into a lower-key neutral slate frame with softer borders and shadows, while keeping the profile photo itself the same size.",
+  },
+  {
     commit: "v200",
     title: "Global Tactical Background Rollback",
     summary: "Reverted the root-level fixed tactical background and parallax system from v198 so the app returns to the earlier simpler global background treatment while keeping the newer homepage profile asset frame in place.",
