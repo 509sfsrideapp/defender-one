@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DelayedRouteLoading from "../../components/DelayedRouteLoading";
+import InitialAppSplash from "../../components/InitialAppSplash";
 
 export default function DeveloperLoaderTestClient() {
   const router = useRouter();
@@ -10,10 +10,10 @@ export default function DeveloperLoaderTestClient() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       router.replace("/developer");
-    }, 2600);
+    }, 3200);
 
     return () => window.clearTimeout(timer);
   }, [router]);
 
-  return <DelayedRouteLoading delayMs={0} />;
+  return <InitialAppSplash forceReplay />;
 }

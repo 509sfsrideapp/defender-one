@@ -6,7 +6,11 @@ import afgscLogo from "../afgsc.png";
 
 const splashSessionKey = "defender-drivers-initial-splash-seen";
 
-export default function InitialAppSplash() {
+type InitialAppSplashProps = {
+  forceReplay?: boolean;
+};
+
+export default function InitialAppSplash({ forceReplay = false }: InitialAppSplashProps) {
   const [visible, setVisible] = useState(true);
   const [fadingOut, setFadingOut] = useState(false);
 
@@ -15,7 +19,7 @@ export default function InitialAppSplash() {
       return;
     }
 
-    if (window.sessionStorage.getItem(splashSessionKey) === "true") {
+    if (!forceReplay && window.sessionStorage.getItem(splashSessionKey) === "true") {
       const hideImmediately = window.requestAnimationFrame(() => {
         setVisible(false);
       });
@@ -29,7 +33,9 @@ export default function InitialAppSplash() {
       return;
     }
 
-    window.sessionStorage.setItem(splashSessionKey, "true");
+    if (!forceReplay) {
+      window.sessionStorage.setItem(splashSessionKey, "true");
+    }
 
     const fadeTimer = window.setTimeout(() => {
       setFadingOut(true);
@@ -43,7 +49,7 @@ export default function InitialAppSplash() {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(hideTimer);
     };
-  }, [visible]);
+  }, [forceReplay, visible]);
 
   if (!visible) {
     return null;
