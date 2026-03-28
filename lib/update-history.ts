@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v181",
+    title: "Validated User Status Light",
+    summary: "Added a small green status light to the end of the homepage AUTH TOKEN VALIDATED user line so the header reads more like an active verified-status strip.",
+  },
+  {
     commit: "v180",
     title: "Homepage Auth Token Header",
     summary: "Added a signed-in homepage header line under the 509 SFS location banner that shows an AUTH TOKEN VALIDATED user tag using the current member's name and rank.",
