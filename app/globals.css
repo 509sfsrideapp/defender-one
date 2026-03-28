@@ -312,18 +312,12 @@ button:disabled {
 .initial-app-splash {
   position: fixed;
   inset: 0;
-  width: 100%;
-  min-height: 100svh;
-  height: 100svh;
+  width: auto;
   z-index: 1000;
   display: grid;
   place-items: center;
   overflow: hidden;
-  padding:
-    calc(env(safe-area-inset-top) + 1rem)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+  padding: 0;
   background:
     radial-gradient(circle at 50% 18%, rgba(37, 99, 235, 0.16), transparent 26%),
     radial-gradient(circle at 50% 84%, rgba(14, 165, 233, 0.08), transparent 30%),
@@ -335,13 +329,6 @@ button:disabled {
 .initial-app-splash-hidden {
   background: transparent;
   pointer-events: none;
-}
-
-@supports (height: 100lvh) {
-  .initial-app-splash {
-    min-height: 100lvh;
-    height: 100lvh;
-  }
 }
 
 .initial-app-splash-door {
@@ -477,6 +464,11 @@ button:disabled {
   width: min(100%, 30rem);
   display: grid;
   place-items: center;
+  padding:
+    calc(env(safe-area-inset-top) + 1rem)
+    env(safe-area-inset-right)
+    max(env(safe-area-inset-bottom), 1rem)
+    env(safe-area-inset-left);
   transition: transform 620ms ease, opacity 420ms ease;
 }
 
@@ -494,7 +486,7 @@ button:disabled {
 .initial-app-splash-panel {
   position: relative;
   width: min(100%, 28rem);
-  min-height: min(72svh, 34rem);
+  min-height: min(34rem, calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem));
   display: grid;
   align-content: center;
   justify-items: center;
@@ -509,12 +501,6 @@ button:disabled {
   box-shadow:
     0 28px 80px rgba(2, 6, 23, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-@supports (min-height: 72lvh) {
-  .initial-app-splash-panel {
-    min-height: min(72lvh, 34rem);
-  }
 }
 
 .initial-app-splash-grid,
