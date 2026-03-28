@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v219",
+    title: "Inbox Return Button Size Trim",
+    summary: "Reduced the size of the inbox Return to Inbox and Open Inbox navigation buttons so they feel less bulky next to the home icon while keeping the same blue gradient theme.",
+  },
+  {
     commit: "v218",
     title: "Home Button Style Match",
     summary: "Matched the top-left home button across the app to the same darker round style used by the persistent bottom-left home button and removed the inbox-only green override so both home controls now look identical.",
