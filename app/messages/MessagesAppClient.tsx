@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
-import { auth, db } from "../../lib/firebase";
+import { auth } from "../../lib/firebase";
 import {
   formatConversationTimestamp,
   getOtherConversationParticipant,
@@ -13,18 +12,6 @@ import {
   type DirectMessageConversationRecord,
   type DirectMessageRecord,
 } from "../../lib/direct-messages";
-import { getInboxUnreadCountsByThread, INBOX_READ_EVENT, loadInboxReadState } from "../../lib/inbox-badges";
-import { getAllMessageThreads, isMessageThreadId, type MessageThreadDefinition, type MessageThreadId } from "../../lib/messages";
-
-type InboxPost = {
-  id: string;
-  threadId: MessageThreadId;
-  title: string;
-  createdAt?: { seconds?: number; nanoseconds?: number } | null;
-  userId?: string;
-  requiresResponse?: boolean;
-  responseSubmittedAt?: { seconds?: number; nanoseconds?: number } | null;
-};
 
 const inboxNavButtonStyle: React.CSSProperties = {
   display: "inline-flex",
@@ -49,55 +36,11 @@ function getBucketTabs() {
     { id: "direct", label: "Direct" },
     { id: "marketplace", label: "Marketplace" },
     { id: "iso", label: "ISO" },
-    { id: "system", label: "System" },
   ] as const satisfies Array<{ id: DirectMessageBucket; label: string }>;
-}
-
-function toMessageTimestampMs(value?: { seconds?: number; nanoseconds?: number } | string | null) {
-  if (!value) return 0;
-  if (typeof value === "string") {
-    const parsed = Date.parse(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  return (value.seconds || 0) * 1000 + Math.floor((value.nanoseconds || 0) / 1000000);
 }
 
 function formatMessageTimestamp(value?: { seconds?: number; nanoseconds?: number } | string | null) {
   return formatConversationTimestamp(value) || "Just now";
-}
-
-function SystemThreadRow({
-  thread,
-  unreadCount,
-}: {
-  thread: MessageThreadDefinition;
-  unreadCount: number;
-}) {
-  return (
-    <Link
-      href={`/messages/${thread.id}`}
-      style={{
-        display: "grid",
-        gap: 4,
-        padding: 14,
-        borderRadius: 14,
-        textDecoration: "none",
-        color: "#e5edf7",
-        border: "1px solid rgba(148, 163, 184, 0.18)",
-        backgroundColor: unreadCount > 0 ? "rgba(17, 24, 39, 0.94)" : "rgba(9, 15, 25, 0.88)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-        <strong>{thread.title}</strong>
-        {unreadCount > 0 ? (
-          <span style={{ minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, display: "inline-grid", placeItems: "center", backgroundColor: "#dc2626", color: "#ffffff", fontSize: 10, fontWeight: 800, lineHeight: 1 }}>
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        ) : null}
-      </div>
-      <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.45 }}>{thread.subtitle}</p>
-    </Link>
-  );
 }
 
 function ConversationRow({
@@ -179,7 +122,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const requestedTab = searchParams.get("tab");
   const requestedConversationId = searchParams.get("conversationId") || "";
   const activeTab: DirectMessageBucket =
-    requestedTab === "marketplace" || requestedTab === "iso" || requestedTab === "system" || requestedTab === "direct"
+    requestedTab === "marketplace" || requestedTab === "iso" || requestedTab === "direct"
       ? requestedTab
       : "direct";
 
@@ -190,9 +133,6 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const [messageDraft, setMessageDraft] = useState("");
   const [messageError, setMessageError] = useState("");
   const [sending, setSending] = useState(false);
-  const [systemGlobalPosts, setSystemGlobalPosts] = useState<InboxPost[]>([]);
-  const [systemPrivatePosts, setSystemPrivatePosts] = useState<InboxPost[]>([]);
-  const [readVersion, setReadVersion] = useState(0);
 
   const setQueryParam = (key: string, value?: string | null) => {
     const nextParams = new URLSearchParams(searchParams.toString());
@@ -261,29 +201,6 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
     };
   }, [userId]);
 
-  useEffect(() => {
-    const handleReadStateChange = () => setReadVersion((current) => current + 1);
-    window.addEventListener("storage", handleReadStateChange);
-    window.addEventListener(INBOX_READ_EVENT, handleReadStateChange as EventListener);
-    return () => {
-      window.removeEventListener("storage", handleReadStateChange);
-      window.removeEventListener(INBOX_READ_EVENT, handleReadStateChange as EventListener);
-    };
-  }, []);
-
-  useEffect(() => {
-    const unsubscribeGlobal = onSnapshot(query(collection(db, "inboxPosts"), orderBy("createdAt", "desc")), (snapshot) => {
-      setSystemGlobalPosts(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<InboxPost, "id">) })).filter((post) => isMessageThreadId(post.threadId)));
-    });
-    const unsubscribePrivate = onSnapshot(query(collection(db, "userInboxPosts"), where("userId", "==", userId)), (snapshot) => {
-      setSystemPrivatePosts(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<InboxPost, "id">) })).filter((post) => isMessageThreadId(post.threadId)));
-    });
-    return () => {
-      unsubscribeGlobal();
-      unsubscribePrivate();
-    };
-  }, [userId]);
-
   const searchText = (searchParams.get("search") || "").trim();
   const activeDmConversations = useMemo(() => {
     const tabFiltered = allConversations.filter((conversation) => conversation.type === activeTab);
@@ -297,12 +214,10 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   }, [activeTab, allConversations, searchText, userId]);
 
   const activeConversation =
-    activeTab === "system"
-      ? null
-      : activeDmConversations.find((conversation) => conversation.id === requestedConversationId) || null;
+    activeDmConversations.find((conversation) => conversation.id === requestedConversationId) || null;
 
   useEffect(() => {
-    if (!activeConversation || activeTab === "system") {
+    if (!activeConversation) {
       setMessages([]);
       return;
     }
@@ -364,10 +279,10 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [activeConversation, activeTab]);
+  }, [activeConversation]);
 
   useEffect(() => {
-    if (!activeConversation || activeTab === "system") return;
+    if (!activeConversation) return;
     const unreadCount = Number(activeConversation.unreadCounts?.[userId] || 0) || 0;
     if (unreadCount <= 0) return;
     let cancelled = false;
@@ -381,24 +296,15 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [activeConversation, activeTab, userId]);
+  }, [activeConversation, userId]);
 
   const unreadCountsByBucket = useMemo(() => {
-    void readVersion;
     return {
       direct: allConversations.filter((conversation) => conversation.type === "direct").reduce((sum, conversation) => sum + (Number(conversation.unreadCounts?.[userId] || 0) || 0), 0),
       marketplace: allConversations.filter((conversation) => conversation.type === "marketplace").reduce((sum, conversation) => sum + (Number(conversation.unreadCounts?.[userId] || 0) || 0), 0),
       iso: allConversations.filter((conversation) => conversation.type === "iso").reduce((sum, conversation) => sum + (Number(conversation.unreadCounts?.[userId] || 0) || 0), 0),
-      system: Object.values(getInboxUnreadCountsByThread([...systemGlobalPosts, ...systemPrivatePosts].sort((left, right) => toMessageTimestampMs(right.createdAt) - toMessageTimestampMs(left.createdAt)), loadInboxReadState())).reduce((sum, count) => sum + count, 0),
     };
-  }, [allConversations, readVersion, systemGlobalPosts, systemPrivatePosts, userId]);
-
-  const systemThreads = useMemo(() => {
-    void readVersion;
-    const allPosts = [...systemGlobalPosts, ...systemPrivatePosts].sort((left, right) => toMessageTimestampMs(right.createdAt) - toMessageTimestampMs(left.createdAt));
-    const unreadCounts = getInboxUnreadCountsByThread(allPosts, loadInboxReadState());
-    return getAllMessageThreads().map((thread) => ({ thread, unreadCount: unreadCounts[thread.id] || 0 }));
-  }, [readVersion, systemGlobalPosts, systemPrivatePosts]);
+  }, [allConversations, userId]);
 
   const handleSubmitMessage = async (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
@@ -441,13 +347,13 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   };
 
   const otherParticipant = activeConversation ? getOtherConversationParticipant(activeConversation, userId) : null;
-  const showThreadPane = activeTab !== "system" && Boolean(activeConversation);
+  const showThreadPane = Boolean(activeConversation);
 
   return (
     <div style={{ marginTop: 18, display: "grid", gap: 16 }}>
       <div style={{ display: "grid", gap: 5 }}>
         <p style={{ margin: 0, color: "#94a3b8", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-          Direct, marketplace, ISO, and system inbox routing
+          Direct, marketplace, and ISO conversation routing
         </p>
         <h1 style={{ margin: 0 }}>Messages</h1>
       </div>
@@ -500,72 +406,43 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
           <input
             value={searchText}
             onChange={(event) => setQueryParam("search", event.target.value.trim() || null)}
-            placeholder={activeTab === "system" ? "Search system channels" : activeTab === "direct" ? "Search by user, username, or thread" : "Search by user or listing context"}
+            placeholder={activeTab === "direct" ? "Search by user, username, or thread" : "Search by user or listing context"}
           />
         </label>
-
-        {activeTab === "system" ? (
-          <div style={{ display: "grid", gap: 12 }}>
-            {systemThreads
-              .filter(({ thread }) => {
-                if (!searchText) return true;
-                const haystack = `${thread.title} ${thread.subtitle} ${thread.description}`.toLowerCase();
-                return haystack.includes(searchText.toLowerCase());
-              })
-              .map(({ thread, unreadCount }) => (
-                <SystemThreadRow key={thread.id} thread={thread} unreadCount={unreadCount} />
-              ))}
-            {systemThreads.length === 0 ? (
-              <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)" }}>
-                <strong>No system channels yet.</strong>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 14, alignItems: "start" }}>
+          <div style={{ display: showThreadPane ? "none" : "grid", gap: 10 }}>
+            {conversationLoading ? (
+              <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)", color: "#94a3b8" }}>
+                Loading conversations...
               </div>
-            ) : null}
-            {systemThreads.length > 0 &&
-            systemThreads.filter(({ thread }) => {
-              if (!searchText) return true;
-              const haystack = `${thread.title} ${thread.subtitle} ${thread.description}`.toLowerCase();
-              return haystack.includes(searchText.toLowerCase());
-            }).length === 0 ? (
-              <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)" }}>
-                <strong>No matching system channels</strong>
+            ) : activeDmConversations.length > 0 ? (
+              activeDmConversations.map((conversation) => (
+                <ConversationRow
+                  key={conversation.id}
+                  conversation={conversation}
+                  currentUserId={userId}
+                  active={conversation.id === activeConversation?.id}
+                  onOpen={() => setQueryParam("conversationId", conversation.id)}
+                />
+              ))
+            ) : (
+              <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)", display: "grid", gap: 6 }}>
+                <strong>{searchText ? "No matching conversations" : activeTab === "direct" ? "No direct messages yet" : activeTab === "marketplace" ? "No marketplace conversations yet" : "No ISO conversations yet"}</strong>
+                <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.5 }}>
+                  {searchText
+                    ? "Try a different name, username, or listing title."
+                    : activeTab === "direct"
+                      ? "Open a user preview anywhere in the app and press Message to start a direct thread."
+                      : activeTab === "marketplace"
+                        ? "Use Message Seller from a marketplace listing to start a listing-linked thread."
+                        : "Use Message Requester from an ISO post to start a request-linked thread."}
+                </p>
               </div>
-            ) : null}
+            )}
           </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 14, alignItems: "start" }}>
-            <div style={{ display: showThreadPane ? "none" : "grid", gap: 10 }}>
-              {conversationLoading ? (
-                <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)", color: "#94a3b8" }}>
-                  Loading conversations...
-                </div>
-              ) : activeDmConversations.length > 0 ? (
-                activeDmConversations.map((conversation) => (
-                  <ConversationRow
-                    key={conversation.id}
-                    conversation={conversation}
-                    currentUserId={userId}
-                    active={conversation.id === activeConversation?.id}
-                    onOpen={() => setQueryParam("conversationId", conversation.id)}
-                  />
-                ))
-              ) : (
-                <div style={{ padding: 16, borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.14)", backgroundColor: "rgba(9, 15, 25, 0.88)", display: "grid", gap: 6 }}>
-                  <strong>{searchText ? "No matching conversations" : activeTab === "direct" ? "No direct messages yet" : activeTab === "marketplace" ? "No marketplace conversations yet" : "No ISO conversations yet"}</strong>
-                  <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.5 }}>
-                    {searchText
-                      ? "Try a different name, username, or listing title."
-                      : activeTab === "direct"
-                        ? "Open a user preview anywhere in the app and press Message to start a direct thread."
-                        : activeTab === "marketplace"
-                          ? "Use Message Seller from a marketplace listing to start a listing-linked thread."
-                          : "Use Message Requester from an ISO post to start a request-linked thread."}
-                  </p>
-                </div>
-              )}
-            </div>
 
-            {showThreadPane ? (
-              <section style={{ borderRadius: 18, border: "1px solid rgba(126, 142, 160, 0.18)", background: "linear-gradient(180deg, rgba(15, 20, 27, 0.98) 0%, rgba(8, 11, 16, 0.995) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)", overflow: "hidden", display: "grid" }}>
+          {showThreadPane ? (
+            <section style={{ borderRadius: 18, border: "1px solid rgba(126, 142, 160, 0.18)", background: "linear-gradient(180deg, rgba(15, 20, 27, 0.98) 0%, rgba(8, 11, 16, 0.995) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 22px 44px rgba(0, 0, 0, 0.3)", overflow: "hidden", display: "grid" }}>
                 <div style={{ padding: "0.9rem 1rem", borderBottom: "1px solid rgba(126, 142, 160, 0.14)", display: "grid", gap: 10, background: "linear-gradient(180deg, rgba(16, 24, 34, 0.98) 0%, rgba(10, 17, 24, 0.99) 100%)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "start", flexWrap: "wrap" }}>
                     <div style={{ minWidth: 0, display: "grid", gap: 4 }}>
@@ -635,9 +512,8 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                   </div>
                 </form>
               </section>
-            ) : null}
-          </div>
-        )}
+          ) : null}
+        </div>
       </section>
     </div>
   );

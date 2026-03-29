@@ -1386,7 +1386,7 @@ export default function HomePage() {
               </div>
               <div className="profile-menu-item-wrap">
                 <Link
-                  href="/messages?tab=system"
+                  href="/inbox"
                   onClick={() => setProfileMenuOpen(false)}
                   style={{
                     display: "block",

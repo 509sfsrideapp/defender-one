@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v326",
+    title: "Messages and Inbox Re-Split",
+    summary: "Removed the System bucket from the Messages app, restored the old-style system Inbox onto its own separate page, and rewired Inbox links so direct messages and system notices stay in their own lanes again.",
+  },
+  {
     commit: "v325",
     title: "Messages Thread Compose and Refresh Fix",
     summary: "Shrank the direct-message composer to a tighter mobile size and stopped the active thread from flashing loading states on every background refresh, so messages now feel steadier while still updating in the background.",
