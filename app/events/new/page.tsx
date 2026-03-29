@@ -417,19 +417,9 @@ export default function NewEventPage() {
             <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
               Scheduling
             </strong>
-            <p style={helperTextStyle}>
-              Keep one-time dates and recurring schedules separate so the board only shows the next real upcoming occurrence for each event.
-            </p>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-            <div>
-              <strong style={{ display: "block", marginBottom: 4 }}>Schedule Setup</strong>
-              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
-                Choose whether this event runs on specific dates or follows a recurring schedule.
-              </p>
-            </div>
-
             <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
               <span>Schedule Type</span>
               <select value={scheduleMode} onChange={(event) => setScheduleMode(event.target.value as "specific_dates" | "recurring")}>

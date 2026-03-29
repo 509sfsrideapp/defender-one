@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v265",
+    title: "Event Scheduling Copy Trim",
+    summary: "Simplified the add-event Scheduling section so it now shows just the Scheduling title and the Schedule Type control without the extra explanatory text between them.",
+  },
+  {
     commit: "v264",
     title: "Collapsible Events Filter Panel",
     summary: "Reworked the main Events filter box into a collapsible Filter panel with a right-side plus/minus toggle, keeping the controls tucked away until expanded.",
