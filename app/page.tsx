@@ -13,8 +13,9 @@ import { getInboxUnreadCount, INBOX_READ_EVENT, loadInboxReadState } from "../li
 import { canDriverSeeRideDuringDispatchWindow, DEFAULT_RIDE_DISPATCH_MODE, type EmergencyRideDispatchMode, normalizeRideDispatchMode } from "../lib/ride-dispatch";
 import { getLatestActiveRideForRider } from "../lib/ride-state";
 import { useActiveRides } from "../lib/use-active-rides";
+import { shouldClearCorruptedVehicleYear } from "../lib/text-format";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { addDoc, collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { isMessageThreadId, type MessageThreadId } from "../lib/messages";
 
 type UserProfile = {
@@ -717,7 +718,22 @@ export default function HomePage() {
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            setProfile(userSnap.data() as UserProfile);
+            const nextProfile = userSnap.data() as UserProfile & { homeStreet?: string };
+            const shouldRepairCorruptedYear = shouldClearCorruptedVehicleYear({
+              carYear: nextProfile.carYear,
+              homeAddress: nextProfile.homeAddress,
+              homeStreet: nextProfile.homeStreet,
+            });
+
+            if (shouldRepairCorruptedYear) {
+              await updateDoc(userRef, {
+                carYear: "",
+                updatedAt: new Date(),
+              });
+              setProfile({ ...nextProfile, carYear: "" });
+            } else {
+              setProfile(nextProfile);
+            }
           } else {
             setProfile(null);
           }

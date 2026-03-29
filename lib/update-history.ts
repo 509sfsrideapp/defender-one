@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v303",
+    title: "Vehicle Year Signup Repair",
+    summary: "Fixed the vehicle-year handling so bad values no longer save during account creation or account edits, and added automatic cleanup for corrupted vehicle-year data when affected users load their profile.",
+  },
+  {
     commit: "v302",
     title: "ISO App Placeholder",
     summary: "Added a new ISO app tile to the homepage with a magnifying-glass icon and connected it to a live placeholder page for future buildout.",

@@ -2,7 +2,7 @@ import { auth, db } from "./firebase";
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { buildHomeAddress } from "./home-address";
-import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate } from "./text-format";
+import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear } from "./text-format";
 import { isValidUsername, normalizeUsername } from "./username";
 
 export const SIGNUP_DRAFT_STORAGE_KEY = "defender-drivers-signup-draft";
@@ -184,7 +184,7 @@ export async function finalizeSignupFromDraft(
   const normalizedHomeCity = formatAddressPart(draft.homeCity);
   const normalizedHomeState = formatStateCode(draft.homeState);
   const normalizedHomeZip = draft.homeZip.trim();
-  const normalizedCarYear = draft.carYear.trim();
+  const normalizedCarYear = normalizeVehicleYear(draft.carYear);
   const normalizedCarMake = formatVehicleField(draft.carMake);
   const normalizedCarModel = formatVehicleField(draft.carModel);
   const normalizedCarColor = formatVehicleField(draft.carColor);

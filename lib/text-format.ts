@@ -203,3 +203,51 @@ export function formatVehicleField(value: string) {
 export function formatVehiclePlate(value: string) {
   return normalizeWhitespace(value).toUpperCase();
 }
+
+export function normalizeVehicleYear(value: string) {
+  const normalized = normalizeWhitespace(value);
+
+  if (!normalized) {
+    return "";
+  }
+
+  if (!/^\d{4}$/.test(normalized)) {
+    return "";
+  }
+
+  const numericYear = Number(normalized);
+  const currentYear = new Date().getFullYear() + 1;
+
+  if (numericYear < 1900 || numericYear > currentYear) {
+    return "";
+  }
+
+  return normalized;
+}
+
+export function shouldClearCorruptedVehicleYear(input: {
+  carYear?: string | null;
+  homeAddress?: string | null;
+  homeStreet?: string | null;
+}) {
+  const rawCarYear = typeof input.carYear === "string" ? input.carYear.trim() : "";
+
+  if (!rawCarYear) {
+    return false;
+  }
+
+  if (normalizeVehicleYear(rawCarYear)) {
+    return false;
+  }
+
+  const normalizedHomeAddress = typeof input.homeAddress === "string" ? input.homeAddress.trim() : "";
+  const normalizedHomeStreet = typeof input.homeStreet === "string" ? input.homeStreet.trim() : "";
+  const loweredCarYear = rawCarYear.toLowerCase();
+
+  return (
+    (normalizedHomeAddress && loweredCarYear === normalizedHomeAddress.toLowerCase()) ||
+    (normalizedHomeStreet && loweredCarYear === normalizedHomeStreet.toLowerCase()) ||
+    loweredCarYear.includes(",") ||
+    /\d+\s+[a-z]/i.test(loweredCarYear)
+  );
+}

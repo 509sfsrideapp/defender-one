@@ -9,10 +9,10 @@ import ImageCropField from "../components/ImageCropField";
 import { auth, db } from "../../lib/firebase";
 import { isAdminEmail } from "../../lib/admin";
 import { buildHomeAddress, splitHomeAddress } from "../../lib/home-address";
-import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate } from "../../lib/text-format";
+import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear, shouldClearCorruptedVehicleYear } from "../../lib/text-format";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { EmailAuthProvider, onAuthStateChanged, reauthenticateWithCredential, User } from "firebase/auth";
-import { collection, doc, getDoc, onSnapshot, query, where, writeBatch } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, updateDoc, where, writeBatch } from "firebase/firestore";
 import { isValidUsername, normalizeUsername } from "../../lib/username";
 
 type UserProfile = {
@@ -110,6 +110,14 @@ export default function AccountPage() {
         const snap = await getDoc(doc(db, "users", currentUser.uid));
         const data = snap.exists() ? (snap.data() as UserProfile) : null;
 
+        const shouldRepairCorruptedYear = data
+          ? shouldClearCorruptedVehicleYear({
+              carYear: data.carYear,
+              homeAddress: data.homeAddress,
+              homeStreet: data.homeStreet,
+            })
+          : false;
+
         const [fallbackFirstName = "", ...fallbackLastNameParts] = (data?.name || "").trim().split(/\s+/);
         const fallbackAddress = splitHomeAddress(data?.homeAddress);
         const parsedAddress = {
@@ -134,13 +142,20 @@ export default function AccountPage() {
           flight: data?.flight || "",
           profilePhotoUrl: data?.driverPhotoUrl || data?.riderPhotoUrl || "",
           bio: data?.bio || "",
-          carYear: data?.carYear || "",
+          carYear: normalizeVehicleYear(data?.carYear || ""),
           carMake: data?.carMake || "",
           carModel: data?.carModel || "",
           carColor: data?.carColor || "",
           carPlate: data?.carPlate || "",
         });
         setOriginalUsername(data?.username || "");
+
+        if (data && shouldRepairCorruptedYear) {
+          await updateDoc(doc(db, "users", currentUser.uid), {
+            carYear: "",
+            updatedAt: new Date(),
+          });
+        }
       } catch (error) {
         console.error(error);
         setStatusMessage("We could not load your account details.");
@@ -272,7 +287,7 @@ export default function AccountPage() {
       const normalizedHomeCity = formatAddressPart(form.homeCity);
       const normalizedHomeState = formatStateCode(form.homeState);
       const normalizedHomeZip = form.homeZip.trim();
-      const normalizedCarYear = form.carYear.trim();
+      const normalizedCarYear = normalizeVehicleYear(form.carYear);
       const normalizedCarMake = formatVehicleField(form.carMake);
       const normalizedCarModel = formatVehicleField(form.carModel);
       const normalizedCarColor = formatVehicleField(form.carColor);
