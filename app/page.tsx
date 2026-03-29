@@ -577,6 +577,8 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
+  const totalOperationalApps = (driverReady ? 1 : 0) + 1 + (showDevTile ? 1 : 0);
+  const totalVisibleApps = 2 + (showDevTile ? 1 : 0);
   const authTokenUserLabel =
     profile?.lastName?.trim() && profile?.firstName?.trim()
       ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
@@ -1271,7 +1273,20 @@ export default function HomePage() {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
-                  <h2 style={{ margin: 0 }}>Applications</h2>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                    <h2 style={{ margin: 0 }}>Applications</h2>
+                    <span
+                      style={{
+                        color: "#94a3b8",
+                        fontSize: 10,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        fontFamily: "var(--font-display)",
+                      }}
+                    >
+                      {`APPLICATIONS_STATUS//UPLINK:${totalOperationalApps}/${totalVisibleApps}`}
+                    </span>
+                  </div>
                 </div>
                 <div
                   style={{
