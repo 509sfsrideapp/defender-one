@@ -135,13 +135,23 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const [messageError, setMessageError] = useState("");
   const [sending, setSending] = useState(false);
 
-  const setQueryParam = (key: string, value?: string | null) => {
+  const setQueryParams = (updates: Record<string, string | null | undefined>) => {
     const nextParams = new URLSearchParams(searchParams.toString());
-    if (!value) nextParams.delete(key);
-    else nextParams.set(key, value);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) nextParams.delete(key);
+      else nextParams.set(key, value);
+    });
     const queryString = nextParams.toString();
     router.replace(queryString ? `/messages?${queryString}` : "/messages");
   };
+
+  const [selectedConversationId, setSelectedConversationId] = useState(requestedConversationId);
+
+  useEffect(() => {
+    setSelectedConversationId(requestedConversationId);
+    setMessages([]);
+    setMessageError("");
+  }, [requestedConversationId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -214,13 +224,14 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
     });
   }, [activeTab, allConversations, searchText, userId]);
 
-  const activeConversationId = requestedConversationId || "";
+  const activeConversationId = selectedConversationId || "";
   const activeConversation =
-    activeDmConversations.find((conversation) => conversation.id === activeConversationId) || null;
+    allConversations.find((conversation) => conversation.id === activeConversationId) || null;
 
   useEffect(() => {
     if (!activeConversationId) {
       setMessages([]);
+      setMessageLoading(false);
       return;
     }
 
@@ -230,6 +241,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       try {
         if (showLoadingState && !cancelled) {
           setMessageLoading(true);
+          setMessages([]);
         }
 
         const idToken = await auth.currentUser?.getIdToken();
@@ -349,7 +361,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   };
 
   const otherParticipant = activeConversation ? getOtherConversationParticipant(activeConversation, userId) : null;
-  const showThreadPane = Boolean(activeConversation);
+  const showThreadPane = Boolean(activeConversationId);
 
   return (
     <div style={{ marginTop: 18, display: "grid", gap: 16 }}>
@@ -371,8 +383,10 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                 key={tab.id}
                 type="button"
                 onClick={() => {
-                  setQueryParam("tab", tab.id);
-                  setQueryParam("conversationId", null);
+                  setQueryParams({
+                    tab: tab.id,
+                    conversationId: null,
+                  });
                 }}
                 style={{
                   display: "inline-flex",
@@ -407,7 +421,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
           </span>
           <input
             value={searchText}
-            onChange={(event) => setQueryParam("search", event.target.value.trim() || null)}
+            onChange={(event) => setQueryParams({ search: event.target.value.trim() || null })}
             placeholder={activeTab === "direct" ? "Search by user, username, or thread" : "Search by user or listing context"}
           />
         </label>
@@ -424,7 +438,11 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                   conversation={conversation}
                   currentUserId={userId}
                   active={conversation.id === activeConversation?.id}
-                  onOpen={() => setQueryParam("conversationId", conversation.id)}
+                  onOpen={() =>
+                    setQueryParams({
+                      conversationId: conversation.id,
+                    })
+                  }
                 />
               ))
             ) : (
@@ -448,14 +466,22 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                 <div style={{ padding: "0.9rem 1rem", borderBottom: "1px solid rgba(126, 142, 160, 0.14)", display: "grid", gap: 10, background: "linear-gradient(180deg, rgba(16, 24, 34, 0.98) 0%, rgba(10, 17, 24, 0.99) 100%)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "start", flexWrap: "wrap" }}>
                     <div style={{ minWidth: 0, display: "grid", gap: 4 }}>
-                      <strong style={{ fontSize: 15 }}>{activeConversation?.type === "direct" ? otherParticipant?.displayName || "Conversation" : otherParticipant?.displayName || "Context Thread"}</strong>
+                      <strong style={{ fontSize: 15 }}>
+                        {activeConversation
+                          ? activeConversation.type === "direct"
+                            ? otherParticipant?.displayName || "Conversation"
+                            : otherParticipant?.displayName || "Context Thread"
+                          : "Opening conversation..."}
+                      </strong>
                       <p style={{ margin: 0, color: "#94a3b8", fontSize: 12, lineHeight: 1.4 }}>
-                        {activeConversation?.type === "direct"
-                          ? [otherParticipant?.username?.trim() ? `@${otherParticipant.username.trim()}` : "", otherParticipant?.flight?.trim() || ""].filter(Boolean).join(" // ") || "Direct message thread"
-                          : `${activeConversation?.type === "marketplace" ? "Marketplace" : "ISO"} conversation`}
+                        {activeConversation
+                          ? activeConversation.type === "direct"
+                            ? [otherParticipant?.username?.trim() ? `@${otherParticipant.username.trim()}` : "", otherParticipant?.flight?.trim() || ""].filter(Boolean).join(" // ") || "Direct message thread"
+                            : `${activeConversation.type === "marketplace" ? "Marketplace" : "ISO"} conversation`
+                          : "Loading thread details"}
                       </p>
                     </div>
-                    <button type="button" onClick={() => setQueryParam("conversationId", null)} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 34, padding: "6px 12px", borderRadius: 10, border: "1px solid rgba(126, 142, 160, 0.18)", background: "rgba(15, 23, 42, 0.72)", color: "#dbe7f5", fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 10.5 }}>
+                    <button type="button" onClick={() => setQueryParams({ conversationId: null })} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: 34, padding: "6px 12px", borderRadius: 10, border: "1px solid rgba(126, 142, 160, 0.18)", background: "rgba(15, 23, 42, 0.72)", color: "#dbe7f5", fontFamily: "var(--font-display)", letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 10.5 }}>
                       Back to List
                     </button>
                   </div>
@@ -485,9 +511,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                     <div style={{ alignSelf: "center", justifySelf: "center", maxWidth: 420, textAlign: "center", display: "grid", gap: 8 }}>
                       <strong>No messages yet</strong>
                       <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
-                        Start the thread below and this conversation will stay grouped inside the {activeConversation?.type === "direct" ? "Direct" : activeConversation?.type === "marketplace" ? "Marketplace" : "ISO"} inbox bucket.
-                      </p>
-                    </div>
+                      Start the thread below and this conversation will stay grouped inside the {activeConversation?.type === "direct" ? "Direct" : activeConversation?.type === "marketplace" ? "Marketplace" : "ISO"} inbox bucket.
+                    </p>
+                  </div>
                   )}
                 </div>
 
@@ -496,7 +522,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                     value={messageDraft}
                     onChange={(event) => setMessageDraft(event.target.value)}
                     rows={2}
-                    placeholder={activeConversation?.type === "direct" ? "Write a direct message..." : activeConversation?.type === "marketplace" ? "Write a listing message..." : "Write an ISO response..."}
+                    placeholder={activeConversation?.type === "direct" ? "Write a direct message..." : activeConversation?.type === "marketplace" ? "Write a listing message..." : activeConversation?.type === "iso" ? "Write an ISO response..." : "Write a message..."}
                     style={{ resize: "none", minHeight: 74, maxHeight: 140 }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && !event.shiftKey) {

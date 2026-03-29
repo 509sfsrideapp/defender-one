@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v332",
+    title: "Message Launch Thread Sync Fix",
+    summary: "Fixed Messages so launching a conversation from places like Marketplace now locks onto the requested thread immediately, instead of visually falling back to a previously opened conversation while the list refresh catches up.",
+  },
+  {
     commit: "v331",
     title: "Marketplace Square Card Photos",
     summary: "Changed the Marketplace board cards to use the same square image format as the listing uploader, so main-page listing photos no longer render as wide 2:1 banners.",
