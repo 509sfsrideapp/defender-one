@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v318",
+    title: "Admin Dashboard Card Cleanup",
+    summary: "Simplified the top of the admin dashboard by removing the extra subtitle and old counter boxes, then replaced them with two cleaner management cards for Account Manager and Ride History plus a temporary section listing the remaining admin tools that still need a permanent home.",
+  },
+  {
     commit: "v317",
     title: "Anonymous Forum Comments",
     summary: "Added anonymous comment support to the forum thread flow with a new Anon Comment action beside Post Comment, plus anonymous reply support and public Anon labels while preserving the underlying author record.",

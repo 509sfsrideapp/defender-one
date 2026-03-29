@@ -266,10 +266,6 @@ export default function AdminPage() {
     );
   }
 
-  const openRides = rides.filter((ride) => ride.status === "open");
-  const acceptedRides = rides.filter((ride) => ride.status === "accepted");
-  const arrivedRides = rides.filter((ride) => ride.status === "arrived");
-  const pickedUpRides = rides.filter((ride) => ride.status === "picked_up");
   const completedRides = rides.filter((ride) => ride.status === "completed");
   const activeRideBoard = rides.filter(
     (ride) =>
@@ -301,102 +297,53 @@ export default function AdminPage() {
       </div>
 
       <h1>Admin Dashboard</h1>
-      <p style={{ maxWidth: 780, color: "#cbd5e1" }}>
-        Monitor live ride activity, driver availability, account operations, and system messaging from one administrative command view.
-      </p>
       <p>
         <strong>Signed in as:</strong> {user.email}
       </p>
 
-      <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(27, 35, 45, 0.96) 0%, rgba(13, 18, 24, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(126, 142, 160, 0.18)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Total Users:</strong> {users.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(18, 47, 49, 0.94) 0%, rgba(8, 23, 24, 0.99) 100%)", color: "#ccfbf1", border: "1px solid rgba(87, 125, 122, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Available Drivers:</strong> {availableDrivers.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(62, 45, 20, 0.94) 0%, rgba(28, 21, 11, 0.99) 100%)", color: "#fef3c7", border: "1px solid rgba(153, 127, 82, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Open Rides:</strong> {openRides.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(36, 44, 58, 0.94) 0%, rgba(15, 20, 28, 0.99) 100%)", color: "#e2e8f0", border: "1px solid rgba(126, 142, 160, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Accepted Rides:</strong> {acceptedRides.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(69, 40, 22, 0.94) 0%, rgba(29, 19, 11, 0.99) 100%)", color: "#ffedd5", border: "1px solid rgba(152, 103, 68, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Arrived:</strong> {arrivedRides.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(28, 43, 59, 0.94) 0%, rgba(12, 18, 26, 0.99) 100%)", color: "#dbeafe", border: "1px solid rgba(110, 133, 156, 0.22)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Picked Up:</strong> {pickedUpRides.length}
-        </div>
-        <div style={{ padding: 14, borderRadius: 12, background: "linear-gradient(180deg, rgba(32, 37, 45, 0.94) 0%, rgba(15, 18, 24, 0.99) 100%)", color: "#e5e7eb", border: "1px solid rgba(126, 142, 160, 0.2)", boxShadow: "0 16px 28px rgba(0,0,0,0.24)" }}>
-          <strong>Completed Rides:</strong> {completedRides.length}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 20 }}>
-        <Link
-          href="/admin/history"
-          style={{
-            display: "inline-block",
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
-          }}
-        >
-          Open Ride History
-        </Link>
-        <Link
-          href="/admin/accounts"
-          style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(28, 84, 81, 0.96) 0%, rgba(10, 49, 46, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
-          }}
-        >
-          Open Accounts
-        </Link>
-        <Link
-          href="/admin/audit"
-          style={{
-            display: "inline-block",
-            marginLeft: 12,
-            padding: "10px 16px",
-            background: "linear-gradient(180deg, rgba(52, 63, 79, 0.96) 0%, rgba(23, 31, 42, 0.98) 100%)",
-            color: "white",
-            textDecoration: "none",
-            borderRadius: 10,
-          }}
-        >
-          Open Audit Log
-        </Link>
-      </div>
-
-      <section style={{ marginTop: 28 }}>
+      <section
+        style={{
+          marginTop: 24,
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 14,
+        }}
+      >
         <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Admin Messages</h2>
-          <p style={{ maxWidth: 520, color: "#94a3b8" }}>
-            Open the admin inbox tools to send official messages, then review and manage everything from one place.
+          <h2 style={{ marginTop: 0, marginBottom: 10 }}>Account Manager</h2>
+          <p style={{ marginTop: 0, marginBottom: 14, color: "#cbd5e1" }}>
+            <strong>Total Accounts:</strong> {users.length}
           </p>
-          <Link href="/admin/inbox" style={featureLinkStyle}>
-            Open Admin Messages
+          <Link href="/admin/accounts" style={featureLinkStyle}>
+            Open Accounts
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0, marginBottom: 10 }}>Ride History</h2>
+          <p style={{ marginTop: 0, marginBottom: 14, color: "#cbd5e1" }}>
+            <strong>Total Rides Given:</strong> {completedRides.length}
+          </p>
+          <Link href="/admin/history" style={featureLinkStyle}>
+            Open Ride History
           </Link>
         </div>
       </section>
 
-      <section style={{ marginTop: 18 }}>
+      <section style={{ marginTop: 22 }}>
         <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Misconduct Queue</h2>
-          <p style={{ maxWidth: 520, color: "#94a3b8" }}>
-            Review user misconduct reports, decide whether the selected content stays live or gets removed, and send the result back into the reporter&apos;s Admin inbox.
-          </p>
-          <Link href="/admin/misconduct" style={featureLinkStyle}>
-            Open Misconduct Queue
-          </Link>
+          <h2 style={{ marginTop: 0, marginBottom: 12 }}>Still Needing a Home</h2>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link href="/admin/audit" style={featureLinkStyle}>
+              Audit Log
+            </Link>
+            <Link href="/admin/inbox" style={featureLinkStyle}>
+              Admin Messages
+            </Link>
+            <Link href="/admin/misconduct" style={featureLinkStyle}>
+              Misconduct Queue
+            </Link>
+          </div>
         </div>
       </section>
 
