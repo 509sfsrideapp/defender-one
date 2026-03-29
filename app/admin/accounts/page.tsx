@@ -560,6 +560,21 @@ export default function AdminAccountsPage() {
                     </div>
 
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <Link
+                        href={`/admin/accounts/${appUser.id}/inbox`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "8px 12px",
+                          backgroundColor: "#0f172a",
+                          color: "white",
+                          textDecoration: "none",
+                          borderRadius: 8,
+                        }}
+                      >
+                        View Inbox
+                      </Link>
                       <button
                         type="button"
                         onClick={() => (messageComposerOpen ? closeMessageComposer() : openMessageComposer(appUser))}

@@ -9,9 +9,8 @@ type UserInboxPostRecord = {
   threadId?: string;
   title?: string;
   requiresResponse?: boolean;
-  responseText?: string | null;
   responseSubmittedAt?: string | null;
-  rideId?: string | null;
+  readAt?: string | null;
 };
 
 export async function POST(
@@ -28,53 +27,39 @@ export async function POST(
 
     const decoded = await verifyFirebaseIdToken(idToken);
     const { postId } = await context.params;
-    const body = (await request.json()) as { responseText?: string };
-    const responseText = body.responseText?.trim() || "";
-
-    if (!responseText) {
-      return NextResponse.json({ error: "Please enter a response before submitting." }, { status: 400 });
-    }
-
-    if (responseText.length > 1500) {
-      return NextResponse.json({ error: "Responses must stay under 1,500 characters." }, { status: 400 });
-    }
-
     const post = await getFirestoreDocument<UserInboxPostRecord>(`userInboxPosts/${postId}`);
 
-    if (!post || post.threadId !== "notifications") {
-      return NextResponse.json({ error: "Notification prompt not found." }, { status: 404 });
+    if (!post) {
+      return NextResponse.json({ error: "Inbox post not found." }, { status: 404 });
     }
 
     if (post.userId !== decoded.sub) {
-      return NextResponse.json({ error: "Unauthorized inbox response." }, { status: 403 });
+      return NextResponse.json({ error: "Unauthorized inbox read update." }, { status: 403 });
     }
 
-    if (!post.requiresResponse) {
-      return NextResponse.json({ error: "This inbox post does not require a response." }, { status: 400 });
+    if (post.requiresResponse && !post.responseSubmittedAt) {
+      return NextResponse.json({ ok: true, skipped: "response_required" });
     }
 
-    if (post.responseSubmittedAt) {
-      return NextResponse.json({ error: "A response has already been submitted for this prompt." }, { status: 409 });
+    if (post.readAt) {
+      return NextResponse.json({ ok: true, skipped: "already_read" });
     }
 
     await patchFirestoreDocument(`userInboxPosts/${postId}`, {
-      responseText,
-      responseSubmittedAt: new Date(),
-      responseAuthorUid: decoded.sub,
       readAt: new Date(),
       readByUserId: decoded.sub,
     });
 
     await writeAuditLog({
-      action: "inbox_post.user_response",
+      action: "inbox_post.mark_read",
       actor: { uid: decoded.sub, email: decoded.email },
       targetType: "userInboxPost",
       targetId: postId,
       status: "success",
-      message: "User submitted a required inbox response.",
+      message: "User inbox post marked as read.",
       details: {
-        rideId: post.rideId || null,
         title: post.title || null,
+        threadId: post.threadId || null,
       },
     });
 
@@ -82,12 +67,12 @@ export async function POST(
   } catch (error) {
     console.error(error);
     await writeAuditLog({
-      action: "inbox_post.user_response",
+      action: "inbox_post.mark_read",
       status: "failure",
-      message: error instanceof Error ? error.message : "Could not save inbox response.",
+      message: error instanceof Error ? error.message : "Could not update inbox read state.",
     }).catch((auditError) => {
       console.error("Audit log write failed", auditError);
     });
-    return NextResponse.json({ error: "Could not save your response." }, { status: 500 });
+    return NextResponse.json({ error: "Could not update inbox read state." }, { status: 500 });
   }
 }

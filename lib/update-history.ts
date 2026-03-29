@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v304",
+    title: "Admin Inbox Read Visibility",
+    summary: "Added server-side read tracking for private user inbox posts, plus a new View Inbox action on admin account cards so admins can review each user’s sent inbox messages with read versus unread status and response completion.",
+  },
+  {
     commit: "v303",
     title: "Vehicle Year Signup Repair",
     summary: "Fixed the vehicle-year handling so bad values no longer save during account creation or account edits, and added automatic cleanup for corrupted vehicle-year data when affected users load their profile.",

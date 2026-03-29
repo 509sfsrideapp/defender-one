@@ -13,6 +13,7 @@ import { getMessageThreadDefinition, getSystemThreadMessages, isMessageThreadId,
 type InboxPost = {
   id: string;
   threadId: MessageThreadId;
+  userId?: string;
   title: string;
   body: string;
   imageUrl?: string | null;
@@ -21,6 +22,8 @@ type InboxPost = {
   responsePrompt?: string | null;
   responseText?: string | null;
   responseSubmittedAt?: { seconds?: number; nanoseconds?: number } | null;
+  readAt?: { seconds?: number; nanoseconds?: number } | null;
+  isPrivatePost?: boolean;
   createdAt?: { seconds?: number; nanoseconds?: number } | null;
 };
 
@@ -135,11 +138,12 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
           });
 
     const unsubscribePrivate = onSnapshot(query(collection(db, "userInboxPosts"), where("userId", "==", userId)), (snapshot) => {
-      privatePosts = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<InboxPost, "id">),
-      }));
-      sortMergedPosts();
+            privatePosts = snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              isPrivatePost: true,
+              ...(docSnap.data() as Omit<InboxPost, "id">),
+            }));
+            sortMergedPosts();
     });
 
     return () => {
@@ -187,7 +191,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
         throw new Error("You need to log in again before submitting this response.");
       }
 
-      const response = await fetch(`/api/user-inbox-posts/${post.id}/respond`, {
+    const response = await fetch(`/api/user-inbox-posts/${post.id}/respond`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -284,6 +288,27 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
 
                         if (openedPostTimestamp) {
                           setReadCutoff((current) => Math.max(current, openedPostTimestamp));
+                        }
+
+                        if (post.isPrivatePost) {
+                          void (async () => {
+                            try {
+                              const idToken = await auth.currentUser?.getIdToken();
+
+                              if (!idToken) {
+                                return;
+                              }
+
+                              await fetch(`/api/user-inbox-posts/${post.id}/read`, {
+                                method: "POST",
+                                headers: {
+                                  Authorization: `Bearer ${idToken}`,
+                                },
+                              });
+                            } catch (error) {
+                              console.error(error);
+                            }
+                          })();
                         }
                       }
                     }

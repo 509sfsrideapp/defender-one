@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
       responsePrompt: null,
       responseText: null,
       responseSubmittedAt: null,
+      readAt: null,
+      readByUserId: null,
       createdAt: new Date(),
       createdByUid: adminToken.sub,
       createdByEmail: adminToken.email || null,
