@@ -299,8 +299,23 @@ export default function EventsPage() {
                 />
               ) : null}
 
-              <div style={{ minWidth: 0, display: "grid", gap: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "start" }}>
+              <div style={{ minWidth: 0, display: "grid", gap: 10, position: "relative" }}>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    color: "#9cc2ee",
+                    fontSize: 12,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    fontFamily: "var(--font-display)",
+                  }}
+                >
+                  View Details
+                </span>
+
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "start", paddingRight: 112 }}>
                   <div style={{ display: "grid", gap: 6 }}>
                     <span
                       style={{
@@ -323,10 +338,6 @@ export default function EventsPage() {
                       {getOrganizerLabel(event)}
                     </p>
                   </div>
-
-                  <span style={{ color: "#9cc2ee", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-                    Open Details
-                  </span>
                 </div>
 
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>

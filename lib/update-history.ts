@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v256",
+    title: "Event Card Action Placement",
+    summary: "Moved the event-card View Details callout into the top-right corner of each Events board card so the action sits more cleanly against the title block.",
+  },
+  {
     commit: "v255",
     title: "Event Banner Ratio Update",
     summary: "Switched event photos back to a top-of-card banner layout with a consistent 2:1 landscape ratio, and upgraded the shared image cropper so event uploads show that same wide crop frame while the user is positioning the image.",
