@@ -306,7 +306,7 @@ export default function MarketplaceDetailPage() {
                 <div
                   style={{
                     width: "100%",
-                    aspectRatio: "2 / 1",
+                    aspectRatio: "1 / 1",
                     borderRadius: 16,
                     backgroundImage: `url(${listingRecord.photoUrl})`,
                     backgroundSize: "cover",
