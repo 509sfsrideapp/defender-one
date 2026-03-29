@@ -220,7 +220,7 @@ export default function EventsPage() {
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <div style={{ display: "grid", minWidth: 0 }}>
-              <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+              <strong style={{ fontSize: 15, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
                 Filter
               </strong>
             </div>
@@ -249,8 +249,28 @@ export default function EventsPage() {
             </button>
           </div>
 
-          {filtersExpanded ? (
-            <>
+          <div
+            style={{
+              display: "grid",
+              gap: 12,
+              overflow: "hidden",
+              maxHeight: filtersExpanded ? 320 : 0,
+              opacity: filtersExpanded ? 1 : 0,
+              transform: filtersExpanded ? "translateY(0) scale(1)" : "translateY(-8px) scale(0.98)",
+              transformOrigin: "top center",
+              transition:
+                "max-height 240ms ease, opacity 180ms ease, transform 200ms ease",
+              pointerEvents: filtersExpanded ? "auto" : "none",
+            }}
+            aria-hidden={!filtersExpanded}
+          >
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                paddingTop: 2,
+              }}
+            >
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
                 <label style={{ display: "grid", gap: 6 }}>
                   <span style={{ fontSize: 12, color: "#94a3b8" }}>Event Type</span>
@@ -290,8 +310,8 @@ export default function EventsPage() {
                   </button>
                 </div>
               ) : null}
-            </>
-          ) : null}
+            </div>
+          </div>
         </section>
 
         <section style={{ display: "grid", gap: 14 }}>

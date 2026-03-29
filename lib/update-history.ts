@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v267",
+    title: "Events Filter Motion Polish",
+    summary: "Made the main Events Filter label slightly larger and added a smoother open/close transition to the collapsible filter panel so it expands more like the existing profile dropdown behavior.",
+  },
+  {
     commit: "v266",
     title: "Emergency Ride Pulse Boost",
     summary: "Increased the emergency ride button’s color and glow pulse slightly so it reads more clearly while still keeping the button physically still with no size animation.",
