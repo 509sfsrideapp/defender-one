@@ -385,11 +385,8 @@ export default function NewEventPage() {
 
           <div style={sectionTitleStyle}>
             <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-              Description and Headcount
+              Description
             </strong>
-            <p style={helperTextStyle}>
-              Use the description box for the actual event brief, expectations, gear notes, or anything people need before showing up.
-            </p>
           </div>
 
           <label style={{ display: "grid", gap: 6 }}>
