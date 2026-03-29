@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v286",
+    title: "Event Attendance Rank Sorting",
+    summary: "Changed the event detail attendance roster to sort by Air Force rank precedence first, so higher-ranking attendees appear above lower-ranking attendees.",
+  },
+  {
     commit: "v285",
     title: "Structured Text Formatting",
     summary: "Added shared formatting for structured user-entered fields so saved address, location, vehicle, and plate data now auto-clean into more consistent capitalization and casing.",

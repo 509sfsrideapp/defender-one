@@ -36,6 +36,34 @@ type EventAttendeeRecord = {
   createdAt?: { seconds?: number; nanoseconds?: number } | Date | null;
 };
 
+const rankOrder = [
+  "Gen",
+  "Lt Gen",
+  "Maj Gen",
+  "Brig Gen",
+  "Col",
+  "Lt Col",
+  "Maj",
+  "Capt",
+  "1st Lt",
+  "2d Lt",
+  "CMSgt",
+  "SMSgt",
+  "MSgt",
+  "TSgt",
+  "SSgt",
+  "SrA",
+  "A1C",
+  "Amn",
+  "AB",
+] as const;
+
+function getAttendeeRankPriority(label: string) {
+  const normalizedLabel = label.trim().toLowerCase();
+  const rankIndex = rankOrder.findIndex((rank) => normalizedLabel.startsWith(rank.toLowerCase()));
+  return rankIndex === -1 ? rankOrder.length : rankIndex;
+}
+
 const sectionStyle: React.CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(126, 142, 160, 0.18)",
@@ -147,7 +175,14 @@ export default function EventDetailPage() {
           ...(docSnap.data() as Omit<EventAttendeeRecord, "id">),
         }));
 
-        nextAttendees.sort((a, b) => a.attendeeLabel.localeCompare(b.attendeeLabel));
+        nextAttendees.sort((a, b) => {
+          const rankDifference = getAttendeeRankPriority(a.attendeeLabel) - getAttendeeRankPriority(b.attendeeLabel);
+          if (rankDifference !== 0) {
+            return rankDifference;
+          }
+
+          return a.attendeeLabel.localeCompare(b.attendeeLabel);
+        });
         setAttendees(nextAttendees);
       }
     );
