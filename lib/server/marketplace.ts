@@ -1,6 +1,9 @@
 import { isAdminEmail } from "../admin";
 import type { MarketplaceListingRecord } from "../marketplace";
-import { getFirestoreDocument, listFirestoreDocuments } from "./firestore-admin";
+import {
+  getFirestoreDocument,
+  queryFirestoreDocuments,
+} from "./firestore-admin";
 
 export type MarketplaceCreatorSummary = {
   name?: string | null;
@@ -37,10 +40,22 @@ function toMarketplaceCreatorSummary(
 }
 
 export async function listMarketplaceListingsWithCreators(): Promise<MarketplaceListResponse> {
-  const listings = (await listFirestoreDocuments("marketplaceListings")) as MarketplaceListingRecord[];
+  const listings = (await queryFirestoreDocuments<Omit<MarketplaceListingRecord, "id">>({
+    collectionPath: "marketplaceListings",
+    orderByField: "createdAt",
+    direction: "DESCENDING",
+    limit: 120,
+  })) as MarketplaceListingRecord[];
   const creatorIds = Array.from(
     new Set(
       listings
+        .filter(
+          (listing) =>
+            !listing.createdByName &&
+            !listing.createdByFirstName &&
+            !listing.createdByLastName &&
+            !listing.createdByRank
+        )
         .map((listing) => listing.createdByUid?.trim() || "")
         .filter(Boolean)
     )
@@ -52,6 +67,24 @@ export async function listMarketplaceListingsWithCreators(): Promise<Marketplace
       return [creatorId, toMarketplaceCreatorSummary(userDocument)] as const;
     })
   );
+
+  listings.forEach((listing) => {
+    const creatorId = listing.createdByUid?.trim() || "";
+    if (!creatorId) {
+      return;
+    }
+
+    if (listing.createdByName || listing.createdByFirstName || listing.createdByLastName || listing.createdByRank) {
+      const embeddedSummary: MarketplaceCreatorSummary = {
+        name: listing.createdByName ?? null,
+        firstName: listing.createdByFirstName ?? null,
+        lastName: listing.createdByLastName ?? null,
+        rank: listing.createdByRank ?? null,
+      };
+
+      creatorEntries.push([creatorId, embeddedSummary] as const);
+    }
+  });
 
   return {
     listings,
@@ -72,9 +105,16 @@ export async function getMarketplaceListingWithCreator(listingId: string): Promi
   }
 
   const creatorProfile = listing.createdByUid
-    ? toMarketplaceCreatorSummary(
-        await getFirestoreDocument<MarketplaceUserDocument>(`users/${listing.createdByUid}`)
-      )
+    ? listing.createdByName || listing.createdByFirstName || listing.createdByLastName || listing.createdByRank
+      ? {
+          name: listing.createdByName ?? null,
+          firstName: listing.createdByFirstName ?? null,
+          lastName: listing.createdByLastName ?? null,
+          rank: listing.createdByRank ?? null,
+        }
+      : toMarketplaceCreatorSummary(
+          await getFirestoreDocument<MarketplaceUserDocument>(`users/${listing.createdByUid}`)
+        )
     : null;
 
   return {

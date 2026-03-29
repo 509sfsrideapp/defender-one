@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseIdToken } from "../../../lib/server/firebase-auth";
 import { writeAuditLog } from "../../../lib/server/audit-log";
-import { createFirestoreDocument } from "../../../lib/server/firestore-admin";
+import { createFirestoreDocument, getFirestoreDocument } from "../../../lib/server/firestore-admin";
 import { listMarketplaceListingsWithCreators } from "../../../lib/server/marketplace";
 import {
   MARKETPLACE_CATEGORY_OPTIONS,
@@ -13,6 +13,13 @@ import {
   type MarketplaceExchangeMethod,
   type MarketplaceStatus,
 } from "../../../lib/marketplace";
+
+type MarketplaceCreatorSeedProfile = {
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  rank?: string | null;
+};
 
 type RequestBody = {
   title?: string;
@@ -92,6 +99,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Choose a valid listing status." }, { status: 400 });
     }
 
+    const creatorProfile = await getFirestoreDocument<MarketplaceCreatorSeedProfile>(`users/${decoded.sub}`);
+
     const createdDocument = (await createFirestoreDocument("marketplaceListings", {
       title,
       category,
@@ -105,6 +114,10 @@ export async function POST(request: NextRequest) {
       status,
       createdByUid: decoded.sub,
       createdByEmail: decoded.email || null,
+      createdByName: creatorProfile?.name ?? null,
+      createdByFirstName: creatorProfile?.firstName ?? null,
+      createdByLastName: creatorProfile?.lastName ?? null,
+      createdByRank: creatorProfile?.rank ?? null,
       createdAt: new Date(),
     })) as { name?: string };
 

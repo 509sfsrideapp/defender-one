@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v337",
+    title: "Marketplace Board Query Relief",
+    summary: "Swapped the Marketplace board over to a tighter ordered server query and embedded seller summary data onto new listings, reducing the number and breadth of Firestore reads needed to render the main listings page.",
+  },
+  {
     commit: "v336",
     title: "Dedicated Message Thread Pages",
     summary: "Split direct messages into a list page and a dedicated thread page, moved system inbox threads under /inbox, and changed conversation opens so chats now load on their own page with a real back-to-list path instead of expanding inside the search screen.",
