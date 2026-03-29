@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v274",
+    title: "Marketplace App Placeholder",
+    summary: "Added a new Marketplace app tile on the homepage with a storefront icon and connected it to a live placeholder page so the app can be built out next.",
+  },
+  {
     commit: "v273",
     title: "Inbox Read-On-Open Narrowing",
     summary: "Changed inbox threads so posts only get marked read when the user actually expands that specific message, instead of clearing just from opening the inbox thread page.",

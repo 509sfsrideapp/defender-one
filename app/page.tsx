@@ -322,6 +322,35 @@ function EventsIcon() {
   );
 }
 
+function MarketplaceIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      width="34"
+      height="34"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M13 18.5h38" />
+      <path d="M13 18.5v4.5" />
+      <path d="M51 18.5v4.5" />
+      <path d="M13 23h38" />
+      <path d="M13 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
+      <path d="M21 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
+      <path d="M29 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
+      <path d="M37 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
+      <path d="M45 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
+      <path d="M16 26.9V48a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4V26.9" />
+      <rect x="21.5" y="33" width="8.5" height="19" rx="2.5" />
+      <rect x="35.5" y="33.5" width="9.5" height="9" rx="2.5" />
+    </svg>
+  );
+}
+
 function DevIcon() {
   return (
     <svg
@@ -577,8 +606,8 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
-  const totalOperationalApps = (driverReady ? 1 : 0) + 1 + (showDevTile ? 1 : 0);
-  const totalVisibleApps = 2 + (showDevTile ? 1 : 0);
+  const totalOperationalApps = (driverReady ? 1 : 0) + 2 + (showDevTile ? 1 : 0);
+  const totalVisibleApps = 3 + (showDevTile ? 1 : 0);
   const authTokenUserLabel =
     profile?.lastName?.trim() && profile?.firstName?.trim()
       ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
@@ -1353,6 +1382,7 @@ export default function HomePage() {
                     badgeCount={visibleDriverRequestCount}
                   />
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
+                  <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
                   {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
                     <PlaceholderTile key={index} />
