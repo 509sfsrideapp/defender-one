@@ -44,6 +44,7 @@ export default function QACommentItem({
   const canReply = !comment.deleted;
   const isAuthor = currentUserId === comment.authorId;
   const visibleAuthorLabel = getVisibleQACommentAuthorLabel(comment, { showAdminIdentity });
+  const adminAuthorLabel = comment.authorAdminLabel?.trim() || comment.authorLabel;
   const leftOffset = Math.min(depth, 4) * 10;
   const utilityChipStyle: React.CSSProperties = {
     minHeight: 26,
@@ -68,7 +69,7 @@ export default function QACommentItem({
         target={{
           targetType: "qa_comment",
           targetId: comment.id,
-          targetLabel: comment.deleted ? "[deleted] comment" : `${visibleAuthorLabel} comment`,
+          targetLabel: comment.deleted ? "[deleted] comment" : `${comment.anonymous ? "Anon" : visibleAuthorLabel} comment`,
           targetPreview: buildQAPostSnippet(comment.body, 200),
           targetPath: `/q-and-a/${comment.postId}`,
           targetOwnerUid: comment.authorId,
@@ -115,6 +116,21 @@ export default function QACommentItem({
                 </div>
               ) : null}
             </div>
+
+            {comment.anonymous && showAdminIdentity && !comment.deleted ? (
+              <p
+                style={{
+                  margin: 0,
+                  color: "#fca5a5",
+                  fontSize: 10,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Admin View // Commented by {adminAuthorLabel}
+              </p>
+            ) : null}
 
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
               {comment.children.length > 0 ? (
