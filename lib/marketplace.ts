@@ -24,6 +24,9 @@ export type MarketplaceListingDocument = {
   address?: string | null;
   description: string;
   photoUrl?: string | null;
+  priceAmount?: number | null;
+  isTrade?: boolean | null;
+  tradeForText?: string | null;
   priceText?: string | null;
   condition: MarketplaceCondition;
   status: MarketplaceStatus;
@@ -118,6 +121,45 @@ export function getMarketplacePreviewText(description?: string | null) {
   return description?.trim() || "Listing details pending.";
 }
 
+export function formatMarketplacePriceLabel(
+  listing: Pick<MarketplaceListingDocument, "priceAmount" | "isTrade" | "tradeForText" | "priceText">
+) {
+  if (listing.isTrade) {
+    const tradeFor = listing.tradeForText?.trim() || "";
+    return tradeFor ? `Trade for ${tradeFor}` : "Trade";
+  }
+
+  if (typeof listing.priceAmount === "number" && Number.isFinite(listing.priceAmount)) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: listing.priceAmount % 1 === 0 ? 0 : 2,
+    }).format(listing.priceAmount);
+  }
+
+  const trimmedPriceText = listing.priceText?.trim() || "";
+  return trimmedPriceText || "Price TBD";
+}
+
+export function getMarketplacePriceAmount(listing: Pick<MarketplaceListingDocument, "priceAmount" | "isTrade" | "priceText">) {
+  if (listing.isTrade) {
+    return null;
+  }
+
+  if (typeof listing.priceAmount === "number" && Number.isFinite(listing.priceAmount)) {
+    return listing.priceAmount;
+  }
+
+  const trimmedPriceText = listing.priceText?.trim() || "";
+  const matchedValue = trimmedPriceText.match(/-?\d+(?:\.\d+)?/);
+  if (!matchedValue) {
+    return null;
+  }
+
+  const parsedValue = Number(matchedValue[0]);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
 export function marketplaceMatchesCategory(
   listing: MarketplaceListingDocument,
   selectedCategory: string
@@ -125,11 +167,47 @@ export function marketplaceMatchesCategory(
   return !selectedCategory || selectedCategory === "all" || listing.category === selectedCategory;
 }
 
-export function marketplaceMatchesStatus(
-  listing: MarketplaceListingDocument,
-  selectedStatus: string
+export function marketplaceMatchesSearch(
+  listing: Pick<MarketplaceListingDocument, "title" | "description">,
+  searchText: string
 ) {
-  return !selectedStatus || selectedStatus === "all" || listing.status === selectedStatus;
+  const normalizedSearch = searchText.trim().toLowerCase();
+  if (!normalizedSearch) {
+    return true;
+  }
+
+  return `${listing.title} ${listing.description}`.toLowerCase().includes(normalizedSearch);
+}
+
+export function marketplaceMatchesPriceRange(
+  listing: Pick<MarketplaceListingDocument, "priceAmount" | "isTrade" | "priceText">,
+  minPriceText: string,
+  maxPriceText: string
+) {
+  const normalizedMin = minPriceText.trim();
+  const normalizedMax = maxPriceText.trim();
+
+  if (!normalizedMin && !normalizedMax) {
+    return true;
+  }
+
+  const priceAmount = getMarketplacePriceAmount(listing);
+  if (priceAmount === null) {
+    return false;
+  }
+
+  const minPrice = normalizedMin ? Number(normalizedMin) : null;
+  const maxPrice = normalizedMax ? Number(normalizedMax) : null;
+
+  if (minPrice !== null && Number.isFinite(minPrice) && priceAmount < minPrice) {
+    return false;
+  }
+
+  if (maxPrice !== null && Number.isFinite(maxPrice) && priceAmount > maxPrice) {
+    return false;
+  }
+
+  return true;
 }
 
 export function sortMarketplaceListings(listings: MarketplaceListingRecord[]) {

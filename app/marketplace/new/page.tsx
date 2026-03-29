@@ -74,7 +74,9 @@ export default function NewMarketplaceListingPage() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<MarketplaceCategory>("gear");
   const [exchangeMethod, setExchangeMethod] = useState<MarketplaceExchangeMethod>("buyer_pickup");
-  const [priceText, setPriceText] = useState("");
+  const [isTrade, setIsTrade] = useState(false);
+  const [priceAmount, setPriceAmount] = useState("");
+  const [tradeForText, setTradeForText] = useState("");
   const [condition, setCondition] = useState<MarketplaceCondition>("good");
   const [status, setStatus] = useState<MarketplaceStatus>("available");
   const [description, setDescription] = useState("");
@@ -105,6 +107,16 @@ export default function NewMarketplaceListingPage() {
       return;
     }
 
+    if (isTrade) {
+      if (!tradeForText.trim()) {
+        setStatusMessage("Tell people what you want to trade for.");
+        return;
+      }
+    } else if (!priceAmount.trim()) {
+      setStatusMessage("Listing price is required unless this is marked as a trade.");
+      return;
+    }
+
     try {
       setSaving(true);
       setStatusMessage("Saving listing...");
@@ -121,7 +133,9 @@ export default function NewMarketplaceListingPage() {
           exchangeMethod,
           description: description.trim(),
           photoUrl: photoUrl.trim() || null,
-          priceText: priceText.trim() || null,
+          isTrade,
+          priceAmount: isTrade ? null : Number(priceAmount),
+          tradeForText: isTrade ? formatStructuredText(tradeForText) : null,
           condition,
           status,
         }),
@@ -220,11 +234,6 @@ export default function NewMarketplaceListingPage() {
             </label>
 
             <label style={{ display: "grid", gap: 6 }}>
-              <span>Price / Trade Text</span>
-              <input value={priceText} onChange={(event) => setPriceText(event.target.value)} placeholder="$40, Free, Trade only..." />
-            </label>
-
-            <label style={{ display: "grid", gap: 6 }}>
               <span>Exchange Method</span>
               <select value={exchangeMethod} onChange={(event) => setExchangeMethod(event.target.value as MarketplaceExchangeMethod)}>
                 {MARKETPLACE_EXCHANGE_METHOD_OPTIONS.map((option) => (
@@ -232,6 +241,47 @@ export default function NewMarketplaceListingPage() {
                 ))}
               </select>
             </label>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                minHeight: 42,
+                paddingTop: 22,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isTrade}
+                onChange={(event) => setIsTrade(event.target.checked)}
+              />
+              <span>Trade Instead of Sale</span>
+            </label>
+
+            {!isTrade ? (
+              <label style={{ display: "grid", gap: 6 }}>
+                <span>Price</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={priceAmount}
+                  onChange={(event) => setPriceAmount(event.target.value)}
+                  placeholder="40.00"
+                />
+              </label>
+            ) : (
+              <label style={{ display: "grid", gap: 6 }}>
+                <span>Looking To Trade For</span>
+                <input
+                  value={tradeForText}
+                  onChange={(event) => setTradeForText(event.target.value)}
+                  placeholder="Dorm furniture, ABU items, tools..."
+                />
+              </label>
+            )}
           </div>
 
           <div style={{ display: "grid", gap: 8 }}>

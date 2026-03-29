@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v328",
+    title: "Marketplace Price and Search Filters",
+    summary: "Reworked Marketplace listings so sale posts require a real price unless marked as trade, added trade-for details, removed the status filter from the board, and replaced it with listing search plus custom min-to-max price filtering.",
+  },
+  {
     commit: "v327",
     title: "Marketplace Create API Fallback",
     summary: "Moved Marketplace listing creation off the direct Firestore client write path and onto a secure app API so new listings can still be created even while the live client-side Firestore rule is out of sync.",

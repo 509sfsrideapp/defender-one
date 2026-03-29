@@ -18,6 +18,7 @@ import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
   formatMarketplaceFulfillmentLabel,
+  formatMarketplacePriceLabel,
   formatMarketplaceStatusLabel,
   type MarketplaceListingRecord,
 } from "../../../lib/marketplace";
@@ -286,7 +287,7 @@ export default function MarketplaceDetailPage() {
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <span style={metaPillStyle}>{formatMarketplaceStatusLabel(listingRecord.status)}</span>
               <span style={metaPillStyle}>{formatMarketplaceConditionLabel(listingRecord.condition)}</span>
-              {listingRecord.priceText?.trim() ? <span style={metaPillStyle}>{listingRecord.priceText.trim()}</span> : null}
+              <span style={metaPillStyle}>{formatMarketplacePriceLabel(listingRecord)}</span>
             </div>
             <h1 style={{ margin: 0 }}>{listingRecord.title}</h1>
             <div
@@ -354,7 +355,7 @@ export default function MarketplaceDetailPage() {
             <p style={{ margin: 0, color: "#cbd5e1" }}>Status: {formatMarketplaceStatusLabel(listingRecord.status)}</p>
             <p style={{ margin: 0, color: "#cbd5e1" }}>Condition: {formatMarketplaceConditionLabel(listingRecord.condition)}</p>
             <p style={{ margin: 0, color: "#cbd5e1" }}>Exchange: {formatMarketplaceFulfillmentLabel(listingRecord)}</p>
-            {listingRecord.priceText?.trim() ? <p style={{ margin: 0, color: "#cbd5e1" }}>Price / Terms: {listingRecord.priceText.trim()}</p> : null}
+            <p style={{ margin: 0, color: "#cbd5e1" }}>{listingRecord.isTrade ? "Trade: " : "Price: "}{formatMarketplacePriceLabel(listingRecord)}</p>
           </div>
 
           <div

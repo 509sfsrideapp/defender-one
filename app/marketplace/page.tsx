@@ -14,11 +14,12 @@ import {
   formatMarketplaceConditionLabel,
   formatMarketplaceFulfillmentLabel,
   formatMarketplaceStatusLabel,
+  formatMarketplacePriceLabel,
   getMarketplacePreviewText,
   MARKETPLACE_CATEGORY_OPTIONS,
-  MARKETPLACE_STATUS_OPTIONS,
   marketplaceMatchesCategory,
-  marketplaceMatchesStatus,
+  marketplaceMatchesPriceRange,
+  marketplaceMatchesSearch,
   sortMarketplaceListings,
   type MarketplaceListingRecord,
 } from "../../lib/marketplace";
@@ -99,7 +100,9 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("available");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [listings, setListings] = useState<MarketplaceListingRecord[]>([]);
   const [creatorDirectory, setCreatorDirectory] = useState<Record<string, MarketplaceCreatorProfile>>({});
 
@@ -152,11 +155,12 @@ export default function MarketplacePage() {
       listings.filter((listing) => {
         return (
           marketplaceMatchesCategory(listing, selectedCategory) &&
-          marketplaceMatchesStatus(listing, selectedStatus)
+          marketplaceMatchesSearch(listing, searchQuery) &&
+          marketplaceMatchesPriceRange(listing, minPrice, maxPrice)
         );
       })
     );
-  }, [listings, selectedCategory, selectedStatus]);
+  }, [listings, maxPrice, minPrice, searchQuery, selectedCategory]);
 
   const getSellerLabel = (listing: MarketplaceListingRecord) => {
     const creator = listing.createdByUid ? creatorDirectory[listing.createdByUid] : null;
@@ -179,7 +183,11 @@ export default function MarketplacePage() {
     return "Seller: Not listed";
   };
 
-  const hasActiveFilters = selectedCategory !== "all" || selectedStatus !== "available";
+  const hasActiveFilters =
+    selectedCategory !== "all" ||
+    Boolean(searchQuery.trim()) ||
+    Boolean(minPrice.trim()) ||
+    Boolean(maxPrice.trim());
 
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading Marketplace" caption="Opening the live listings board." /></main>;
@@ -217,7 +225,6 @@ export default function MarketplacePage() {
               <h1 style={{ margin: "4px 0 0" }}>Marketplace</h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <span style={infoPillStyle}>{filteredListings.length} listings shown</span>
-                <span style={infoPillStyle}>Status: {formatMarketplaceStatusLabel(selectedStatus as "available" | "pending" | "sold" | "removed")}</span>
               </div>
             </div>
           </div>
@@ -259,11 +266,20 @@ export default function MarketplacePage() {
 
           <div
             className={`app-collapsible-panel${filtersExpanded ? " app-collapsible-panel-open" : ""}`}
-            style={{ display: "grid", gap: 12, maxHeight: filtersExpanded ? 260 : 0 }}
+            style={{ display: "grid", gap: 12, maxHeight: filtersExpanded ? 360 : 0 }}
             aria-hidden={!filtersExpanded}
           >
             <div style={{ display: "grid", gap: 12, paddingTop: 2 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+                <label style={{ display: "grid", gap: 6, gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>Search</span>
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search listing names and descriptions..."
+                  />
+                </label>
+
                 <label style={{ display: "grid", gap: 6 }}>
                   <span style={{ fontSize: 12, color: "#94a3b8" }}>Category</span>
                   <select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
@@ -275,13 +291,29 @@ export default function MarketplacePage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 6 }}>
-                  <span style={{ fontSize: 12, color: "#94a3b8" }}>Status</span>
-                  <select value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
-                    <option value="all">All statuses</option>
-                    {MARKETPLACE_STATUS_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>Min Price</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={minPrice}
+                    onChange={(event) => setMinPrice(event.target.value)}
+                    placeholder="Blank"
+                  />
+                </label>
+
+                <label style={{ display: "grid", gap: 6 }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>Max Price</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={maxPrice}
+                    onChange={(event) => setMaxPrice(event.target.value)}
+                    placeholder="Blank"
+                  />
                 </label>
               </div>
 
@@ -291,7 +323,9 @@ export default function MarketplacePage() {
                     type="button"
                     onClick={() => {
                       setSelectedCategory("all");
-                      setSelectedStatus("available");
+                      setSearchQuery("");
+                      setMinPrice("");
+                      setMaxPrice("");
                     }}
                     style={secondaryButtonStyle}
                   >
@@ -386,7 +420,7 @@ export default function MarketplacePage() {
                   <span style={infoPillStyle}>{formatMarketplaceStatusLabel(listing.status)}</span>
                   <span style={infoPillStyle}>{formatMarketplaceConditionLabel(listing.condition)}</span>
                   <span style={infoPillStyle}>{formatMarketplaceFulfillmentLabel(listing)}</span>
-                  {listing.priceText?.trim() ? <span style={infoPillStyle}>{listing.priceText.trim()}</span> : null}
+                  <span style={infoPillStyle}>{formatMarketplacePriceLabel(listing)}</span>
                 </div>
 
                 <p
@@ -409,7 +443,7 @@ export default function MarketplacePage() {
             <div style={{ ...cardStyle, padding: "1rem 1rem 1.1rem" }}>
               <strong style={{ display: "block", marginBottom: 8 }}>No listings match this filter set</strong>
               <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
-                Try widening the status or category filter, or post the first listing from the button above.
+                Try widening the search, category, or price range filter, or post the first listing from the button above.
               </p>
             </div>
           )}

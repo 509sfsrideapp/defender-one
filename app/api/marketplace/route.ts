@@ -17,7 +17,9 @@ type RequestBody = {
   title?: string;
   category?: MarketplaceCategory;
   exchangeMethod?: MarketplaceExchangeMethod;
-  priceText?: string;
+  priceAmount?: number | null;
+  isTrade?: boolean;
+  tradeForText?: string;
   condition?: MarketplaceCondition;
   status?: MarketplaceStatus;
   description?: string;
@@ -45,7 +47,13 @@ export async function POST(request: NextRequest) {
     const title = body.title?.trim() || "";
     const description = body.description?.trim() || "";
     const photoUrl = body.photoUrl?.trim() || null;
-    const priceText = body.priceText?.trim() || null;
+    const isTrade = Boolean(body.isTrade);
+    const tradeForText = body.tradeForText?.trim() || null;
+    const rawPriceAmount =
+      typeof body.priceAmount === "number" && Number.isFinite(body.priceAmount)
+        ? body.priceAmount
+        : null;
+    const priceAmount = isTrade ? null : rawPriceAmount;
     const category = body.category?.trim() || "";
     const exchangeMethod = body.exchangeMethod?.trim() || "";
     const condition = body.condition?.trim() || "";
@@ -57,6 +65,14 @@ export async function POST(request: NextRequest) {
 
     if (!description) {
       return NextResponse.json({ error: "Description is required." }, { status: 400 });
+    }
+
+    if (isTrade) {
+      if (!tradeForText) {
+        return NextResponse.json({ error: "Tell people what you want to trade for." }, { status: 400 });
+      }
+    } else if (priceAmount === null || priceAmount < 0) {
+      return NextResponse.json({ error: "Enter a valid listing price." }, { status: 400 });
     }
 
     if (!isValidOption(category, MARKETPLACE_CATEGORY_OPTIONS)) {
@@ -81,7 +97,9 @@ export async function POST(request: NextRequest) {
       exchangeMethod,
       description,
       photoUrl,
-      priceText,
+      priceAmount,
+      isTrade,
+      tradeForText,
       condition,
       status,
       createdByUid: decoded.sub,
@@ -106,7 +124,9 @@ export async function POST(request: NextRequest) {
         category,
         exchangeMethod,
         hasPhoto: Boolean(photoUrl),
-        hasPriceText: Boolean(priceText),
+        isTrade,
+        hasPriceAmount: priceAmount !== null,
+        hasTradeForText: Boolean(tradeForText),
       },
     });
 
