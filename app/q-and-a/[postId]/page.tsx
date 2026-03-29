@@ -8,6 +8,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
+import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { auth, db } from "../../../lib/firebase";
 import { isAdminEmail } from "../../../lib/admin";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
@@ -514,9 +515,12 @@ export default function QAPostDetailPage() {
             <>
               <div style={{ display: "grid", gap: 8 }}>
                 <h1 style={{ margin: 0 }}>{postRecord.deleted ? "[deleted]" : postRecord.title}</h1>
-                <p
+                <div
                   style={{
-                    margin: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    flexWrap: "wrap",
                     color: "#94a3b8",
                     fontSize: 12,
                     letterSpacing: "0.08em",
@@ -524,10 +528,20 @@ export default function QAPostDetailPage() {
                     fontFamily: "var(--font-display)",
                   }}
                 >
-                  {visibleAuthorLabel}
-                  {" // "}
-                  {formatRelativeTimestamp(postRecord.createdAt)}
-                </p>
+                  {postRecord.anonymous ? (
+                    <span>{visibleAuthorLabel}</span>
+                  ) : (
+                    <UserPreviewTrigger
+                      userId={postRecord.authorId}
+                      displayLabel={visibleAuthorLabel}
+                      triggerStyle={{ color: "#dbe7f5" }}
+                    >
+                      <span style={{ color: "#dbe7f5" }}>{visibleAuthorLabel}</span>
+                    </UserPreviewTrigger>
+                  )}
+                  <span>{"//"}</span>
+                  <span>{formatRelativeTimestamp(postRecord.createdAt)}</span>
+                </div>
                 {postRecord.anonymous && showAdminIdentity ? (
                   <p
                     style={{

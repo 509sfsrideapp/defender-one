@@ -225,7 +225,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
       <main style={{ padding: 20 }}>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
           <HomeIconLink />
-          <Link href="/messages" style={inboxNavButtonStyle}>Return to Inbox</Link>
+          <Link href="/messages?tab=system" style={inboxNavButtonStyle}>Return to Inbox</Link>
         </div>
         <h1>Thread Unavailable</h1>
         <p>That inbox thread could not be found.</p>
@@ -237,7 +237,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
     <main style={{ padding: 20 }}>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
         <HomeIconLink />
-        <Link href="/messages" style={inboxNavButtonStyle}>Return to Inbox</Link>
+        <Link href="/messages?tab=system" style={inboxNavButtonStyle}>Return to Inbox</Link>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         <div style={{ width: 46, height: 46, borderRadius: 14, display: "grid", placeItems: "center", backgroundColor: thread.iconBackground, color: thread.iconColor, border: "1px solid rgba(148, 163, 184, 0.16)" }}>

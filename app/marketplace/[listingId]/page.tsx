@@ -9,8 +9,10 @@ import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
+import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
+import { openMarketplaceConversation } from "../../../lib/direct-message-launch";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   formatMarketplaceCategoryLabel,
@@ -77,6 +79,7 @@ export default function MarketplaceDetailPage() {
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingListing, setDeletingListing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -286,18 +289,48 @@ export default function MarketplaceDetailPage() {
               {listingRecord.priceText?.trim() ? <span style={metaPillStyle}>{listingRecord.priceText.trim()}</span> : null}
             </div>
             <h1 style={{ margin: 0 }}>{listingRecord.title}</h1>
-            <p
+            <div
               style={{
-                margin: 0,
-                color: "#dbe7f5",
-                fontFamily: "var(--font-display)",
-                fontSize: 12,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
               }}
             >
-              {sellerLabel}
-            </p>
+              <UserPreviewTrigger
+                userId={listingRecord.createdByUid}
+                displayLabel={sellerLabel.replace(/^Seller:\s*/, "")}
+                triggerStyle={{
+                  color: "#dbe7f5",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 12,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                <span>{sellerLabel}</span>
+              </UserPreviewTrigger>
+              {listingRecord.createdByUid && listingRecord.createdByUid !== user.uid ? (
+                <button
+                  type="button"
+                  disabled={messageOpening}
+                  onClick={async () => {
+                    try {
+                      setMessageOpening(true);
+                      setStatusMessage("");
+                      await openMarketplaceConversation(router, listingRecord.id);
+                    } catch (error) {
+                      setStatusMessage(error instanceof Error ? error.message : "Could not open the seller thread.");
+                    } finally {
+                      setMessageOpening(false);
+                    }
+                  }}
+                  style={primaryButtonStyle}
+                >
+                  {messageOpening ? "Opening..." : "Message Seller"}
+                </button>
+              ) : null}
+            </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatMarketplaceLocationLabel(listingRecord.location)}</p>
             {listingRecord.address ? <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{listingRecord.address}</p> : null}
           </div>

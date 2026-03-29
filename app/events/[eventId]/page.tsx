@@ -9,6 +9,7 @@ import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
+import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
@@ -506,9 +507,10 @@ export default function EventDetailPage() {
               )}
             </div>
             <h1 style={{ margin: 0 }}>{eventRecord.name}</h1>
-            <p
-              style={{
-                margin: 0,
+            <UserPreviewTrigger
+              userId={eventRecord.createdByUid}
+              displayLabel={organizerLabel.replace(/^POC:\s*/, "")}
+              triggerStyle={{
                 color: "#dbe7f5",
                 fontFamily: "var(--font-display)",
                 fontSize: 12,
@@ -516,8 +518,8 @@ export default function EventDetailPage() {
                 textTransform: "uppercase",
               }}
             >
-              {organizerLabel}
-            </p>
+              <span>{organizerLabel}</span>
+            </UserPreviewTrigger>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatEventLocationLabel(eventRecord.location)}</p>
             {eventRecord.address ? (
               <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{eventRecord.address}</p>
@@ -666,7 +668,13 @@ export default function EventDetailPage() {
                     >
                       {!attendee.attendeePhotoUrl ? attendee.attendeeLabel.charAt(0).toUpperCase() : null}
                     </div>
-                    <p style={{ margin: 0, color: "#cbd5e1" }}>{attendee.attendeeLabel}</p>
+                    <UserPreviewTrigger
+                      userId={attendee.attendeeUid}
+                      displayLabel={attendee.attendeeLabel}
+                      triggerStyle={{ color: "#cbd5e1", justifySelf: "start" }}
+                    >
+                      <span>{attendee.attendeeLabel}</span>
+                    </UserPreviewTrigger>
                   </div>
                 ))}
               </div>

@@ -9,8 +9,10 @@ import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
+import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
+import { openIsoConversation } from "../../../lib/direct-message-launch";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   formatIsoCategoryLabel,
@@ -78,6 +80,7 @@ export default function ISORequestDetailPage() {
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingRequest, setDeletingRequest] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -288,18 +291,48 @@ export default function ISORequestDetailPage() {
               {requestRecord.neededByDate?.trim() ? <span style={metaPillStyle}>Need by {formatIsoNeedByLabel(requestRecord.neededByDate)}</span> : null}
             </div>
             <h1 style={{ margin: 0 }}>{requestRecord.title}</h1>
-            <p
+            <div
               style={{
-                margin: 0,
-                color: "#dbe7f5",
-                fontFamily: "var(--font-display)",
-                fontSize: 12,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
               }}
             >
-              {requesterLabel}
-            </p>
+              <UserPreviewTrigger
+                userId={requestRecord.createdByUid}
+                displayLabel={requesterLabel.replace(/^Requester:\s*/, "")}
+                triggerStyle={{
+                  color: "#dbe7f5",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 12,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                <span>{requesterLabel}</span>
+              </UserPreviewTrigger>
+              {requestRecord.createdByUid && requestRecord.createdByUid !== user.uid ? (
+                <button
+                  type="button"
+                  disabled={messageOpening}
+                  onClick={async () => {
+                    try {
+                      setMessageOpening(true);
+                      setStatusMessage("");
+                      await openIsoConversation(router, requestRecord.id);
+                    } catch (error) {
+                      setStatusMessage(error instanceof Error ? error.message : "Could not open the requester thread.");
+                    } finally {
+                      setMessageOpening(false);
+                    }
+                  }}
+                  style={primaryButtonStyle}
+                >
+                  {messageOpening ? "Opening..." : "Message Requester"}
+                </button>
+              ) : null}
+            </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatIsoLocationLabel(requestRecord.location)}</p>
             {requestRecord.address ? <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{requestRecord.address}</p> : null}
           </div>

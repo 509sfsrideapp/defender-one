@@ -11,6 +11,7 @@ import {
 import { ReportableTarget } from "../../components/MisconductReporting";
 import QACommentComposer from "./QACommentComposer";
 import QAVoteControls from "./QAVoteControls";
+import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 
 type QACommentItemProps = {
   comment: QACommentNode;
@@ -88,9 +89,21 @@ export default function QACommentItem({
           <div style={{ display: "grid", gap: 6 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "start" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", minWidth: 0, flex: "1 1 180px" }}>
-                <strong style={{ color: comment.deleted ? "#94a3b8" : "#dbe7f5", fontSize: 13, lineHeight: 1.2 }}>
-                  {comment.deleted ? "[deleted]" : visibleAuthorLabel}
-                </strong>
+                {comment.deleted || comment.anonymous ? (
+                  <strong style={{ color: comment.deleted ? "#94a3b8" : "#dbe7f5", fontSize: 13, lineHeight: 1.2 }}>
+                    {comment.deleted ? "[deleted]" : visibleAuthorLabel}
+                  </strong>
+                ) : (
+                  <UserPreviewTrigger
+                    userId={comment.authorId}
+                    displayLabel={visibleAuthorLabel}
+                    triggerStyle={{ display: "inline-flex", alignItems: "center" }}
+                  >
+                    <strong style={{ color: "#dbe7f5", fontSize: 13, lineHeight: 1.2 }}>
+                      {visibleAuthorLabel}
+                    </strong>
+                  </UserPreviewTrigger>
+                )}
                 <span
                   style={{
                     color: "#94a3b8",

@@ -1,87 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AppLoadingState from "../../components/AppLoadingState";
-import HomeIconLink from "../../components/HomeIconLink";
-import { auth } from "../../../lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-
-const inboxNavButtonStyle: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: 32,
-  padding: "5px 13px",
-  borderRadius: 10,
-  textDecoration: "none",
-  background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
-  color: "#f8fafc",
-  border: "1px solid rgba(126, 142, 160, 0.24)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 28px rgba(17, 24, 39, 0.26)",
-  fontFamily: "var(--font-display)",
-  letterSpacing: "0.07em",
-  textTransform: "uppercase",
-  fontSize: 10.5,
-};
 
 export default function DirectMessagesPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading) {
-    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Direct Messages" caption="Opening your direct message workspace." /></main>;
-  }
-
-  if (!user) {
-    return (
-      <main style={{ padding: 20 }}>
-        <HomeIconLink />
-        <h1>Direct Messages</h1>
-        <p>You need to log in first.</p>
-      </main>
-    );
-  }
+    router.replace("/messages?tab=direct");
+  }, [router]);
 
   return (
     <main style={{ padding: 20 }}>
-      <HomeIconLink />
-      <h1>Direct Messages</h1>
-      <p style={{ maxWidth: 700 }}>
-        This is the future home for one-to-one user messaging. We can wire inbox threads, unread counts, and user search
-        into this screen next.
-      </p>
-      <div
-        style={{
-          marginTop: 20,
-          maxWidth: 760,
-          padding: 18,
-          borderRadius: 16,
-          border: "1px solid rgba(148, 163, 184, 0.18)",
-          backgroundColor: "rgba(9, 15, 25, 0.88)",
-          boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
-        }}
-      >
-        <strong>Direct message threads are coming next.</strong>
-        <p style={{ margin: "6px 0 0", color: "#94a3b8" }}>
-          Once we add user-to-user messaging, your conversations will show up here as their own message list.
-        </p>
-        <Link
-          href="/messages"
-          style={{ ...inboxNavButtonStyle, marginTop: 16 }}
-        >
-          Open Inbox
-        </Link>
-      </div>
+      <AppLoadingState
+        title="Opening Messages"
+        caption="Redirecting you into the direct-message inbox."
+      />
     </main>
   );
 }

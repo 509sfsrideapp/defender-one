@@ -623,6 +623,26 @@ function MagnifyingGlassIcon() {
   );
 }
 
+function MessagesIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      width="34"
+      height="34"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 18h36a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H28l-10 8v-8h-4a6 6 0 0 1-6-6V24a6 6 0 0 1 6-6Z" />
+      <path d="M21 28h22" />
+      <path d="M21 36h15" />
+    </svg>
+  );
+}
+
 function DevIcon() {
   return (
     <svg
@@ -914,10 +934,10 @@ export default function HomePage() {
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
   const showAdminTile = Boolean(user && isAdminEmail(user.email));
-  const visibleAppTileCount = 5 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const visibleAppTileCount = 6 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const appTilePlaceholderCount = Math.max(0, 9 - visibleAppTileCount);
-  const totalOperationalApps = (driverReady ? 1 : 0) + 4 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
-  const totalVisibleApps = 5 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const totalOperationalApps = (driverReady ? 1 : 0) + 5 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const totalVisibleApps = 6 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const authTokenUserLabel =
     profile?.lastName?.trim() && profile?.firstName?.trim()
       ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
@@ -1366,7 +1386,7 @@ export default function HomePage() {
               </div>
               <div className="profile-menu-item-wrap">
                 <Link
-                  href="/messages"
+                  href="/messages?tab=system"
                   onClick={() => setProfileMenuOpen(false)}
                   style={{
                     display: "block",
@@ -1693,6 +1713,7 @@ export default function HomePage() {
                     pulseGreen={Boolean(driverReady && profile?.available)}
                   />
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
+                  <AppTile href="/messages?tab=direct" icon={<MessagesIcon />} label="MESSAGES" />
                   <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="FORUMS" />
                   <AppTile href="/iso" icon={<MagnifyingGlassIcon />} label="ISO" />
