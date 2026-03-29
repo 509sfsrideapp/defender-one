@@ -8,14 +8,14 @@ type QAVoteControlsProps = {
 };
 
 const buttonBaseStyle: React.CSSProperties = {
-  minHeight: 30,
-  minWidth: 30,
-  padding: "0 8px",
-  borderRadius: 999,
+  minHeight: 26,
+  minWidth: 26,
+  padding: "0 6px",
+  borderRadius: 10,
   border: "1px solid rgba(126, 142, 160, 0.16)",
   background: "rgba(15, 23, 42, 0.74)",
   color: "#dbe7f5",
-  fontSize: 13,
+  fontSize: 12,
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
@@ -27,9 +27,9 @@ export default function QAVoteControls({ score, currentVote, onVote, compact = f
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: compact ? 6 : 8,
-        padding: compact ? "4px 6px" : "6px 8px",
-        borderRadius: 999,
+        gap: compact ? 4 : 6,
+        padding: compact ? "3px 5px" : "5px 7px",
+        borderRadius: 12,
         border: "1px solid rgba(126, 142, 160, 0.16)",
         background: "rgba(17, 24, 39, 0.62)",
       }}
@@ -40,8 +40,8 @@ export default function QAVoteControls({ score, currentVote, onVote, compact = f
         aria-label="Thumbs up"
         style={{
           ...buttonBaseStyle,
-          minHeight: compact ? 28 : 30,
-          minWidth: compact ? 28 : 30,
+          minHeight: compact ? 24 : 26,
+          minWidth: compact ? 24 : 26,
           background: currentVote === 1 ? "rgba(22, 163, 74, 0.2)" : buttonBaseStyle.background,
           border: currentVote === 1 ? "1px solid rgba(74, 222, 128, 0.28)" : buttonBaseStyle.border,
           color: currentVote === 1 ? "#bbf7d0" : "#dbe7f5",
@@ -51,10 +51,10 @@ export default function QAVoteControls({ score, currentVote, onVote, compact = f
       </button>
       <span
         style={{
-          minWidth: compact ? 20 : 24,
+          minWidth: compact ? 18 : 22,
           textAlign: "center",
           color: "#dbe7f5",
-          fontSize: compact ? 11 : 12,
+          fontSize: compact ? 10 : 11,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           fontFamily: "var(--font-display)",
@@ -68,8 +68,8 @@ export default function QAVoteControls({ score, currentVote, onVote, compact = f
         aria-label="Thumbs down"
         style={{
           ...buttonBaseStyle,
-          minHeight: compact ? 28 : 30,
-          minWidth: compact ? 28 : 30,
+          minHeight: compact ? 24 : 26,
+          minWidth: compact ? 24 : 26,
           background: currentVote === -1 ? "rgba(185, 28, 28, 0.2)" : buttonBaseStyle.background,
           border: currentVote === -1 ? "1px solid rgba(248, 113, 113, 0.28)" : buttonBaseStyle.border,
           color: currentVote === -1 ? "#fecaca" : "#dbe7f5",

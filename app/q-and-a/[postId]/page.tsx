@@ -396,7 +396,7 @@ export default function QAPostDetailPage() {
           </div>
 
           {editingPost && canEditPost ? (
-            <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ display: "grid", gap: 8 }}>
               <label style={{ display: "grid", gap: 6 }}>
                 <span style={{ color: "#94a3b8", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
                   Title

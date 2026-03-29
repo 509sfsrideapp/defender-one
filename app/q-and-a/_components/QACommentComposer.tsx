@@ -46,9 +46,9 @@ export default function QACommentComposer({
     <div
       style={{
         display: "grid",
-        gap: 10,
-        padding: compact ? "0.85rem" : "1rem",
-        borderRadius: 14,
+        gap: compact ? 8 : 10,
+        padding: compact ? "0.65rem" : "0.9rem",
+        borderRadius: 12,
         border: "1px solid rgba(126, 142, 160, 0.14)",
         background: "rgba(12, 18, 26, 0.78)",
       }}
@@ -57,14 +57,14 @@ export default function QACommentComposer({
         value={body}
         onChange={(event) => setBody(event.target.value)}
         placeholder={placeholder}
-        rows={compact ? 4 : 6}
+        rows={compact ? 3 : 5}
         disabled={submitting}
-        style={{ minHeight: compact ? 100 : 148 }}
+        style={{ minHeight: compact ? 82 : 132 }}
       />
 
       {errorMessage ? <p style={{ margin: 0, color: "#fca5a5" }}>{errorMessage}</p> : null}
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button
           type="button"
           onClick={() => void submitComment()}
@@ -73,9 +73,9 @@ export default function QACommentComposer({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            minHeight: 38,
-            padding: "8px 13px",
-            borderRadius: 10,
+            minHeight: compact ? 34 : 36,
+            padding: compact ? "7px 11px" : "8px 13px",
+            borderRadius: 9,
             textDecoration: "none",
             background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
             color: "#ffffff",
@@ -84,7 +84,7 @@ export default function QACommentComposer({
             fontFamily: "var(--font-display)",
             letterSpacing: "0.07em",
             textTransform: "uppercase",
-            fontSize: 10.5,
+            fontSize: compact ? 10 : 10.5,
           }}
         >
           {submitting ? "Submitting..." : submitLabel}
@@ -98,9 +98,9 @@ export default function QACommentComposer({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              minHeight: 38,
-              padding: "8px 13px",
-              borderRadius: 10,
+              minHeight: compact ? 34 : 36,
+              padding: compact ? "7px 11px" : "8px 13px",
+              borderRadius: 9,
               textDecoration: "none",
               background: "linear-gradient(180deg, rgba(24, 31, 40, 0.98) 0%, rgba(11, 16, 22, 0.99) 100%)",
               color: "#dbe7f5",
@@ -109,7 +109,7 @@ export default function QACommentComposer({
               fontFamily: "var(--font-display)",
               letterSpacing: "0.07em",
               textTransform: "uppercase",
-              fontSize: 10.5,
+              fontSize: compact ? 10 : 10.5,
             }}
           >
             Cancel

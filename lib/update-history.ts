@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v314",
+    title: "Forums Thread Compact Layout",
+    summary: "Refactored the forum comment thread into a denser mobile-first layout with tighter comment cards, smaller utility actions, slimmer vote controls, and reduced nesting spacing so more discussion fits on screen without losing the tactical thread structure.",
+  },
+  {
     commit: "v313",
     title: "Forums Feature Rename",
     summary: "Renamed the user-facing Q&A feature labeling to Forums across the homepage app tile, forum pages, and moderation labels so the discussion system reads consistently across the app.",
