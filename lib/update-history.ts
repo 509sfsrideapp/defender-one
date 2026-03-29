@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v290",
+    title: "Q&A My Posts View",
+    summary: "Added a My Posts button to the top-right of the Q&A feed and a dedicated My Posts page so users can review just the discussion threads they created from one place.",
+  },
+  {
     commit: "v289",
     title: "Q&A Post Edit and Delete",
     summary: "Added author-only edit and delete controls for Q&A posts, including inline title and body editing on the post page plus a delete flow that removes the post from the feed while preserving the comment thread data behind it.",

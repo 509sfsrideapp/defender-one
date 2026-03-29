@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
-import AppLoadingState from "../components/AppLoadingState";
-import HomeIconLink from "../components/HomeIconLink";
-import { auth, db } from "../../lib/firebase";
-import { sortQAPosts, type QAPostRecord, type QAPostSortMode } from "../../lib/q-and-a";
-import QAPostCard from "./_components/QAPostCard";
+import AppLoadingState from "../../components/AppLoadingState";
+import HomeIconLink from "../../components/HomeIconLink";
+import { auth, db } from "../../../lib/firebase";
+import { sortQAPosts, type QAPostRecord, type QAPostSortMode } from "../../../lib/q-and-a";
+import QAPostCard from "../_components/QAPostCard";
 
 const pageShellStyle: React.CSSProperties = {
   maxWidth: 980,
@@ -56,7 +56,7 @@ const infoPillStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
 };
 
-export default function QAndAPage() {
+export default function QAMyPostsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<QAPostRecord[]>([]);
@@ -88,17 +88,20 @@ export default function QAndAPage() {
     return () => unsubscribe();
   }, [user]);
 
-  const visiblePosts = useMemo(() => sortQAPosts(posts, sortMode), [posts, sortMode]);
+  const myPosts = useMemo(
+    () => sortQAPosts(posts.filter((post) => post.authorId === user?.uid), sortMode),
+    [posts, sortMode, user?.uid]
+  );
 
   if (loading) {
-    return <main style={{ padding: 20 }}><AppLoadingState title="Loading Q&A" caption="Opening the discussion feed." /></main>;
+    return <main style={{ padding: 20 }}><AppLoadingState title="Loading My Posts" caption="Gathering the posts tied to your account." /></main>;
   }
 
   if (!user) {
     return (
       <main style={{ padding: 20 }}>
         <HomeIconLink />
-        <h1>Q&amp;A</h1>
+        <h1>My Posts</h1>
         <p>You need to log in first.</p>
       </main>
     );
@@ -121,25 +124,25 @@ export default function QAndAPage() {
                   fontFamily: "var(--font-display)",
                 }}
               >
-                Discussion feed
+                Author review
               </p>
-              <h1 style={{ margin: "4px 0 0" }}>Q&amp;A</h1>
+              <h1 style={{ margin: "4px 0 0" }}>My Posts</h1>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <span style={infoPillStyle}>{visiblePosts.length} posts shown</span>
-                <span style={infoPillStyle}>Threaded discussion enabled</span>
+                <span style={infoPillStyle}>{myPosts.length} posts shown</span>
+                <span style={infoPillStyle}>Author controls available</span>
               </div>
             </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <Link
-              href="/q-and-a/my-posts"
+              href="/q-and-a"
               style={{
                 ...primaryButtonStyle,
                 background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
               }}
             >
-              My Posts
+              All Posts
             </Link>
             <Link href="/q-and-a/new" style={{ ...primaryButtonStyle, gap: 8 }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
@@ -158,7 +161,7 @@ export default function QAndAPage() {
                 fontFamily: "var(--font-display)",
               }}
             >
-              Post Feed
+              My Threads
             </strong>
 
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -173,7 +176,7 @@ export default function QAndAPage() {
             </div>
           </div>
 
-          {visiblePosts.length === 0 ? (
+          {myPosts.length === 0 ? (
             <div
               style={{
                 borderRadius: 14,
@@ -185,7 +188,7 @@ export default function QAndAPage() {
               }}
             >
               <p style={{ margin: 0, color: "#cbd5e1" }}>
-                No posts yet. Start the discussion by creating the first thread.
+                You have not created any Q&amp;A posts yet.
               </p>
               <div>
                 <Link href="/q-and-a/new" style={primaryButtonStyle}>
@@ -195,7 +198,7 @@ export default function QAndAPage() {
             </div>
           ) : (
             <div style={{ display: "grid", gap: 12 }}>
-              {visiblePosts.map((post) => (
+              {myPosts.map((post) => (
                 <QAPostCard key={post.id} post={post} />
               ))}
             </div>
