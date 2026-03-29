@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v333",
+    title: "Messages Bucket Auto-Correction",
+    summary: "Updated the Messages app so if a deep link or unread open request includes a conversation id without the right tab, it now resolves the thread type and automatically snaps into the correct Direct, Marketplace, or ISO bucket instead of staying stuck on the wrong tab.",
+  },
+  {
     commit: "v332",
     title: "Message Launch Thread Sync Fix",
     summary: "Fixed Messages so launching a conversation from places like Marketplace now locks onto the requested thread immediately, instead of visually falling back to a previously opened conversation while the list refresh catches up.",

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "../../lib/firebase";
 import {
@@ -122,7 +122,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const requestedConversationId = searchParams.get("conversationId") || "";
-  const activeTab: DirectMessageBucket =
+  const requestedBucket: DirectMessageBucket =
     requestedTab === "marketplace" || requestedTab === "iso" || requestedTab === "direct"
       ? requestedTab
       : "direct";
@@ -135,7 +135,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const [messageError, setMessageError] = useState("");
   const [sending, setSending] = useState(false);
 
-  const setQueryParams = (updates: Record<string, string | null | undefined>) => {
+  const setQueryParams = useCallback((updates: Record<string, string | null | undefined>) => {
     const nextParams = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
       if (!value) nextParams.delete(key);
@@ -143,7 +143,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
     });
     const queryString = nextParams.toString();
     router.replace(queryString ? `/messages?${queryString}` : "/messages");
-  };
+  }, [router, searchParams]);
 
   const [selectedConversationId, setSelectedConversationId] = useState(requestedConversationId);
 
@@ -213,6 +213,11 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   }, [userId]);
 
   const searchText = (searchParams.get("search") || "").trim();
+  const activeConversationId = selectedConversationId || "";
+  const activeConversation =
+    allConversations.find((conversation) => conversation.id === activeConversationId) || null;
+  const activeTab: DirectMessageBucket = activeConversation?.type || requestedBucket;
+
   const activeDmConversations = useMemo(() => {
     const tabFiltered = allConversations.filter((conversation) => conversation.type === activeTab);
     if (!searchText) return tabFiltered;
@@ -224,9 +229,20 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
     });
   }, [activeTab, allConversations, searchText, userId]);
 
-  const activeConversationId = selectedConversationId || "";
-  const activeConversation =
-    allConversations.find((conversation) => conversation.id === activeConversationId) || null;
+  useEffect(() => {
+    if (!requestedConversationId || !activeConversation) {
+      return;
+    }
+
+    if (requestedTab === activeConversation.type) {
+      return;
+    }
+
+    setQueryParams({
+      tab: activeConversation.type,
+      conversationId: requestedConversationId,
+    });
+  }, [activeConversation, requestedConversationId, requestedTab, setQueryParams]);
 
   useEffect(() => {
     if (!activeConversationId) {
