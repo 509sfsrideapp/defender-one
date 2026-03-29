@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v331",
+    title: "Marketplace Square Card Photos",
+    summary: "Changed the Marketplace board cards to use the same square image format as the listing uploader, so main-page listing photos no longer render as wide 2:1 banners.",
+  },
+  {
     commit: "v330",
     title: "Marketplace Server Readback Fix",
     summary: "Moved Marketplace board and detail reads onto secure app APIs, bundled seller summaries into those responses, and switched Marketplace delete onto the same server path so newly created listings now load back reliably even while the client Firestore rules for that collection are still out of sync.",
