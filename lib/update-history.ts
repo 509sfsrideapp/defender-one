@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v329",
+    title: "Messages Thread Stability and Bubble Sizing",
+    summary: "Stopped active DM threads from re-triggering their loading state every time the conversation list refreshed, and fixed single-message bubbles so they size to content instead of stretching tall inside the thread pane.",
+  },
+  {
     commit: "v328",
     title: "Marketplace Price and Search Filters",
     summary: "Reworked Marketplace listings so sale posts require a real price unless marked as trade, added trade-for details, removed the status filter from the board, and replaced it with listing search plus custom min-to-max price filtering.",

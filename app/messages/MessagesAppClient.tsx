@@ -94,9 +94,10 @@ function MessageBubble({ message, currentUserId }: { message: DirectMessageRecor
   const ownMessage = message.senderId === currentUserId;
 
   return (
-    <div style={{ display: "grid", justifyItems: ownMessage ? "end" : "start" }}>
+    <div style={{ display: "flex", justifyContent: ownMessage ? "flex-end" : "flex-start", alignSelf: ownMessage ? "flex-end" : "flex-start" }}>
       <div
         style={{
+          width: "fit-content",
           maxWidth: "min(84%, 460px)",
           display: "grid",
           gap: 6,
@@ -213,11 +214,12 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
     });
   }, [activeTab, allConversations, searchText, userId]);
 
+  const activeConversationId = requestedConversationId || "";
   const activeConversation =
-    activeDmConversations.find((conversation) => conversation.id === requestedConversationId) || null;
+    activeDmConversations.find((conversation) => conversation.id === activeConversationId) || null;
 
   useEffect(() => {
-    if (!activeConversation) {
+    if (!activeConversationId) {
       setMessages([]);
       return;
     }
@@ -241,7 +243,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
         }
 
         const response = await fetch(
-          `/api/messages/conversations/${activeConversation.id}/messages`,
+          `/api/messages/conversations/${activeConversationId}/messages`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
@@ -279,10 +281,10 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [activeConversation]);
+  }, [activeConversationId]);
 
   useEffect(() => {
-    if (!activeConversation) return;
+    if (!activeConversationId || !activeConversation) return;
     const unreadCount = Number(activeConversation.unreadCounts?.[userId] || 0) || 0;
     if (unreadCount <= 0) return;
     let cancelled = false;
@@ -290,13 +292,13 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       try {
         const idToken = await auth.currentUser?.getIdToken();
         if (!idToken || cancelled) return;
-        await fetch(`/api/messages/conversations/${activeConversation.id}/read`, { method: "POST", headers: { Authorization: `Bearer ${idToken}` } });
+        await fetch(`/api/messages/conversations/${activeConversationId}/read`, { method: "POST", headers: { Authorization: `Bearer ${idToken}` } });
       } catch (error) {
         console.error(error);
       }
     })();
     return () => { cancelled = true; };
-  }, [activeConversation, userId]);
+  }, [activeConversation, activeConversationId, userId]);
 
   const unreadCountsByBucket = useMemo(() => {
     return {
@@ -474,7 +476,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                   ) : null}
                 </div>
 
-                <div style={{ padding: "1rem", display: "grid", gap: 12, minHeight: 320, maxHeight: 520, overflowY: "auto", background: "linear-gradient(180deg, rgba(9, 14, 20, 0.98) 0%, rgba(3, 8, 14, 0.995) 100%)" }}>
+                <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: 12, minHeight: 320, maxHeight: 520, overflowY: "auto", background: "linear-gradient(180deg, rgba(9, 14, 20, 0.98) 0%, rgba(3, 8, 14, 0.995) 100%)" }}>
                   {messageLoading ? (
                     <p style={{ margin: 0, color: "#94a3b8" }}>Loading messages...</p>
                   ) : messages.length > 0 ? (
