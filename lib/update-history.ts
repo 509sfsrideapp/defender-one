@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v339",
+    title: "Events Read Optimization",
+    summary: "Embedded lightweight organizer summary fields onto new events and removed the broad live users-collection listeners from the Events board and event detail page, replacing them with targeted fallbacks for older records so the event experience stays the same while background Firestore reads drop sharply.",
+  },
+  {
     commit: "v338",
     title: "Dev-Locked Marketplace, ISO, and Messages",
     summary: "Removed Marketplace, ISO, and Messages from the live user dashboard, moved Marketplace and ISO into Developer Tools beside Messages, and added route-level developer access gates so those three features stay behind the dev PIN while Driver, Events, and Forums remain the main user-facing apps.",

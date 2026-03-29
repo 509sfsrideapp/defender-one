@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
@@ -13,7 +13,7 @@ import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
-import { formatEventDateEntry, formatEventLocationLabel, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
+import { formatEventCreatorLabel, formatEventDateEntry, formatEventLocationLabel, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
 
 type UserProfile = {
   firstName?: string | null;
@@ -116,7 +116,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [eventRecord, setEventRecord] = useState<EventRecord | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [creatorDirectory, setCreatorDirectory] = useState<Record<string, EventCreatorProfile>>({});
+  const [creatorProfile, setCreatorProfile] = useState<EventCreatorProfile | null>(null);
   const [attendees, setAttendees] = useState<EventAttendeeRecord[]>([]);
   const [attendanceSaving, setAttendanceSaving] = useState(false);
   const [attendanceStatus, setAttendanceStatus] = useState("");
@@ -198,23 +198,35 @@ export default function EventDetailPage() {
   }, [params.eventId, user]);
 
   useEffect(() => {
-    if (!user) {
-      setCreatorDirectory({});
+    if (!user || !eventRecord?.createdByUid) {
+      setCreatorProfile(null);
       return;
     }
 
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const nextDirectory: Record<string, EventCreatorProfile> = {};
+    if (formatEventCreatorLabel(eventRecord) !== "POC: Not listed") {
+      setCreatorProfile(null);
+      return;
+    }
 
-      snapshot.docs.forEach((docSnap) => {
-        nextDirectory[docSnap.id] = docSnap.data() as EventCreatorProfile;
-      });
+    let cancelled = false;
 
-      setCreatorDirectory(nextDirectory);
-    });
+    void (async () => {
+      try {
+        const snapshot = await getDoc(doc(db, "users", eventRecord.createdByUid!));
+        if (!snapshot.exists() || cancelled) {
+          return;
+        }
 
-    return () => unsubscribe();
-  }, [user]);
+        setCreatorProfile(snapshot.data() as EventCreatorProfile);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventRecord, user]);
 
   const scheduleLines = useMemo(() => {
     if (!eventRecord) {
@@ -255,25 +267,18 @@ export default function EventDetailPage() {
       return "POC: Not listed";
     }
 
-    const creator = eventRecord.createdByUid ? creatorDirectory[eventRecord.createdByUid] : null;
-    const rank = creator?.rank?.trim() || "";
-    const lastName = creator?.lastName?.trim() || "";
-    const firstInitial = creator?.firstName?.trim()?.charAt(0).toUpperCase() || "";
-
-    if (rank && lastName && firstInitial) {
-      return `POC: ${rank} ${lastName}, ${firstInitial}`;
+    const embeddedLabel = formatEventCreatorLabel(eventRecord);
+    if (embeddedLabel !== "POC: Not listed") {
+      return embeddedLabel;
     }
 
-    if (rank && lastName) {
-      return `POC: ${rank} ${lastName}`;
-    }
-
-    if (creator?.name?.trim()) {
-      return `POC: ${creator.name.trim()}`;
-    }
-
-    return "POC: Not listed";
-  }, [creatorDirectory, eventRecord]);
+    return creatorProfile ? formatEventCreatorLabel({
+      createdByName: creatorProfile.name,
+      createdByFirstName: creatorProfile.firstName,
+      createdByLastName: creatorProfile.lastName,
+      createdByRank: creatorProfile.rank,
+    }) : "POC: Not listed";
+  }, [creatorProfile, eventRecord]);
 
   const currentUserAttending = useMemo(() => {
     if (!user) {

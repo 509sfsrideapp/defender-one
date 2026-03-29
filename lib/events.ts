@@ -37,6 +37,10 @@ export type EventDocument = {
   recurrence?: EventRecurringRule | null;
   createdByUid?: string | null;
   createdByEmail?: string | null;
+  createdByName?: string | null;
+  createdByFirstName?: string | null;
+  createdByLastName?: string | null;
+  createdByRank?: string | null;
   createdAt?: {
     seconds?: number;
     nanoseconds?: number;
@@ -211,6 +215,26 @@ export function createEmptyEventDateEntry(): EventDateEntry {
 
 export function formatEventTypeLabel(type: EventType) {
   return EVENT_TYPE_OPTIONS.find((option) => option.value === type)?.label || "Other";
+}
+
+export function formatEventCreatorLabel(event: Pick<EventDocument, "createdByName" | "createdByFirstName" | "createdByLastName" | "createdByRank">) {
+  const rank = event.createdByRank?.trim() || "";
+  const lastName = event.createdByLastName?.trim() || "";
+  const firstInitial = event.createdByFirstName?.trim()?.charAt(0).toUpperCase() || "";
+
+  if (rank && lastName && firstInitial) {
+    return `POC: ${rank} ${lastName}, ${firstInitial}`;
+  }
+
+  if (rank && lastName) {
+    return `POC: ${rank} ${lastName}`;
+  }
+
+  if (event.createdByName?.trim()) {
+    return `POC: ${event.createdByName.trim()}`;
+  }
+
+  return "POC: Not listed";
 }
 
 export function formatEventLocationLabel(location?: string | null) {

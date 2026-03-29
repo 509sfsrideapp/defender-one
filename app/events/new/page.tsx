@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
@@ -98,6 +98,12 @@ const recurringPillStyle = (selected: boolean): React.CSSProperties => ({
 export default function NewEventPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [profileSummary, setProfileSummary] = useState<{
+    name?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    rank?: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -128,6 +134,39 @@ export default function NewEventPage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setProfileSummary(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const snapshot = await getDoc(doc(db, "users", user.uid));
+        if (!snapshot.exists() || cancelled) {
+          return;
+        }
+
+        const profile = snapshot.data() as {
+          name?: string | null;
+          firstName?: string | null;
+          lastName?: string | null;
+          rank?: string | null;
+        };
+
+        setProfileSummary(profile);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const selectedCadence = recurrence.cadence || "weekly";
   const selectedMonthlyWeekday = recurrence.weekdays?.[0] || "Monday";
@@ -292,6 +331,10 @@ export default function NewEventPage() {
             : null,
         createdByUid: user.uid,
         createdByEmail: user.email || null,
+        createdByName: profileSummary?.name?.trim() || user.displayName?.trim() || null,
+        createdByFirstName: profileSummary?.firstName?.trim() || null,
+        createdByLastName: profileSummary?.lastName?.trim() || null,
+        createdByRank: profileSummary?.rank?.trim() || null,
         createdAt: new Date(),
       });
 

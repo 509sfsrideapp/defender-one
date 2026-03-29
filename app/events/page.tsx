@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, documentId, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { ReportableTarget } from "../components/MisconductReporting";
 import { auth, db } from "../../lib/firebase";
 import { buildMisconductPreviewText } from "../../lib/misconduct";
-import { EVENT_TYPE_OPTIONS, eventMatchesDateRange, eventMatchesType, formatEventLocationLabel, formatEventTypeLabel, getEventCardDateLabel, isUpcomingEvent, sortEventsByUpcomingDate, type EventRecord } from "../../lib/events";
+import { EVENT_TYPE_OPTIONS, eventMatchesDateRange, eventMatchesType, formatEventCreatorLabel, formatEventLocationLabel, formatEventTypeLabel, getEventCardDateLabel, isUpcomingEvent, sortEventsByUpcomingDate, type EventRecord } from "../../lib/events";
 
 type EventCreatorProfile = {
   name?: string | null;
@@ -117,20 +117,53 @@ export default function EventsPage() {
   }, [user]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || events.length === 0) {
+      return;
+    }
 
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const nextDirectory: Record<string, EventCreatorProfile> = {};
+    const creatorIds = Array.from(
+      new Set(
+        events
+          .filter((event) => formatEventCreatorLabel(event) === "POC: Not listed")
+          .map((event) => event.createdByUid?.trim() || "")
+          .filter((creatorId) => creatorId && !creatorDirectory[creatorId])
+      )
+    );
 
-      snapshot.docs.forEach((docSnap) => {
-        nextDirectory[docSnap.id] = docSnap.data() as EventCreatorProfile;
-      });
+    if (creatorIds.length === 0) {
+      return;
+    }
 
-      setCreatorDirectory(nextDirectory);
-    });
+    let cancelled = false;
 
-    return () => unsubscribe();
-  }, [user]);
+    void (async () => {
+      try {
+        const nextDirectory: Record<string, EventCreatorProfile> = {};
+
+        for (let index = 0; index < creatorIds.length; index += 10) {
+          const batchIds = creatorIds.slice(index, index + 10);
+          const snapshot = await getDocs(query(collection(db, "users"), where(documentId(), "in", batchIds)));
+
+          snapshot.docs.forEach((docSnap) => {
+            nextDirectory[docSnap.id] = docSnap.data() as EventCreatorProfile;
+          });
+        }
+
+        if (!cancelled && Object.keys(nextDirectory).length > 0) {
+          setCreatorDirectory((current) => ({
+            ...current,
+            ...nextDirectory,
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [creatorDirectory, events, user]);
 
   const filteredEvents = useMemo(() => {
     return sortEventsByUpcomingDate(
@@ -148,24 +181,18 @@ export default function EventsPage() {
   const nextEvent = filteredEvents[0] || null;
 
   const getOrganizerLabel = (event: EventRecord) => {
+    const embeddedLabel = formatEventCreatorLabel(event);
+    if (embeddedLabel !== "POC: Not listed") {
+      return embeddedLabel;
+    }
+
     const creator = event.createdByUid ? creatorDirectory[event.createdByUid] : null;
-    const rank = creator?.rank?.trim() || "";
-    const lastName = creator?.lastName?.trim() || "";
-    const firstInitial = creator?.firstName?.trim()?.charAt(0).toUpperCase() || "";
-
-    if (rank && lastName && firstInitial) {
-      return `POC: ${rank} ${lastName}, ${firstInitial}`;
-    }
-
-    if (rank && lastName) {
-      return `POC: ${rank} ${lastName}`;
-    }
-
-    if (creator?.name?.trim()) {
-      return `POC: ${creator.name.trim()}`;
-    }
-
-    return "POC: Not listed";
+    return creator ? formatEventCreatorLabel({
+      createdByName: creator.name,
+      createdByFirstName: creator.firstName,
+      createdByLastName: creator.lastName,
+      createdByRank: creator.rank,
+    }) : "POC: Not listed";
   };
 
   if (loading) {
