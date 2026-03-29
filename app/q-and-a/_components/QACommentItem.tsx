@@ -24,6 +24,9 @@ type QACommentItemProps = {
   onUpdate: (commentId: string, body: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
   onVote: (commentId: string, value: 1 | -1) => Promise<void>;
+  onLoadReplies?: (commentId: string, options?: { reset?: boolean }) => Promise<void>;
+  loadingRepliesByCommentId?: Record<string, boolean>;
+  moreRepliesByCommentId?: Record<string, boolean>;
 };
 
 export default function QACommentItem({
@@ -37,16 +40,22 @@ export default function QACommentItem({
   onUpdate,
   onDelete,
   onVote,
+  onLoadReplies,
+  loadingRepliesByCommentId = {},
+  moreRepliesByCommentId = {},
 }: QACommentItemProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => (comment.replyCount || 0) > 0 && comment.children.length === 0);
   const [replyOpen, setReplyOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const descendantCount = countQACommentDescendants(comment);
+  const descendantCount = Math.max(comment.replyCount || 0, countQACommentDescendants(comment));
   const canReply = !comment.deleted;
   const isAuthor = currentUserId === comment.authorId;
   const visibleAuthorLabel = getVisibleQACommentAuthorLabel(comment, { showAdminIdentity });
   const adminAuthorLabel = comment.authorAdminLabel?.trim() || comment.authorLabel;
   const leftOffset = Math.min(depth, 4) * 10;
+  const hasReplyBranch = comment.children.length > 0 || (comment.replyCount || 0) > 0;
+  const loadingReplies = Boolean(loadingRepliesByCommentId[comment.id]);
+  const hasMoreReplies = Boolean(moreRepliesByCommentId[comment.id]);
   const utilityChipStyle: React.CSSProperties = {
     minHeight: 26,
     padding: "4px 8px",
@@ -145,11 +154,21 @@ export default function QACommentItem({
               </p>
             ) : null}
 
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
-              {comment.children.length > 0 ? (
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+              {hasReplyBranch ? (
                 <button
                   type="button"
-                  onClick={() => setCollapsed((current) => !current)}
+                  onClick={() => {
+                    if (collapsed) {
+                      setCollapsed(false);
+                      if (comment.children.length === 0 && comment.replyCount && onLoadReplies) {
+                        void onLoadReplies(comment.id, { reset: true });
+                      }
+                      return;
+                    }
+
+                    setCollapsed(true);
+                  }}
                   style={utilityChipStyle}
                 >
                   {collapsed ? `Expand (${descendantCount})` : "Collapse"}
@@ -237,7 +256,7 @@ export default function QACommentItem({
         </div>
       </ReportableTarget>
 
-      {!collapsed && comment.children.length > 0 ? (
+      {!collapsed && hasReplyBranch ? (
         <div
           style={{
             marginTop: 8,
@@ -261,8 +280,32 @@ export default function QACommentItem({
               onUpdate={onUpdate}
               onDelete={onDelete}
               onVote={onVote}
+              onLoadReplies={onLoadReplies}
+              loadingRepliesByCommentId={loadingRepliesByCommentId}
+              moreRepliesByCommentId={moreRepliesByCommentId}
             />
           ))}
+          {loadingReplies && comment.children.length === 0 ? (
+            <p style={{ margin: 0, color: "#94a3b8", fontSize: 11 }}>Loading replies...</p>
+          ) : null}
+          {hasMoreReplies ? (
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!onLoadReplies) {
+                    return;
+                  }
+
+                  void onLoadReplies(comment.id);
+                }}
+                disabled={loadingReplies}
+                style={utilityChipStyle}
+              >
+                {loadingReplies ? "Loading..." : "Load More Replies"}
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

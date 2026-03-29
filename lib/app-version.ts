@@ -1,1 +1,1 @@
-export const CURRENT_APP_VERSION = 340;
+export const CURRENT_APP_VERSION = 341;

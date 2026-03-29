@@ -2,8 +2,20 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  collection,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  QueryDocumentSnapshot,
+  startAfter,
+  where,
+} from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
@@ -15,6 +27,7 @@ import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount 
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   buildQACommentTree,
+  dedupeQARecordsById,
   formatRelativeTimestamp,
   getVisibleQAPostAuthorLabel,
   normalizeQAVoteValue,
@@ -49,24 +62,35 @@ const infoPillStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
 };
 
+const FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE = 10;
+const FORUM_REPLY_PAGE_SIZE = 10;
+
 export default function QAPostDetailPage() {
   const params = useParams<{ postId: string }>();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [postRecord, setPostRecord] = useState<QAPostRecord | null>(null);
-  const [comments, setComments] = useState<QACommentRecord[]>([]);
+  const [topLevelComments, setTopLevelComments] = useState<QACommentRecord[]>([]);
+  const [loadedRepliesByParentId, setLoadedRepliesByParentId] = useState<Record<string, QACommentRecord[]>>({});
   const [postVote, setPostVote] = useState(0);
   const [commentVotesById, setCommentVotesById] = useState<Record<string, number>>({});
   const [commentSortMode, setCommentSortMode] = useState<QACommentSortMode>("top");
+  const [hasMoreTopLevelComments, setHasMoreTopLevelComments] = useState(false);
+  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+  const [hasMoreRepliesByParentId, setHasMoreRepliesByParentId] = useState<Record<string, boolean>>({});
+  const [loadingRepliesByParentId, setLoadingRepliesByParentId] = useState<Record<string, boolean>>({});
   const [editingPost, setEditingPost] = useState(false);
   const [postDraftTitle, setPostDraftTitle] = useState("");
   const [postDraftBody, setPostDraftBody] = useState("");
   const [postActionError, setPostActionError] = useState("");
   const [savingPost, setSavingPost] = useState(false);
   const [deletingPost, setDeletingPost] = useState(false);
+  const initializedCommentsRef = useRef(false);
+  const topLevelCommentCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const replyCursorsByParentIdRef = useRef<Record<string, QueryDocumentSnapshot<DocumentData> | null>>({});
 
-  const loadPostDetail = useCallback(async (currentUser: User, postId: string) => {
+  const loadPostRecord = useCallback(async (postId: string) => {
     logFirestoreQueryRun("forums.post.detail", { postId });
     const snapshot = await getDoc(doc(db, "qaPosts", postId));
 
@@ -81,7 +105,9 @@ export default function QAPostDetailPage() {
       ...(snapshot.data() as Omit<QAPostRecord, "id">),
     });
     logFirestoreQueryResult("forums.post.detail", { postId, count: 1 });
+  }, []);
 
+  const loadPostVote = useCallback(async (currentUser: User, postId: string) => {
     logFirestoreQueryRun("forums.post.vote", { postId, userId: currentUser.uid });
     const postVotesSnapshot = await getDocs(
       query(collection(db, "qaPostVotes"), where("userId", "==", currentUser.uid))
@@ -91,7 +117,9 @@ export default function QAPostDetailPage() {
       .find((vote) => vote.postId === postId);
     setPostVote(normalizeQAVoteValue(Number(firstVote?.value || 0)));
     logFirestoreQueryResult("forums.post.vote", { postId, count: postVotesSnapshot.size });
+  }, []);
 
+  const loadCommentVotes = useCallback(async (currentUser: User, postId: string) => {
     logFirestoreQueryRun("forums.post.comment-votes", { postId, userId: currentUser.uid });
     const commentVotesSnapshot = await getDocs(
       query(collection(db, "qaCommentVotes"), where("userId", "==", currentUser.uid))
@@ -107,18 +135,139 @@ export default function QAPostDetailPage() {
 
     setCommentVotesById(nextCommentVotes);
     logFirestoreQueryResult("forums.post.comment-votes", { postId, count: commentVotesSnapshot.size });
+  }, []);
 
-    logFirestoreQueryRun("forums.post.comments", { postId });
-    const commentsSnapshot = await getDocs(
-      query(collection(db, "qaComments"), where("postId", "==", postId))
-    );
-    setComments(
-      commentsSnapshot.docs.map((docSnap) => ({
+  const fetchCommentRecord = useCallback(async (commentId: string) => {
+    const commentSnapshot = await getDoc(doc(db, "qaComments", commentId));
+
+    if (!commentSnapshot.exists()) {
+      return null;
+    }
+
+    return {
+      id: commentSnapshot.id,
+      ...(commentSnapshot.data() as Omit<QACommentRecord, "id">),
+    } satisfies QACommentRecord;
+  }, []);
+
+  const loadTopLevelComments = useCallback(async (postId: string, options?: { reset?: boolean }) => {
+    const reset = Boolean(options?.reset);
+    const nextCursor = reset ? null : topLevelCommentCursorRef.current;
+    const sortConstraints =
+      commentSortMode === "oldest"
+        ? [orderBy("createdAt", "asc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)]
+        : commentSortMode === "top"
+          ? [orderBy("score", "desc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)]
+          : [orderBy("createdAt", "desc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)];
+
+    setLoadingMoreComments(true);
+    try {
+      logFirestoreQueryRun("forums.post.comments.top-level", {
+        postId,
+        sortMode: commentSortMode,
+        limit: FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE,
+        cursor: nextCursor?.id || null,
+      });
+      const commentsSnapshot = await getDocs(
+        query(
+          collection(db, "qaComments"),
+          where("postId", "==", postId),
+          where("parentCommentId", "==", null),
+          ...(nextCursor ? [...sortConstraints.slice(0, -1), startAfter(nextCursor), sortConstraints[sortConstraints.length - 1]] : sortConstraints)
+        )
+      );
+
+      const nextComments = commentsSnapshot.docs.map((docSnap) => ({
         id: docSnap.id,
         ...(docSnap.data() as Omit<QACommentRecord, "id">),
-      }))
+      }));
+
+      logFirestoreQueryResult("forums.post.comments.top-level", { postId, count: commentsSnapshot.size });
+      setTopLevelComments((current) => (reset ? nextComments : dedupeQARecordsById([...current, ...nextComments])));
+      topLevelCommentCursorRef.current = commentsSnapshot.docs[commentsSnapshot.docs.length - 1] || null;
+      setHasMoreTopLevelComments(commentsSnapshot.size === FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE);
+    } finally {
+      setLoadingMoreComments(false);
+    }
+  }, [commentSortMode]);
+
+  const loadReplies = useCallback(async (parentCommentId: string, options?: { reset?: boolean }) => {
+    const reset = Boolean(options?.reset);
+    const nextCursor = reset ? null : replyCursorsByParentIdRef.current[parentCommentId] || null;
+
+    setLoadingRepliesByParentId((current) => ({
+      ...current,
+      [parentCommentId]: true,
+    }));
+
+    try {
+      logFirestoreQueryRun("forums.post.comments.replies", {
+        parentCommentId,
+        limit: FORUM_REPLY_PAGE_SIZE,
+        cursor: nextCursor?.id || null,
+      });
+      const repliesSnapshot = await getDocs(
+        query(
+          collection(db, "qaComments"),
+          where("parentCommentId", "==", parentCommentId),
+          orderBy("createdAt", "asc"),
+          ...(nextCursor ? [startAfter(nextCursor)] : []),
+          limit(FORUM_REPLY_PAGE_SIZE)
+        )
+      );
+
+      const nextReplies = repliesSnapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<QACommentRecord, "id">),
+      }));
+
+      logFirestoreQueryResult("forums.post.comments.replies", { parentCommentId, count: repliesSnapshot.size });
+      setLoadedRepliesByParentId((current) => ({
+        ...current,
+        [parentCommentId]: reset ? nextReplies : dedupeQARecordsById([...(current[parentCommentId] || []), ...nextReplies]),
+      }));
+      replyCursorsByParentIdRef.current = {
+        ...replyCursorsByParentIdRef.current,
+        [parentCommentId]: repliesSnapshot.docs[repliesSnapshot.docs.length - 1] || null,
+      };
+      setHasMoreRepliesByParentId((current) => ({
+        ...current,
+        [parentCommentId]: repliesSnapshot.size === FORUM_REPLY_PAGE_SIZE,
+      }));
+    } finally {
+      setLoadingRepliesByParentId((current) => ({
+        ...current,
+        [parentCommentId]: false,
+      }));
+    }
+  }, []);
+
+  const updateCommentRecord = useCallback((commentId: string, updater: (comment: QACommentRecord) => QACommentRecord) => {
+    let handled = false;
+
+    setTopLevelComments((current) =>
+      current.map((comment) => {
+        if (comment.id !== commentId) {
+          return comment;
+        }
+
+        handled = true;
+        return updater(comment);
+      })
     );
-    logFirestoreQueryResult("forums.post.comments", { postId, count: commentsSnapshot.size });
+
+    if (handled) {
+      return;
+    }
+
+    setLoadedRepliesByParentId((current) => {
+      const nextEntries = Object.entries(current).map(([parentId, replies]) => [
+        parentId,
+        replies.map((comment) => (comment.id === commentId ? updater(comment) : comment)),
+      ] as const);
+
+      return Object.fromEntries(nextEntries);
+    });
   }, []);
 
   useEffect(() => {
@@ -133,19 +282,66 @@ export default function QAPostDetailPage() {
 
   useEffect(() => {
     if (!user || !params.postId) {
+      initializedCommentsRef.current = false;
       setPostRecord(null);
-      setComments([]);
+      setTopLevelComments([]);
+      setLoadedRepliesByParentId({});
       setPostVote(0);
       setCommentVotesById({});
+      topLevelCommentCursorRef.current = null;
+      setHasMoreTopLevelComments(false);
+      replyCursorsByParentIdRef.current = {};
+      setHasMoreRepliesByParentId({});
+      setLoadingRepliesByParentId({});
       return;
     }
 
-    void loadPostDetail(user, params.postId).finally(() => {
+    initializedCommentsRef.current = false;
+    setLoading(true);
+    setTopLevelComments([]);
+    setLoadedRepliesByParentId({});
+    topLevelCommentCursorRef.current = null;
+    setHasMoreTopLevelComments(false);
+    replyCursorsByParentIdRef.current = {};
+    setHasMoreRepliesByParentId({});
+    setLoadingRepliesByParentId({});
+
+    void Promise.all([
+      loadPostRecord(params.postId),
+      loadPostVote(user, params.postId),
+      loadCommentVotes(user, params.postId),
+      loadTopLevelComments(params.postId, { reset: true }),
+    ]).finally(() => {
+      initializedCommentsRef.current = true;
       setLoading(false);
     });
-  }, [loadPostDetail, params.postId, user]);
+  }, [loadCommentVotes, loadPostRecord, loadPostVote, loadTopLevelComments, params.postId, user]);
 
-  const commentTree = useMemo(() => buildQACommentTree(comments, commentSortMode), [commentSortMode, comments]);
+  useEffect(() => {
+    if (!user || !params.postId || !initializedCommentsRef.current) {
+      return;
+    }
+
+    setLoadedRepliesByParentId({});
+    topLevelCommentCursorRef.current = null;
+    setHasMoreTopLevelComments(false);
+    replyCursorsByParentIdRef.current = {};
+    setHasMoreRepliesByParentId({});
+    setLoadingRepliesByParentId({});
+
+    void loadTopLevelComments(params.postId, { reset: true }).catch((error) => {
+      console.error(error);
+    });
+  }, [commentSortMode, loadTopLevelComments, params.postId, user]);
+
+  const loadedComments = useMemo(
+    () => dedupeQARecordsById([
+      ...topLevelComments,
+      ...Object.values(loadedRepliesByParentId).flat(),
+    ]),
+    [loadedRepliesByParentId, topLevelComments]
+  );
+  const commentTree = useMemo(() => buildQACommentTree(loadedComments, commentSortMode), [commentSortMode, loadedComments]);
   const showAdminIdentity = isAdminEmail(user?.email);
   const canEditPost = Boolean(user && postRecord && !postRecord.deleted && postRecord.authorId === user.uid);
   const canDeletePost = Boolean(
@@ -462,7 +658,16 @@ export default function QAPostDetailPage() {
                       }
 
                       setEditingPost(false);
-                      await loadPostDetail(user, postRecord.id);
+                      setPostRecord((current) =>
+                        current
+                          ? {
+                              ...current,
+                              title,
+                              body,
+                              updatedAt: new Date().toISOString(),
+                            }
+                          : current
+                      );
                     } catch (error) {
                       setPostActionError(error instanceof Error ? error.message : "Could not update the post.");
                     } finally {
@@ -617,13 +822,24 @@ export default function QAPostDetailPage() {
                   }),
                 });
 
-                const payload = (await response.json().catch(() => ({}))) as { error?: string };
+                const payload = (await response.json().catch(() => ({}))) as { error?: string; commentId?: string };
 
                 if (!response.ok) {
                   throw new Error(payload.error || "Could not create the comment.");
                 }
 
-                await loadPostDetail(user, postRecord.id);
+                const nextComment = payload.commentId ? await fetchCommentRecord(payload.commentId) : null;
+                setPostRecord((current) =>
+                  current
+                    ? {
+                        ...current,
+                        commentCount: (current.commentCount || 0) + 1,
+                      }
+                    : current
+                );
+                if (nextComment) {
+                  setTopLevelComments((current) => dedupeQARecordsById([...current, nextComment]));
+                }
               }}
             />
           ) : null}
@@ -662,13 +878,31 @@ export default function QAPostDetailPage() {
                       }),
                     });
 
-                    const payload = (await response.json().catch(() => ({}))) as { error?: string };
+                    const payload = (await response.json().catch(() => ({}))) as { error?: string; commentId?: string };
 
                     if (!response.ok) {
                       throw new Error(payload.error || "Could not create the reply.");
                     }
 
-                    await loadPostDetail(user, postRecord.id);
+                    const nextReply = payload.commentId ? await fetchCommentRecord(payload.commentId) : null;
+                    setPostRecord((current) =>
+                      current
+                        ? {
+                            ...current,
+                            commentCount: (current.commentCount || 0) + 1,
+                          }
+                        : current
+                    );
+                    updateCommentRecord(parentCommentId, (current) => ({
+                      ...current,
+                      replyCount: (current.replyCount || 0) + 1,
+                    }));
+                    if (nextReply) {
+                      setLoadedRepliesByParentId((current) => ({
+                        ...current,
+                        [parentCommentId]: dedupeQARecordsById([...(current[parentCommentId] || []), nextReply]),
+                      }));
+                    }
                   }}
                   onUpdate={async (commentId, body) => {
                     const idToken = await auth.currentUser?.getIdToken();
@@ -692,7 +926,11 @@ export default function QAPostDetailPage() {
                       throw new Error(payload.error || "Could not update the comment.");
                     }
 
-                    await loadPostDetail(user, postRecord.id);
+                    updateCommentRecord(commentId, (current) => ({
+                      ...current,
+                      body,
+                      updatedAt: new Date().toISOString(),
+                    }));
                   }}
                   onDelete={async (commentId) => {
                     const confirmed = window.confirm("Delete this comment?");
@@ -719,7 +957,12 @@ export default function QAPostDetailPage() {
                       throw new Error(payload.error || "Could not delete the comment.");
                     }
 
-                    await loadPostDetail(user, postRecord.id);
+                    updateCommentRecord(commentId, (current) => ({
+                      ...current,
+                      body: "",
+                      deleted: true,
+                      updatedAt: new Date().toISOString(),
+                    }));
                   }}
                   onVote={async (commentId, value) => {
                     const idToken = await auth.currentUser?.getIdToken();
@@ -749,19 +992,42 @@ export default function QAPostDetailPage() {
                       ...current,
                       [commentId]: nextValue,
                     }));
-                    setComments((current) =>
-                      current.map((currentComment) =>
-                        currentComment.id === commentId
-                          ? {
-                              ...currentComment,
-                              score: (currentComment.score || 0) - currentVote + nextValue,
-                            }
-                          : currentComment
-                      )
-                    );
+                    updateCommentRecord(commentId, (currentComment) => ({
+                      ...currentComment,
+                      score: (currentComment.score || 0) - currentVote + nextValue,
+                    }));
                   }}
+                  onLoadReplies={loadReplies}
+                  loadingRepliesByCommentId={loadingRepliesByParentId}
+                  moreRepliesByCommentId={hasMoreRepliesByParentId}
                 />
               ))}
+              {hasMoreTopLevelComments ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => void loadTopLevelComments(postRecord.id)}
+                    disabled={loadingMoreComments}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: 40,
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(126, 142, 160, 0.24)",
+                      background: "linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%)",
+                      color: "#ffffff",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontSize: 11,
+                    }}
+                  >
+                    {loadingMoreComments ? "Loading..." : "Load More Comments"}
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </section>

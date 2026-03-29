@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { collection, DocumentData, getDocs, limit, orderBy, query, QueryDocumentSnapshot, startAfter, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
@@ -58,12 +58,70 @@ const infoPillStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
 };
 
+const FORUM_POST_PAGE_SIZE = 15;
+
+function dedupePosts(posts: QAPostRecord[]) {
+  const seen = new Set<string>();
+  return posts.filter((post) => {
+    if (seen.has(post.id)) {
+      return false;
+    }
+    seen.add(post.id);
+    return true;
+  });
+}
+
 export default function QAndAPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<QAPostRecord[]>([]);
   const [postVotesById, setPostVotesById] = useState<Record<string, number>>({});
   const [sortMode, setSortMode] = useState<QAPostSortMode>("newest");
+  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+  const lastPostCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+
+  const loadPosts = useCallback(async (options?: { reset?: boolean }) => {
+    const reset = Boolean(options?.reset);
+    const nextCursor = reset ? null : lastPostCursorRef.current;
+
+    setLoadingMorePosts(true);
+    try {
+      logFirestoreQueryRun("forums.feed.posts", {
+        collection: "qaPosts",
+        sortMode,
+        limit: FORUM_POST_PAGE_SIZE,
+        cursor: nextCursor?.id || null,
+      });
+
+      const constraints =
+        sortMode === "oldest"
+          ? [orderBy("createdAt", "asc"), limit(FORUM_POST_PAGE_SIZE)]
+          : sortMode === "top"
+            ? [orderBy("score", "desc"), limit(FORUM_POST_PAGE_SIZE)]
+            : [orderBy("createdAt", "desc"), limit(FORUM_POST_PAGE_SIZE)];
+
+      const snapshot = await getDocs(
+        query(
+          collection(db, "qaPosts"),
+          ...(nextCursor ? [...constraints.slice(0, -1), startAfter(nextCursor), constraints[constraints.length - 1]] : constraints)
+        )
+      );
+
+      const nextPosts = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<QAPostRecord, "id">),
+      }));
+
+      logFirestoreQueryResult("forums.feed.posts", { count: nextPosts.length, sortMode });
+      setPosts((current) => (reset ? nextPosts : dedupePosts([...current, ...nextPosts])));
+      const nextLastCursor = snapshot.docs[snapshot.docs.length - 1] || null;
+      lastPostCursorRef.current = nextLastCursor;
+      setHasMorePosts(snapshot.size === FORUM_POST_PAGE_SIZE);
+    } finally {
+      setLoadingMorePosts(false);
+    }
+  }, [sortMode]);
 
   useEffect(() => {
     logFirestoreScreenMount("forums.feed");
@@ -80,28 +138,13 @@ export default function QAndAPage() {
       return;
     }
 
-    let cancelled = false;
-
-    void (async () => {
-      logFirestoreQueryRun("forums.feed.posts", { collection: "qaPosts", limit: 50 });
-      const snapshot = await getDocs(query(collection(db, "qaPosts"), orderBy("createdAt", "desc"), limit(50)));
-      if (cancelled) {
-        return;
-      }
-      const nextPosts = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<QAPostRecord, "id">),
-      }));
-      logFirestoreQueryResult("forums.feed.posts", { count: nextPosts.length });
-      setPosts(nextPosts);
-    })().catch((error) => {
+    setPosts([]);
+    lastPostCursorRef.current = null;
+    setHasMorePosts(false);
+    void loadPosts({ reset: true }).catch((error) => {
       console.error(error);
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  }, [loadPosts, sortMode, user]);
 
   useEffect(() => {
     if (!user) {
@@ -291,6 +334,18 @@ export default function QAndAPage() {
                   }}
                 />
               ))}
+              {hasMorePosts ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => void loadPosts()}
+                    disabled={loadingMorePosts}
+                    style={primaryButtonStyle}
+                  >
+                    {loadingMorePosts ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </section>

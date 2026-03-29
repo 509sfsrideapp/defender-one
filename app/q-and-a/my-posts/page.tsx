@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { collection, getDocs, limit, query, where } from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { collection, DocumentData, getDocs, limit, orderBy, query, QueryDocumentSnapshot, startAfter, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
 import { isAdminEmail } from "../../../lib/admin";
 import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount } from "../../../lib/firestore-read-debug";
-import { normalizeQAVoteValue, sortQAPosts, type QAPostRecord, type QAPostSortMode, type QAVoteDocument } from "../../../lib/q-and-a";
+import { dedupeQARecordsById, normalizeQAVoteValue, sortQAPosts, type QAPostRecord, type QAPostSortMode, type QAVoteDocument } from "../../../lib/q-and-a";
 import QAPostCard from "../_components/QAPostCard";
 
 const pageShellStyle: React.CSSProperties = {
@@ -58,12 +58,63 @@ const infoPillStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
 };
 
+const FORUM_MY_POSTS_PAGE_SIZE = 15;
+
 export default function QAMyPostsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<QAPostRecord[]>([]);
   const [postVotesById, setPostVotesById] = useState<Record<string, number>>({});
   const [sortMode, setSortMode] = useState<QAPostSortMode>("newest");
+  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+  const lastPostCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+
+  const loadPosts = useCallback(async (options?: { reset?: boolean }) => {
+    if (!user) {
+      return;
+    }
+
+    const reset = Boolean(options?.reset);
+    const nextCursor = reset ? null : lastPostCursorRef.current;
+
+    setLoadingMorePosts(true);
+    try {
+      logFirestoreQueryRun("forums.my-posts.posts", {
+        collection: "qaPosts",
+        userId: user.uid,
+        sortMode,
+        limit: FORUM_MY_POSTS_PAGE_SIZE,
+        cursor: nextCursor?.id || null,
+      });
+
+      const constraints =
+        sortMode === "oldest"
+          ? [where("authorId", "==", user.uid), orderBy("createdAt", "asc"), limit(FORUM_MY_POSTS_PAGE_SIZE)]
+          : sortMode === "top"
+            ? [where("authorId", "==", user.uid), orderBy("score", "desc"), limit(FORUM_MY_POSTS_PAGE_SIZE)]
+            : [where("authorId", "==", user.uid), orderBy("createdAt", "desc"), limit(FORUM_MY_POSTS_PAGE_SIZE)];
+
+      const snapshot = await getDocs(
+        query(
+          collection(db, "qaPosts"),
+          ...(nextCursor ? [...constraints.slice(0, -1), startAfter(nextCursor), constraints[constraints.length - 1]] : constraints)
+        )
+      );
+
+      const nextPosts = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<QAPostRecord, "id">),
+      }));
+
+      logFirestoreQueryResult("forums.my-posts.posts", { count: nextPosts.length, sortMode });
+      setPosts((current) => (reset ? nextPosts : dedupeQARecordsById([...current, ...nextPosts])));
+      lastPostCursorRef.current = snapshot.docs[snapshot.docs.length - 1] || null;
+      setHasMorePosts(snapshot.size === FORUM_MY_POSTS_PAGE_SIZE);
+    } finally {
+      setLoadingMorePosts(false);
+    }
+  }, [sortMode, user]);
 
   useEffect(() => {
     logFirestoreScreenMount("forums.my-posts");
@@ -80,40 +131,13 @@ export default function QAMyPostsPage() {
       return;
     }
 
-    let cancelled = false;
-
-    void (async () => {
-      logFirestoreQueryRun("forums.my-posts.posts", {
-        collection: "qaPosts",
-        userId: user.uid,
-        limit: 50,
-      });
-      const snapshot = await getDocs(
-        query(
-          collection(db, "qaPosts"),
-          where("authorId", "==", user.uid),
-          limit(50)
-        )
-      );
-      if (cancelled) {
-        return;
-      }
-
-      const nextPosts = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<QAPostRecord, "id">),
-      }));
-
-      logFirestoreQueryResult("forums.my-posts.posts", { count: nextPosts.length });
-      setPosts(nextPosts);
-    })().catch((error) => {
+    setPosts([]);
+    lastPostCursorRef.current = null;
+    setHasMorePosts(false);
+    void loadPosts({ reset: true }).catch((error) => {
       console.error(error);
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  }, [loadPosts, sortMode, user]);
 
   useEffect(() => {
     if (!user) {
@@ -307,6 +331,18 @@ export default function QAMyPostsPage() {
                   }}
                 />
               ))}
+              {hasMorePosts ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => void loadPosts()}
+                    disabled={loadingMorePosts}
+                    style={primaryButtonStyle}
+                  >
+                    {loadingMorePosts ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </section>

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v341",
+    title: "Forums Pagination",
+    summary: "Added incremental loading to the Forums feed, My Posts, and forum comment threads so posts and top-level comments now load in smaller cursor-based batches, while replies only load when a branch is expanded and can continue with their own load-more steps without changing the existing forum layout.",
+  },
+  {
     commit: "v340",
     title: "Firestore Read Audit Cleanup",
     summary: "Removed the live Forums feed and thread listeners in favor of lower-read fetch flows, tightened broad homepage and Inbox system-post listeners with limits, merged duplicate Driver ride listeners, slowed dev-locked message polling, and added temporary Firestore read debug logging so remaining hotspots are easier to trace without changing the app’s visible behavior.",

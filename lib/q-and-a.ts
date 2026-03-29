@@ -63,6 +63,19 @@ export type QACommentNode = QACommentRecord & {
   children: QACommentNode[];
 };
 
+export function dedupeQARecordsById<T extends { id: string }>(records: T[]) {
+  const seen = new Set<string>();
+
+  return records.filter((record) => {
+    if (seen.has(record.id)) {
+      return false;
+    }
+
+    seen.add(record.id);
+    return true;
+  });
+}
+
 export type QAVoteDocument = {
   userId: string;
   value: QAVoteValue;
