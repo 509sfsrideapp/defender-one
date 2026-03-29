@@ -9,7 +9,7 @@ import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
-import { formatEventDateEntry, formatEventTypeLabel, formatRecurringRule, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
+import { formatEventDateEntry, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
 
 const sectionStyle: React.CSSProperties = {
   borderRadius: 18,
@@ -35,6 +35,20 @@ const primaryButtonStyle: React.CSSProperties = {
   letterSpacing: "0.07em",
   textTransform: "uppercase",
   fontSize: 10.5,
+};
+
+const metaPillStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "7px 11px",
+  borderRadius: 999,
+  border: "1px solid rgba(126, 142, 160, 0.16)",
+  background: "rgba(17, 24, 39, 0.62)",
+  color: "#dbe7f5",
+  fontSize: 11,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  fontFamily: "var(--font-display)",
 };
 
 export default function EventDetailPage() {
@@ -95,6 +109,14 @@ export default function EventDetailPage() {
         year: "numeric",
       })
     );
+  }, [eventRecord]);
+
+  const nextOccurrenceLabel = useMemo(() => {
+    if (!eventRecord) {
+      return "Schedule pending";
+    }
+
+    return getEventCardDateLabel(eventRecord);
   }, [eventRecord]);
 
   if (loading) {
@@ -172,7 +194,7 @@ export default function EventDetailPage() {
               >
                 <div
                   style={{
-                    minHeight: 260,
+                    minHeight: 280,
                     borderRadius: 16,
                     backgroundImage: `url(${eventRecord.photoUrl})`,
                     backgroundSize: "cover",
@@ -192,15 +214,36 @@ export default function EventDetailPage() {
           ) : null}
 
           <div style={{ display: "grid", gap: 10 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <span style={metaPillStyle}>{formatEventTypeLabel(eventRecord.type)}</span>
+              <span style={metaPillStyle}>Next: {nextOccurrenceLabel}</span>
+              {typeof eventRecord.neededPeople === "number" && eventRecord.neededPeople > 0 ? (
+                <span style={metaPillStyle}>{eventRecord.neededPeople} needed</span>
+              ) : (
+                <span style={metaPillStyle}>Open attendance</span>
+              )}
+            </div>
             <h1 style={{ margin: 0 }}>{eventRecord.name}</h1>
-            <p style={{ margin: 0, color: "#cbd5e1" }}>{eventRecord.location}</p>
+            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{eventRecord.location}</p>
             {eventRecord.address ? (
-              <p style={{ margin: 0, color: "#94a3b8" }}>{eventRecord.address}</p>
+              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{eventRecord.address}</p>
+            ) : null}
+            {eventRecord.photoUrl ? (
+              <p style={{ margin: 0, color: "#7f8da3", fontSize: 12 }}>
+                Tap the event photo to expand it.
+              </p>
             ) : null}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
-            <div>
+            <div
+              style={{
+                borderRadius: 14,
+                border: "1px solid rgba(126, 142, 160, 0.14)",
+                background: "linear-gradient(180deg, rgba(13, 18, 24, 0.96) 0%, rgba(7, 10, 14, 0.98) 100%)",
+                padding: 14,
+              }}
+            >
               <strong style={{ display: "block", marginBottom: 8 }}>Schedule</strong>
               <div style={{ display: "grid", gap: 8 }}>
                 {scheduleLines.length > 0 ? scheduleLines.map((line) => (
@@ -210,7 +253,9 @@ export default function EventDetailPage() {
                 )}
                 {eventRecord.scheduleMode === "recurring" && recurringUpcomingLines.length > 0 ? (
                   <>
-                    <p style={{ margin: "6px 0 0", color: "#94a3b8" }}>Next 3 upcoming dates</p>
+                    <p style={{ margin: "8px 0 0", color: "#94a3b8", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+                      Next 3 Upcoming Dates
+                    </p>
                     {recurringUpcomingLines.map((line) => (
                       <p key={line} style={{ margin: 0, color: "#cbd5e1" }}>{line}</p>
                     ))}
@@ -219,17 +264,41 @@ export default function EventDetailPage() {
               </div>
             </div>
 
-            <div>
-              <strong style={{ display: "block", marginBottom: 8 }}>Attendance</strong>
+            <div
+              style={{
+                borderRadius: 14,
+                border: "1px solid rgba(126, 142, 160, 0.14)",
+                background: "linear-gradient(180deg, rgba(13, 18, 24, 0.96) 0%, rgba(7, 10, 14, 0.98) 100%)",
+                padding: 14,
+                display: "grid",
+                gap: 10,
+              }}
+            >
+              <strong style={{ display: "block" }}>Attendance</strong>
               <p style={{ margin: 0, color: "#cbd5e1" }}>
                 {typeof eventRecord.neededPeople === "number" && eventRecord.neededPeople > 0
                   ? `${eventRecord.neededPeople} people needed`
                   : "No target headcount set"}
               </p>
+              <div style={{ display: "grid", gap: 4 }}>
+                <span style={{ color: "#94a3b8", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+                  Event Format
+                </span>
+                <p style={{ margin: 0, color: "#cbd5e1" }}>
+                  {eventRecord.scheduleMode === "recurring" ? "Recurring schedule with rolling upcoming dates." : "One-time event with specific date blocks."}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div>
+          <div
+            style={{
+              borderRadius: 14,
+              border: "1px solid rgba(126, 142, 160, 0.14)",
+              background: "linear-gradient(180deg, rgba(13, 18, 24, 0.96) 0%, rgba(7, 10, 14, 0.98) 100%)",
+              padding: 14,
+            }}
+          >
             <strong style={{ display: "block", marginBottom: 8 }}>Description</strong>
             <p style={{ margin: 0, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.65 }}>
               {eventRecord.description}

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v251",
+    title: "Events Experience Polish",
+    summary: "Polished the Events board, event detail view, and add-event flow with clearer hierarchy, stronger schedule/meta presentation, better filter controls, improved empty states, and a cleaner mobile-friendly creation form.",
+  },
+  {
     commit: "v250",
     title: "Developer Terminal Layout Polish",
     summary: "Refactored the developer access terminal into a cleaner mobile-first anti-tamper panel with better spacing, clearer visual hierarchy, stronger keypad focus, and no overlapping header/status elements.",

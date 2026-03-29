@@ -50,6 +50,35 @@ const primaryButtonStyle: React.CSSProperties = {
   fontSize: 12,
 };
 
+const sectionTitleStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+};
+
+const helperTextStyle: React.CSSProperties = {
+  margin: 0,
+  color: "#94a3b8",
+  lineHeight: 1.55,
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 42,
+  padding: "10px 15px",
+  borderRadius: 12,
+  textDecoration: "none",
+  background: "linear-gradient(180deg, rgba(24, 31, 40, 0.98) 0%, rgba(11, 16, 22, 0.99) 100%)",
+  color: "#dbe7f5",
+  border: "1px solid rgba(126, 142, 160, 0.2)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 20px rgba(0, 0, 0, 0.22)",
+  fontFamily: "var(--font-display)",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  fontSize: 11,
+};
+
 const recurringPillStyle = (selected: boolean): React.CSSProperties => ({
   minHeight: 38,
   padding: "8px 12px",
@@ -303,6 +332,15 @@ export default function NewEventPage() {
         </div>
 
         <section style={{ ...sectionStyle, display: "grid", gap: 16 }}>
+          <div style={sectionTitleStyle}>
+            <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+              Event Basics
+            </strong>
+            <p style={helperTextStyle}>
+              Set the core identity of the event first, then add the richer schedule and description details below.
+            </p>
+          </div>
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
             <label style={{ display: "grid", gap: 6 }}>
               <span>Event Name</span>
@@ -344,6 +382,15 @@ export default function NewEventPage() {
             />
           </div>
 
+          <div style={sectionTitleStyle}>
+            <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+              Description and Headcount
+            </strong>
+            <p style={helperTextStyle}>
+              Use the description box for the actual event brief, expectations, gear notes, or anything people need before showing up.
+            </p>
+          </div>
+
           <label style={{ display: "grid", gap: 6 }}>
             <span>Description</span>
             <textarea
@@ -367,11 +414,20 @@ export default function NewEventPage() {
         </section>
 
         <section style={{ ...sectionStyle, display: "grid", gap: 16 }}>
+          <div style={sectionTitleStyle}>
+            <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+              Scheduling
+            </strong>
+            <p style={helperTextStyle}>
+              Keep one-time dates and recurring schedules separate so the board only shows the next real upcoming occurrence for each event.
+            </p>
+          </div>
+
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <div>
               <strong style={{ display: "block", marginBottom: 4 }}>Schedule Setup</strong>
-              <p style={{ margin: 0, color: "#94a3b8" }}>
-                Keep one-time dates and recurring schedules separate so each event can be set up the clean way.
+              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
+                Choose whether this event runs on specific dates or follows a recurring schedule.
               </p>
             </div>
 
@@ -454,7 +510,7 @@ export default function NewEventPage() {
             >
               <div style={{ display: "grid", gap: 4 }}>
                 <strong>Recurring Pattern</strong>
-                <p style={{ margin: 0, color: "#94a3b8" }}>
+                <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
                   Weekly and biweekly repeats can use multiple weekdays. Monthly repeats can target patterns like every third Monday.
                 </p>
               </div>
@@ -562,6 +618,8 @@ export default function NewEventPage() {
               border: "1px solid rgba(126, 142, 160, 0.16)",
               background: "linear-gradient(180deg, rgba(13, 18, 24, 0.96) 0%, rgba(7, 10, 14, 0.98) 100%)",
               padding: 14,
+              display: "grid",
+              gap: 8,
             }}
           >
             <strong style={{ display: "block", marginBottom: 6 }}>Schedule Preview</strong>
@@ -569,16 +627,30 @@ export default function NewEventPage() {
             <p style={{ margin: "8px 0 0", color: "#94a3b8" }}>
               Type: {formatEventTypeLabel(eventType)}
             </p>
+            <p style={{ margin: 0, color: "#7f8da3", fontSize: 13 }}>
+              This preview helps confirm the board-facing event summary before you save it.
+            </p>
           </div>
         </section>
 
-        {statusMessage ? <p style={{ margin: 0, color: "#cbd5e1" }}>{statusMessage}</p> : null}
+        {statusMessage ? (
+          <section
+            style={{
+              ...sectionStyle,
+              padding: "0.9rem 1rem",
+              borderColor: "rgba(126, 142, 160, 0.24)",
+              background: "linear-gradient(180deg, rgba(26, 31, 38, 0.98) 0%, rgba(12, 16, 21, 0.99) 100%)",
+            }}
+          >
+            <p style={{ margin: 0, color: "#dbe7f5", lineHeight: 1.55 }}>{statusMessage}</p>
+          </section>
+        ) : null}
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <button type="button" onClick={() => void submitEvent()} disabled={saving}>
+          <button type="button" onClick={() => void submitEvent()} disabled={saving} style={primaryButtonStyle}>
             {saving ? "Saving Event..." : "Create Event"}
           </button>
-          <Link href="/events" style={primaryButtonStyle}>Cancel</Link>
+          <Link href="/events" style={secondaryButtonStyle}>Cancel</Link>
         </div>
       </div>
     </main>

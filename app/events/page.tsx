@@ -41,6 +41,38 @@ const primaryButtonStyle: React.CSSProperties = {
   fontSize: 12,
 };
 
+const secondaryButtonStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 40,
+  padding: "9px 14px",
+  borderRadius: 12,
+  textDecoration: "none",
+  background: "linear-gradient(180deg, rgba(24, 31, 40, 0.98) 0%, rgba(11, 16, 22, 0.99) 100%)",
+  color: "#dbe7f5",
+  border: "1px solid rgba(126, 142, 160, 0.2)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 20px rgba(0, 0, 0, 0.22)",
+  fontFamily: "var(--font-display)",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  fontSize: 11,
+};
+
+const infoPillStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "7px 11px",
+  borderRadius: 999,
+  border: "1px solid rgba(126, 142, 160, 0.16)",
+  background: "rgba(17, 24, 39, 0.62)",
+  color: "#dbe7f5",
+  fontSize: 11,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  fontFamily: "var(--font-display)",
+};
+
 export default function EventsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +117,9 @@ export default function EventsPage() {
     );
   }, [dateFrom, dateTo, events, selectedType]);
 
+  const hasActiveFilters = selectedType !== "all" || Boolean(dateFrom) || Boolean(dateTo);
+  const nextEvent = filteredEvents[0] || null;
+
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading Events" caption="Opening the upcoming events board." /></main>;
   }
@@ -103,9 +138,9 @@ export default function EventsPage() {
     <main style={{ padding: 20 }}>
       <div style={pageShellStyle}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <HomeIconLink style={{ marginBottom: 0 }} />
-            <div>
+            <div style={{ display: "grid", gap: 6 }}>
               <p
                 style={{
                   margin: 0,
@@ -116,9 +151,17 @@ export default function EventsPage() {
                   fontFamily: "var(--font-display)",
                 }}
               >
-                Scheduling and group coordination
+                Scheduling and group coordination board
               </p>
               <h1 style={{ margin: "4px 0 0" }}>Events</h1>
+              <p style={{ margin: 0, color: "#cbd5e1", maxWidth: 560, lineHeight: 1.55 }}>
+                Track the nearest upcoming events first, narrow the board by type or date, and jump straight into full event details from any card.
+              </p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <span style={infoPillStyle}>{filteredEvents.length} upcoming shown</span>
+                <span style={infoPillStyle}>Sorted nearest first</span>
+                {nextEvent ? <span style={infoPillStyle}>Next up: {nextEvent.name}</span> : null}
+              </div>
             </div>
           </div>
 
@@ -129,13 +172,29 @@ export default function EventsPage() {
         </div>
 
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>
-          <div style={{ display: "grid", gap: 4 }}>
-            <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-              Upcoming Events
-            </strong>
-            <p style={{ margin: 0, color: "#94a3b8" }}>
-              Scroll through the current event board, then filter by type or date range to narrow it down.
-            </p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
+              <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+                Upcoming Events
+              </strong>
+              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
+                The board is already sorted from the closest upcoming event to the farthest one. Filters only narrow what is shown.
+              </p>
+            </div>
+
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedType("all");
+                  setDateFrom("");
+                  setDateTo("");
+                }}
+                style={secondaryButtonStyle}
+              >
+                Clear Filters
+              </button>
+            ) : null}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
@@ -171,8 +230,7 @@ export default function EventsPage() {
               style={{
                 ...cardStyle,
                 display: "grid",
-                gridTemplateColumns: event.photoUrl ? "150px minmax(0, 1fr)" : "minmax(0, 1fr)",
-                gap: 16,
+                gap: 14,
                 padding: 16,
                 textDecoration: "none",
                 color: "#e5edf7",
@@ -181,7 +239,7 @@ export default function EventsPage() {
               {event.photoUrl ? (
                 <div
                   style={{
-                    minHeight: 140,
+                    minHeight: 180,
                     borderRadius: 14,
                     backgroundImage: `url(${event.photoUrl})`,
                     backgroundSize: "cover",
@@ -214,8 +272,16 @@ export default function EventsPage() {
                   </div>
 
                   <span style={{ color: "#9cc2ee", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-                    View Event
+                    Open Details
                   </span>
+                </div>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <span style={infoPillStyle}>{getEventCardDateLabel(event)}</span>
+                  <span style={infoPillStyle}>{event.location}</span>
+                  {typeof event.neededPeople === "number" && event.neededPeople > 0 ? (
+                    <span style={infoPillStyle}>{event.neededPeople} needed</span>
+                  ) : null}
                 </div>
 
                 <div style={{ display: "grid", gap: 5, color: "#cbd5e1" }}>
@@ -237,9 +303,24 @@ export default function EventsPage() {
           )) : (
             <div style={{ ...cardStyle, padding: "1rem 1rem 1.1rem" }}>
               <strong style={{ display: "block", marginBottom: 8 }}>No matching upcoming events</strong>
-              <p style={{ margin: 0, color: "#94a3b8" }}>
+              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
                 Try widening the date range, clearing the type filter, or add the first event from the button above.
               </p>
+              {hasActiveFilters ? (
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType("all");
+                      setDateFrom("");
+                      setDateTo("");
+                    }}
+                    style={secondaryButtonStyle}
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
         </section>
