@@ -245,9 +245,6 @@ export default function SignupPage() {
           style={{ display: "block", marginBottom: 16, width: "100%" }}
         />
 
-        <p style={{ marginTop: 0, marginBottom: 12, color: "#94a3b8" }}>
-          A profile photo is required for account creation.
-        </p>
         <div style={{ marginBottom: 16 }}>
           <ImageCropField
             value={profilePhotoUrl}
