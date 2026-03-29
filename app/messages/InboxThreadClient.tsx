@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { auth, db } from "../../lib/firebase";
 import HomeIconLink from "../components/HomeIconLink";
-import { loadInboxReadState, markInboxThreadRead } from "../../lib/inbox-badges";
+import { INBOX_READ_EVENT, loadInboxReadState, markInboxThreadRead } from "../../lib/inbox-badges";
 import { toTimestampMs } from "../../lib/ride-dispatch";
 import FullscreenImageViewer from "../components/FullscreenImageViewer";
 import { getMessageThreadDefinition, getSystemThreadMessages, isMessageThreadId, type MessageThreadIconKey, type MessageThreadId } from "../../lib/messages";
@@ -97,12 +97,12 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
   const [responseDrafts, setResponseDrafts] = useState<Record<string, string>>({});
   const [submittingResponseId, setSubmittingResponseId] = useState<string | null>(null);
   const [responseError, setResponseError] = useState<string>("");
-  const [initialReadCutoff, setInitialReadCutoff] = useState(0);
+  const [readCutoff, setReadCutoff] = useState(0);
 
   useEffect(() => {
     if (!thread) return;
 
-    setInitialReadCutoff(loadInboxReadState()[thread.id] || 0);
+    setReadCutoff(loadInboxReadState()[thread.id] || 0);
 
     const postsQuery =
       thread.id === "notifications"
@@ -131,11 +131,33 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
   }, [thread, userId]);
 
   useEffect(() => {
+    if (!thread) {
+      return;
+    }
+
+    const handleReadStateChange = () => {
+      setReadCutoff(loadInboxReadState()[thread.id] || 0);
+    };
+
+    window.addEventListener("storage", handleReadStateChange);
+    window.addEventListener(INBOX_READ_EVENT, handleReadStateChange as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", handleReadStateChange);
+      window.removeEventListener(INBOX_READ_EVENT, handleReadStateChange as EventListener);
+    };
+  }, [thread]);
+
+  useEffect(() => {
     if (!thread || posts.length === 0) {
       return;
     }
 
-    markInboxThreadRead(thread.id, toTimestampMs(posts[0]?.createdAt));
+    const latestTimestamp = toTimestampMs(posts[0]?.createdAt);
+    markInboxThreadRead(thread.id, latestTimestamp);
+    if (latestTimestamp) {
+      setReadCutoff((current) => Math.max(current, latestTimestamp));
+    }
   }, [posts, thread]);
 
   const fallbackMessages = useMemo(() => (thread ? getSystemThreadMessages(thread.id) : []), [thread]);
@@ -174,7 +196,11 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
         throw new Error(payload.error || "Could not submit your response.");
       }
 
-      markInboxThreadRead(thread.id, toTimestampMs(posts[0]?.createdAt));
+      const latestTimestamp = toTimestampMs(posts[0]?.createdAt);
+      markInboxThreadRead(thread.id, latestTimestamp);
+      if (latestTimestamp) {
+        setReadCutoff((current) => Math.max(current, latestTimestamp));
+      }
       setResponseDrafts((current) => ({ ...current, [post.id]: "" }));
     } catch (error) {
       console.error(error);
@@ -220,7 +246,7 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
         <div style={{ padding: 16, display: "grid", gap: 12 }}>
           {posts.length > 0 ? posts.map((post) => {
             const postCreatedAtMs = toTimestampMs(post.createdAt);
-            const isUnread = postCreatedAtMs != null && postCreatedAtMs > initialReadCutoff;
+            const isUnread = postCreatedAtMs != null && postCreatedAtMs > readCutoff;
 
             return (
               <div

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v270",
+    title: "Inbox Unread Marker Sync Fix",
+    summary: "Fixed inbox thread unread indicators so the red unread badges and styling clear immediately once a thread is opened and marked read, instead of lingering until a later refresh.",
+  },
+  {
     commit: "v269",
     title: "Event Attendance Copy Trim",
     summary: "Removed the extra helper sentence from the event detail attendance roster card to keep that section tighter and less repetitive.",
