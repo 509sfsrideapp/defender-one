@@ -17,7 +17,7 @@ import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
-  formatMarketplaceLocationLabel,
+  formatMarketplaceFulfillmentLabel,
   formatMarketplaceStatusLabel,
   type MarketplaceListingRecord,
 } from "../../../lib/marketplace";
@@ -331,7 +331,12 @@ export default function MarketplaceDetailPage() {
                 </button>
               ) : null}
             </div>
-            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatMarketplaceLocationLabel(listingRecord.location)}</p>
+            <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>
+              {formatMarketplaceFulfillmentLabel(listingRecord)}
+            </p>
+            {listingRecord.location?.trim() ? (
+              <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{listingRecord.location.trim()}</p>
+            ) : null}
             {listingRecord.address ? <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{listingRecord.address}</p> : null}
           </div>
 
@@ -348,6 +353,7 @@ export default function MarketplaceDetailPage() {
             <strong style={{ display: "block", marginBottom: 6 }}>Listing Details</strong>
             <p style={{ margin: 0, color: "#cbd5e1" }}>Status: {formatMarketplaceStatusLabel(listingRecord.status)}</p>
             <p style={{ margin: 0, color: "#cbd5e1" }}>Condition: {formatMarketplaceConditionLabel(listingRecord.condition)}</p>
+            <p style={{ margin: 0, color: "#cbd5e1" }}>Exchange: {formatMarketplaceFulfillmentLabel(listingRecord)}</p>
             {listingRecord.priceText?.trim() ? <p style={{ margin: 0, color: "#cbd5e1" }}>Price / Terms: {listingRecord.priceText.trim()}</p> : null}
           </div>
 

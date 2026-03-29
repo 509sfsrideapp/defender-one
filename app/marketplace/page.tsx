@@ -12,7 +12,7 @@ import { buildMisconductPreviewText } from "../../lib/misconduct";
 import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
-  formatMarketplaceLocationLabel,
+  formatMarketplaceFulfillmentLabel,
   formatMarketplaceStatusLabel,
   getMarketplacePreviewText,
   MARKETPLACE_CATEGORY_OPTIONS,
@@ -385,13 +385,9 @@ export default function MarketplacePage() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   <span style={infoPillStyle}>{formatMarketplaceStatusLabel(listing.status)}</span>
                   <span style={infoPillStyle}>{formatMarketplaceConditionLabel(listing.condition)}</span>
-                  <span style={infoPillStyle}>{formatMarketplaceLocationLabel(listing.location)}</span>
+                  <span style={infoPillStyle}>{formatMarketplaceFulfillmentLabel(listing)}</span>
                   {listing.priceText?.trim() ? <span style={infoPillStyle}>{listing.priceText.trim()}</span> : null}
                 </div>
-
-                {listing.address ? (
-                  <p style={{ margin: 0, color: "#cbd5e1" }}><strong>Address:</strong> {listing.address}</p>
-                ) : null}
 
                 <p
                   style={{

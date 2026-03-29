@@ -14,11 +14,13 @@ export type MarketplaceCondition =
   | "for_parts";
 
 export type MarketplaceStatus = "available" | "pending" | "sold" | "removed";
+export type MarketplaceExchangeMethod = "buyer_pickup" | "seller_dropoff" | "set_meet";
 
 export type MarketplaceListingDocument = {
   title: string;
   category: MarketplaceCategory;
-  location: string;
+  exchangeMethod?: MarketplaceExchangeMethod | null;
+  location?: string | null;
   address?: string | null;
   description: string;
   photoUrl?: string | null;
@@ -61,6 +63,15 @@ export const MARKETPLACE_STATUS_OPTIONS: Array<{ value: MarketplaceStatus; label
   { value: "removed", label: "Removed" },
 ];
 
+export const MARKETPLACE_EXCHANGE_METHOD_OPTIONS: Array<{
+  value: MarketplaceExchangeMethod;
+  label: string;
+}> = [
+  { value: "buyer_pickup", label: "Buyer Pickup" },
+  { value: "seller_dropoff", label: "Seller Dropoff" },
+  { value: "set_meet", label: "Set Meet" },
+];
+
 function getCreatedAtMs(
   createdAt?: MarketplaceListingDocument["createdAt"]
 ) {
@@ -87,9 +98,20 @@ export function formatMarketplaceStatusLabel(status: MarketplaceStatus) {
   return MARKETPLACE_STATUS_OPTIONS.find((option) => option.value === status)?.label || "Available";
 }
 
-export function formatMarketplaceLocationLabel(location?: string | null) {
-  const trimmedLocation = location?.trim() || "";
-  return trimmedLocation ? `@${trimmedLocation}` : "@Location TBD";
+export function formatMarketplaceExchangeMethodLabel(exchangeMethod?: MarketplaceExchangeMethod | null) {
+  return (
+    MARKETPLACE_EXCHANGE_METHOD_OPTIONS.find((option) => option.value === exchangeMethod)?.label ||
+    "Buyer Pickup"
+  );
+}
+
+export function formatMarketplaceFulfillmentLabel(listing: Pick<MarketplaceListingDocument, "exchangeMethod" | "location">) {
+  if (listing.exchangeMethod) {
+    return formatMarketplaceExchangeMethodLabel(listing.exchangeMethod);
+  }
+
+  const trimmedLocation = listing.location?.trim() || "";
+  return trimmedLocation ? `@${trimmedLocation}` : "Buyer Pickup";
 }
 
 export function getMarketplacePreviewText(description?: string | null) {

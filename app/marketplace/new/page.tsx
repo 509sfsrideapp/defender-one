@@ -9,13 +9,15 @@ import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import ImageCropField from "../../components/ImageCropField";
 import { auth, db } from "../../../lib/firebase";
-import { formatAddressPart, formatStructuredText } from "../../../lib/text-format";
+import { formatStructuredText } from "../../../lib/text-format";
 import {
   MARKETPLACE_CATEGORY_OPTIONS,
   MARKETPLACE_CONDITION_OPTIONS,
+  MARKETPLACE_EXCHANGE_METHOD_OPTIONS,
   MARKETPLACE_STATUS_OPTIONS,
   type MarketplaceCategory,
   type MarketplaceCondition,
+  type MarketplaceExchangeMethod,
   type MarketplaceStatus,
 } from "../../../lib/marketplace";
 
@@ -72,8 +74,7 @@ export default function NewMarketplaceListingPage() {
   const [photoStatusMessage, setPhotoStatusMessage] = useState("");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<MarketplaceCategory>("gear");
-  const [location, setLocation] = useState("");
-  const [address, setAddress] = useState("");
+  const [exchangeMethod, setExchangeMethod] = useState<MarketplaceExchangeMethod>("buyer_pickup");
   const [priceText, setPriceText] = useState("");
   const [condition, setCondition] = useState<MarketplaceCondition>("good");
   const [status, setStatus] = useState<MarketplaceStatus>("available");
@@ -100,11 +101,6 @@ export default function NewMarketplaceListingPage() {
       return;
     }
 
-    if (!location.trim()) {
-      setStatusMessage("Location is required.");
-      return;
-    }
-
     if (!description.trim()) {
       setStatusMessage("Description is required.");
       return;
@@ -117,8 +113,7 @@ export default function NewMarketplaceListingPage() {
       const createdRef = await addDoc(collection(db, "marketplaceListings"), {
         title: formatStructuredText(title),
         category,
-        location: formatStructuredText(location),
-        address: formatAddressPart(address) || null,
+        exchangeMethod,
         description: description.trim(),
         photoUrl: photoUrl.trim() || null,
         priceText: priceText.trim() || null,
@@ -218,13 +213,12 @@ export default function NewMarketplaceListingPage() {
             </label>
 
             <label style={{ display: "grid", gap: 6 }}>
-              <span>Location</span>
-              <input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Dorms, squadron, base housing..." />
-            </label>
-
-            <label style={{ display: "grid", gap: 6, gridColumn: "1 / -1" }}>
-              <span>Address (Optional)</span>
-              <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="123 Main St, Whiteman AFB, MO 65305" />
+              <span>Exchange Method</span>
+              <select value={exchangeMethod} onChange={(event) => setExchangeMethod(event.target.value as MarketplaceExchangeMethod)}>
+                {MARKETPLACE_EXCHANGE_METHOD_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </label>
           </div>
 
@@ -249,7 +243,7 @@ export default function NewMarketplaceListingPage() {
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe condition, pickup expectations, what is included, and any trade notes."
+              placeholder="Describe condition, what is included, and any trade notes. Final handoff details can be worked out in chat."
               rows={7}
             />
           </label>

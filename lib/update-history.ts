@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v323",
+    title: "Marketplace Handoff Method Picker",
+    summary: "Replaced Marketplace location and address entry with a simple buyer pickup, seller dropoff, or set meet dropdown on new listings, and updated listing displays to show that handoff method more cleanly.",
+  },
+  {
     commit: "v322",
     title: "Marketplace and ISO Square Upload Crops",
     summary: "Changed the Marketplace and ISO image uploaders to use square crop framing so new listing and request photos are positioned and saved in a consistent square format.",
