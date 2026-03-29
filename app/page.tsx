@@ -106,6 +106,37 @@ const HOMEPAGE_STATUS_PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const HOMEPAGE_STATUS_SOURCES = ["LOCAL", "REMOTE", "UNKNOWN", "INTERNAL"];
 const HOMEPAGE_STATUS_RESULTS = ["SUCCESS", "FAILED", "PARTIAL", "INCONCLUSIVE"];
 const HOMEPAGE_STATUS_RUNWAYS = ["ASSIGNED", "HOLDING", "STANDBY"];
+const HOMEPAGE_STATUS_POSTS = [
+  "W1",
+  "W2",
+  "W3",
+  "W4",
+  "W5",
+  "W6",
+  "W7",
+  "W9",
+  "B1",
+  "B2",
+  "B3",
+  "B5",
+  "B6",
+  "POL-1",
+  "POL-2",
+  "POL-3",
+  "ARNOLD",
+  "SPIRIT",
+  "LEMAY",
+  "WC",
+  "DEF-1",
+  "DEF-A",
+  "DEF-B",
+  "DEF-C",
+  "DEF-D",
+  "DEF-F",
+  "RDA",
+  "PL2",
+  "SSC",
+];
 
 function chooseRandom<T>(items: T[]) {
   return items[Math.floor(Math.random() * items.length)];
@@ -319,6 +350,7 @@ function createHomepageStatusScenario(): HomepageStatusScenario {
     { value: `MISSION_ABORTED//CAUSE:MONSTER_ZERO_REFUSED_TAXI`, weight: 2 },
     { value: `QUEUE_GHOSTING//CAUSE:PHANTOM_RIDER//SECTOR:${sector}`, weight: 2 },
     { value: `EFD_STATUS//ERROR404:NOT-FOUND`, weight: 3 },
+    { value: `INITIATE_POST_CHECK//POST:${chooseRandom(HOMEPAGE_STATUS_POSTS)}//STATUS:CODE-${randomInt(1, 22)}`, weight: 4 },
     { value: `STATUS_AUDIT//STATE:${statusPool}//PRIORITY:${priorityPool}//SOURCE:${sourcePool}`, weight: 4 },
     { value: `OPS_RESULT_SUMMARY//RESULT:${resultPool}//PRIORITY:${priorityPool}`, weight: 4 },
   ];
