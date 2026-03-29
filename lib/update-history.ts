@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v316",
+    title: "Admin Account Editor Scroll Fix",
+    summary: "Raised the collapsible height limits inside the admin account viewer so the full Edit Account form no longer gets cut off and can expand far enough to reach the lower fields.",
+  },
+  {
     commit: "v315",
     title: "Signup Photo Status Cleanup",
     summary: "Removed the extra bottom-of-page profile photo ready message from account creation so signup only shows the upload progress inline with the photo field instead of surfacing a redundant page-level status.",

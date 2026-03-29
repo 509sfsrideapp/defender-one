@@ -694,7 +694,7 @@ export default function AdminAccountsPage() {
 
                 <div
                   className={`app-collapsible-panel${expanded ? " app-collapsible-panel-open" : ""}`}
-                  style={{ marginTop: expanded ? 16 : 0, maxHeight: expanded ? 760 : 0 }}
+                  style={{ marginTop: expanded ? 16 : 0, maxHeight: expanded ? 4200 : 0 }}
                   aria-hidden={!expanded}
                 >
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
@@ -804,7 +804,7 @@ export default function AdminAccountsPage() {
 
                     <div
                       className={`app-collapsible-panel${editComposerOpen ? " app-collapsible-panel-open" : ""}`}
-                      style={{ marginTop: editComposerOpen ? 14 : 0, maxHeight: editComposerOpen ? 1200 : 0 }}
+                      style={{ marginTop: editComposerOpen ? 14 : 0, maxHeight: editComposerOpen ? 2600 : 0 }}
                       aria-hidden={!editComposerOpen}
                     >
                       <div
