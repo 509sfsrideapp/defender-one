@@ -246,7 +246,8 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
         <div style={{ padding: 16, display: "grid", gap: 12 }}>
           {posts.length > 0 ? posts.map((post) => {
             const postCreatedAtMs = toTimestampMs(post.createdAt);
-            const isUnread = postCreatedAtMs != null && postCreatedAtMs > readCutoff;
+            const needsResponseUnread = Boolean(post.requiresResponse && !post.responseSubmittedAt);
+            const isUnread = needsResponseUnread || (postCreatedAtMs != null && postCreatedAtMs > readCutoff);
 
             return (
               <div
