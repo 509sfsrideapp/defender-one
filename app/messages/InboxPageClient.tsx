@@ -71,7 +71,7 @@ function ThreadCard({
 }) {
   return (
     <Link
-      href={`/messages/${thread.id}`}
+      href={`/inbox/${thread.id}`}
       style={{
         display: "grid",
         gridTemplateColumns: "auto 1fr auto",

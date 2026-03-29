@@ -70,8 +70,7 @@ export function openConversationInMessages(
 ) {
   const searchParams = new URLSearchParams();
   searchParams.set("tab", bucket);
-  searchParams.set("conversationId", conversationId);
-  router.push(`/messages?${searchParams.toString()}`);
+  router.push(`/messages/${conversationId}?${searchParams.toString()}`);
 }
 
 export async function openDirectMessage(
