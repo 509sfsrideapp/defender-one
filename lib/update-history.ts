@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v338",
+    title: "Dev-Locked Marketplace, ISO, and Messages",
+    summary: "Removed Marketplace, ISO, and Messages from the live user dashboard, moved Marketplace and ISO into Developer Tools beside Messages, and added route-level developer access gates so those three features stay behind the dev PIN while Driver, Events, and Forums remain the main user-facing apps.",
+  },
+  {
     commit: "v337",
     title: "Marketplace Board Query Relief",
     summary: "Swapped the Marketplace board over to a tighter ordered server query and embedded seller summary data onto new listings, reducing the number and breadth of Firestore reads needed to render the main listings page.",

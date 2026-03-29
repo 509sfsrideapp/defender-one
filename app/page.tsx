@@ -556,35 +556,6 @@ function EventsIcon() {
   );
 }
 
-function MarketplaceIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 64 64"
-      width="34"
-      height="34"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M13 18.5h38" />
-      <path d="M13 18.5v4.5" />
-      <path d="M51 18.5v4.5" />
-      <path d="M13 23h38" />
-      <path d="M13 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
-      <path d="M21 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
-      <path d="M29 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
-      <path d="M37 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
-      <path d="M45 23c0 2.1 1.8 3.9 4 3.9s4-1.8 4-3.9" />
-      <path d="M16 26.9V48a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4V26.9" />
-      <rect x="21.5" y="33" width="8.5" height="19" rx="2.5" />
-      <rect x="35.5" y="33.5" width="9.5" height="9" rx="2.5" />
-    </svg>
-  );
-}
-
 function QuestionMarkIcon() {
   return (
     <svg
@@ -600,45 +571,6 @@ function QuestionMarkIcon() {
     >
       <path d="M23.5 24.5c0-5.1 4.2-9.2 9.7-9.2 5.3 0 9.3 3.5 9.3 8.3 0 3.7-1.8 5.9-5.5 8.4-3.1 2.1-4.8 3.8-4.8 7.1" />
       <path d="M32 46.8v.4" />
-    </svg>
-  );
-}
-
-function MagnifyingGlassIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 64 64"
-      width="34"
-      height="34"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="28" cy="28" r="13" />
-      <path d="m38 38 11 11" />
-    </svg>
-  );
-}
-
-function MessagesIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 64 64"
-      width="34"
-      height="34"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 18h36a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H28l-10 8v-8h-4a6 6 0 0 1-6-6V24a6 6 0 0 1 6-6Z" />
-      <path d="M21 28h22" />
-      <path d="M21 36h15" />
     </svg>
   );
 }
@@ -934,10 +866,10 @@ export default function HomePage() {
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
   const showAdminTile = Boolean(user && isAdminEmail(user.email));
-  const visibleAppTileCount = 6 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const visibleAppTileCount = 3 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const appTilePlaceholderCount = Math.max(0, 9 - visibleAppTileCount);
-  const totalOperationalApps = (driverReady ? 1 : 0) + 5 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
-  const totalVisibleApps = 6 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const totalOperationalApps = (driverReady ? 1 : 0) + 2 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const totalVisibleApps = 3 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const authTokenUserLabel =
     profile?.lastName?.trim() && profile?.firstName?.trim()
       ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
@@ -1713,10 +1645,7 @@ export default function HomePage() {
                     pulseGreen={Boolean(driverReady && profile?.available)}
                   />
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
-                  <AppTile href="/messages?tab=direct" icon={<MessagesIcon />} label="MESSAGES" />
-                  <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="FORUMS" />
-                  <AppTile href="/iso" icon={<MagnifyingGlassIcon />} label="ISO" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : null}
                   {showAdminTile ? <AppTile href="/admin" icon={<AdminIcon />} label="Admin Dashboard" /> : null}
                   {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (

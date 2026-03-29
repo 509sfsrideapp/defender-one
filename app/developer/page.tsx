@@ -79,9 +79,25 @@ export default async function DeveloperPage() {
 
         <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>Messages</h2>
-          <p style={{ maxWidth: 320 }}>Keep the inbox and direct-message feature accessible from here while we leave it off the main dashboard for now.</p>
+          <p style={{ maxWidth: 320 }}>Keep the direct-message feature available here while it stays off the live user dashboard.</p>
           <Link href="/messages/direct" style={featureLinkStyle}>
             Open Messages
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Marketplace</h2>
+          <p style={{ maxWidth: 320 }}>Open the Marketplace feature from here while we keep it behind developer access.</p>
+          <Link href="/marketplace" style={featureLinkStyle}>
+            Open Marketplace
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>ISO</h2>
+          <p style={{ maxWidth: 320 }}>Open the ISO board from here while we keep it behind developer access.</p>
+          <Link href="/iso" style={featureLinkStyle}>
+            Open ISO
           </Link>
         </div>
 
