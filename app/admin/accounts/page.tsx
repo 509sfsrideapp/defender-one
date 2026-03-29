@@ -49,6 +49,9 @@ export default function AdminAccountsPage() {
   const [actingOnUserId, setActingOnUserId] = useState("");
   const [accountActionMessage, setAccountActionMessage] = useState("");
   const [expandedUserIds, setExpandedUserIds] = useState<Record<string, boolean>>({});
+  const [messageDraftUserId, setMessageDraftUserId] = useState("");
+  const [messageTitle, setMessageTitle] = useState("");
+  const [messageBody, setMessageBody] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -210,6 +213,63 @@ export default function AdminAccountsPage() {
     }
   };
 
+  const openMessageComposer = (appUser: AppUser) => {
+    setMessageDraftUserId(appUser.id);
+    setMessageTitle("");
+    setMessageBody("");
+    setAccountActionMessage("");
+  };
+
+  const closeMessageComposer = () => {
+    setMessageDraftUserId("");
+    setMessageTitle("");
+    setMessageBody("");
+  };
+
+  const sendAccountMessage = async (appUser: AppUser) => {
+    if (!auth.currentUser) {
+      setAccountActionMessage("Admin session expired. Please log in again.");
+      return;
+    }
+
+    if (!messageTitle.trim() || !messageBody.trim()) {
+      setAccountActionMessage("Message title and body are both required.");
+      return;
+    }
+
+    try {
+      setActingOnUserId(appUser.id);
+      setAccountActionMessage("Sending admin message...");
+      const idToken = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/admin/user-inbox-posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          userId: appUser.id,
+          title: messageTitle.trim(),
+          body: messageBody.trim(),
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Could not send the admin message.");
+      }
+
+      setAccountActionMessage(`Message sent to ${appUser.name || appUser.email || appUser.id}.`);
+      closeMessageComposer();
+    } catch (error) {
+      console.error(error);
+      setAccountActionMessage(error instanceof Error ? error.message : "Could not send the admin message.");
+    } finally {
+      setActingOnUserId("");
+    }
+  };
+
   if (loading) {
     return (
       <main style={{ padding: 20 }}>
@@ -339,6 +399,7 @@ export default function AdminAccountsPage() {
             const photoUrl = appUser.driverPhotoUrl || appUser.riderPhotoUrl || "";
             const busy = actingOnUserId === appUser.id;
             const expanded = Boolean(expandedUserIds[appUser.id]);
+            const messageComposerOpen = messageDraftUserId === appUser.id;
 
             return (
               <div
@@ -459,6 +520,21 @@ export default function AdminAccountsPage() {
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       <button
                         type="button"
+                        onClick={() => (messageComposerOpen ? closeMessageComposer() : openMessageComposer(appUser))}
+                        disabled={busy}
+                        style={{
+                          padding: "8px 12px",
+                          backgroundColor: "#1d4ed8",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {busy && messageComposerOpen ? "Working..." : messageComposerOpen ? "Close Message" : "Message User"}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleAccountAction(appUser.accountFrozen ? "unfreeze" : "freeze", appUser)}
                         disabled={busy || isAdminEmail(appUser.email)}
                         style={{
@@ -487,6 +563,71 @@ export default function AdminAccountsPage() {
                       >
                         {busy ? "Working..." : "Delete"}
                       </button>
+                    </div>
+
+                    <div
+                      className={`app-collapsible-panel${messageComposerOpen ? " app-collapsible-panel-open" : ""}`}
+                      style={{ marginTop: messageComposerOpen ? 14 : 0, maxHeight: messageComposerOpen ? 320 : 0 }}
+                      aria-hidden={!messageComposerOpen}
+                    >
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: 10,
+                          padding: 14,
+                          borderRadius: 12,
+                          border: "1px solid rgba(96, 165, 250, 0.18)",
+                          backgroundColor: "rgba(12, 20, 32, 0.8)",
+                        }}
+                      >
+                        <strong>Send Admin Inbox Message</strong>
+                        <input
+                          value={messageTitle}
+                          onChange={(event) => setMessageTitle(event.target.value)}
+                          placeholder="Message title"
+                          disabled={busy}
+                        />
+                        <textarea
+                          value={messageBody}
+                          onChange={(event) => setMessageBody(event.target.value)}
+                          placeholder="Message text"
+                          rows={5}
+                          disabled={busy}
+                          style={{ minHeight: 132 }}
+                        />
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            onClick={() => void sendAccountMessage(appUser)}
+                            disabled={busy}
+                            style={{
+                              padding: "8px 12px",
+                              backgroundColor: "#1d4ed8",
+                              color: "white",
+                              border: "none",
+                              borderRadius: 8,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {busy ? "Sending..." : "Send to Admin Inbox"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={closeMessageComposer}
+                            disabled={busy}
+                            style={{
+                              padding: "8px 12px",
+                              backgroundColor: "#1f2937",
+                              color: "white",
+                              border: "none",
+                              borderRadius: 8,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
               </div>

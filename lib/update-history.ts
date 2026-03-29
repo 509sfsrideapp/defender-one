@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v284",
+    title: "Admin Account Messaging",
+    summary: "Added a Message User action to expanded admin account cards so admins can send private account-related messages directly into that user’s Admin inbox thread.",
+  },
+  {
     commit: "v283",
     title: "Event POC Email Fallback Removal",
     summary: "Removed the email-address fallback from event organizer labels so event cards and detail headers now stay name-based instead of showing creator email addresses.",

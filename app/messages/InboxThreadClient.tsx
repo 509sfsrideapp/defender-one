@@ -103,31 +103,49 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
     if (!thread) return;
 
     setReadCutoff(loadInboxReadState()[thread.id] || 0);
+    let globalPosts: InboxPost[] = [];
+    let privatePosts: InboxPost[] = [];
 
-    const postsQuery =
+    const sortMergedPosts = () => {
+      setPosts(
+        [...globalPosts, ...privatePosts]
+          .filter((post) => isMessageThreadId(post.threadId))
+          .filter((post) => post.threadId === thread.id)
+          .sort((a, b) => {
+            const bSeconds = b.createdAt?.seconds ?? 0;
+            const aSeconds = a.createdAt?.seconds ?? 0;
+            if (bSeconds !== aSeconds) {
+              return bSeconds - aSeconds;
+            }
+
+            return (b.createdAt?.nanoseconds ?? 0) - (a.createdAt?.nanoseconds ?? 0);
+          })
+      );
+    };
+
+    const unsubscribeGlobal =
       thread.id === "notifications"
-        ? query(collection(db, "userInboxPosts"), where("userId", "==", userId))
-        : query(collection(db, "inboxPosts"), where("threadId", "==", thread.id));
+        ? () => undefined
+        : onSnapshot(query(collection(db, "inboxPosts"), where("threadId", "==", thread.id)), (snapshot) => {
+            globalPosts = snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              ...(docSnap.data() as Omit<InboxPost, "id">),
+            }));
+            sortMergedPosts();
+          });
 
-    const unsubscribe = onSnapshot(postsQuery, (snapshot) => {
-      const nextPosts = snapshot.docs
-        .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<InboxPost, "id">) }))
-        .filter((post) => isMessageThreadId(post.threadId))
-        .filter((post) => post.threadId === thread.id)
-        .sort((a, b) => {
-          const bSeconds = b.createdAt?.seconds ?? 0;
-          const aSeconds = a.createdAt?.seconds ?? 0;
-          if (bSeconds !== aSeconds) {
-            return bSeconds - aSeconds;
-          }
-
-          return (b.createdAt?.nanoseconds ?? 0) - (a.createdAt?.nanoseconds ?? 0);
-        });
-
-      setPosts(nextPosts);
+    const unsubscribePrivate = onSnapshot(query(collection(db, "userInboxPosts"), where("userId", "==", userId)), (snapshot) => {
+      privatePosts = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<InboxPost, "id">),
+      }));
+      sortMergedPosts();
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeGlobal();
+      unsubscribePrivate();
+    };
   }, [thread, userId]);
 
   useEffect(() => {
