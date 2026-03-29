@@ -268,9 +268,18 @@ export async function getFirestoreDocument<T extends Record<string, unknown>>(do
   } as { id: string } & T;
 }
 
-export async function listFirestoreDocumentsByField(
+export async function listFirestoreDocumentsByField<T extends Record<string, unknown>>(
   collectionPath: string,
   fieldPath: string,
+  value: string | boolean | number | null
+) {
+  return listFirestoreDocumentsByFieldOperator<T>(collectionPath, fieldPath, "EQUAL", value);
+}
+
+export async function listFirestoreDocumentsByFieldOperator<T extends Record<string, unknown>>(
+  collectionPath: string,
+  fieldPath: string,
+  op: "EQUAL" | "ARRAY_CONTAINS",
   value: string | boolean | number | null
 ) {
   const accessToken = await getGoogleAccessToken();
@@ -288,7 +297,7 @@ export async function listFirestoreDocumentsByField(
           where: {
             fieldFilter: {
               field: { fieldPath },
-              op: "EQUAL",
+              op,
               value: toStructuredQueryValue(value),
             },
           },
@@ -321,5 +330,5 @@ export async function listFirestoreDocumentsByField(
       ...Object.fromEntries(
         Object.entries(document.fields || {}).map(([field, fieldValue]) => [field, fromFirestoreValue(fieldValue)])
       ),
-    }));
+    })) as Array<{ id: string; path: string } & T>;
 }

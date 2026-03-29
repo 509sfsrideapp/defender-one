@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import {
+  listDirectMessageConversationsForUser,
   openDirectConversation,
   openIsoConversation,
   openMarketplaceConversation,
@@ -106,6 +107,28 @@ export async function POST(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Could not open the conversation." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get("authorization");
+    const idToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (!idToken) {
+      return NextResponse.json({ error: "Missing user token." }, { status: 401 });
+    }
+
+    const decoded = await verifyFirebaseIdToken(idToken);
+    const conversations = await listDirectMessageConversationsForUser(decoded.sub);
+
+    return NextResponse.json({ ok: true, conversations });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Could not load conversations." },
       { status: 500 }
     );
   }

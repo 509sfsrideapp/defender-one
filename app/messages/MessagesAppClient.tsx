@@ -203,12 +203,59 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   };
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(query(collection(db, "dmConversations"), where("participantIds", "array-contains", userId)), (snapshot) => {
-      const nextConversations = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<DirectMessageConversationRecord, "id">) }));
-      setAllConversations(sortDirectMessageConversations(nextConversations));
-      setConversationLoading(false);
-    }, () => setConversationLoading(false));
-    return () => unsubscribe();
+    let cancelled = false;
+
+    const loadConversations = async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+
+        if (!idToken) {
+          if (!cancelled) {
+            setAllConversations([]);
+            setConversationLoading(false);
+          }
+          return;
+        }
+
+        const response = await fetch("/api/messages/conversations", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        const payload = (await response.json().catch(() => ({}))) as {
+          conversations?: DirectMessageConversationRecord[];
+          error?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Could not load conversations.");
+        }
+
+        if (!cancelled) {
+          setAllConversations(
+            sortDirectMessageConversations(payload.conversations || [])
+          );
+          setConversationLoading(false);
+        }
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) {
+          setConversationLoading(false);
+        }
+      }
+    };
+
+    setConversationLoading(true);
+    void loadConversations();
+    const interval = window.setInterval(() => {
+      void loadConversations();
+    }, 4000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [userId]);
 
   useEffect(() => {
@@ -256,12 +303,61 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       setMessages([]);
       return;
     }
+
+    let cancelled = false;
+
+    const loadMessages = async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+
+        if (!idToken) {
+          if (!cancelled) {
+            setMessages([]);
+            setMessageLoading(false);
+          }
+          return;
+        }
+
+        const response = await fetch(
+          `/api/messages/conversations/${activeConversation.id}/messages`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        const payload = (await response.json().catch(() => ({}))) as {
+          messages?: DirectMessageRecord[];
+          error?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Could not load messages.");
+        }
+
+        if (!cancelled) {
+          setMessages(payload.messages || []);
+          setMessageLoading(false);
+        }
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) {
+          setMessageLoading(false);
+        }
+      }
+    };
+
     setMessageLoading(true);
-    const unsubscribe = onSnapshot(query(collection(db, "dmConversations", activeConversation.id, "messages"), orderBy("createdAt", "asc")), (snapshot) => {
-      setMessages(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<DirectMessageRecord, "id">) })));
-      setMessageLoading(false);
-    }, () => setMessageLoading(false));
-    return () => unsubscribe();
+    void loadMessages();
+    const interval = window.setInterval(() => {
+      void loadMessages();
+    }, 2500);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [activeConversation, activeTab]);
 
   useEffect(() => {

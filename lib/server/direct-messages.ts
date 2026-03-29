@@ -1,6 +1,8 @@
 import {
   createFirestoreDocument,
   getFirestoreDocument,
+  listFirestoreDocuments,
+  listFirestoreDocumentsByFieldOperator,
   patchFirestoreDocument,
 } from "./firestore-admin";
 import {
@@ -9,6 +11,7 @@ import {
   buildMarketplaceConversationId,
   buildMessagePreview,
   buildParticipantKey,
+  type DirectMessageRecord,
   type DirectMessageConversationRecord,
   type DirectMessageConversationType,
   type DirectMessageParticipantProfile,
@@ -187,6 +190,55 @@ export async function openIsoConversation(input: {
 
 export async function getDirectMessageConversation(conversationId: string) {
   return await getFirestoreDocument<DirectMessageConversationRecord>(`dmConversations/${conversationId}`);
+}
+
+export async function listDirectMessageConversationsForUser(userId: string) {
+  const conversations = await listFirestoreDocumentsByFieldOperator<
+    Omit<DirectMessageConversationRecord, "id">
+  >(
+    "dmConversations",
+    "participantIds",
+    "ARRAY_CONTAINS",
+    userId
+  );
+
+  return conversations.filter((conversation) => conversation.participantIds?.includes(userId));
+}
+
+export async function listDirectMessagesForConversation(input: {
+  conversationId: string;
+  userId: string;
+}) {
+  const conversation = await getDirectMessageConversation(input.conversationId);
+
+  if (!conversation) {
+    throw new Error("That conversation is unavailable.");
+  }
+
+  if (!conversation.participantIds.includes(input.userId)) {
+    throw new Error("You do not have access to that conversation.");
+  }
+
+  const messages = (await listFirestoreDocuments(
+    `dmConversations/${input.conversationId}/messages`
+  )) as DirectMessageRecord[];
+
+  return messages.sort((left, right) => {
+    const leftTime =
+      typeof left.createdAt === "string"
+        ? Date.parse(left.createdAt)
+        : (left.createdAt?.seconds || 0) * 1000;
+    const rightTime =
+      typeof right.createdAt === "string"
+        ? Date.parse(right.createdAt)
+        : (right.createdAt?.seconds || 0) * 1000;
+
+    if (leftTime !== rightTime) {
+      return leftTime - rightTime;
+    }
+
+    return String(left.id || "").localeCompare(String(right.id || ""));
+  });
 }
 
 export async function sendDirectMessage(input: {

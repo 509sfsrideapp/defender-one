@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v321",
+    title: "Direct Message Thread Launch Fix",
+    summary: "Changed the new messaging feature to load DM conversation lists and thread contents through secure app APIs, so tapping Message on a user now opens into the actual conversation flow instead of only landing on the Messages app shell.",
+  },
+  {
     commit: "v320",
     title: "User Preview Motion Polish",
     summary: "Smoothed the shared user-preview card so profile detail expansion now fades and slides open and closed cleanly everywhere that new messaging profile preview is used.",
