@@ -623,6 +623,26 @@ function DevIcon() {
   );
 }
 
+function AdminIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      width="36"
+      height="36"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M32 10 46 16v12c0 11-6.3 20.7-14 25-7.7-4.3-14-14-14-25V16l14-6Z" />
+      <path d="M32 21v21" />
+      <path d="M23.5 31.5h17" />
+    </svg>
+  );
+}
+
 function NullStatusIcon({ text }: { text: string }) {
   return (
     <div
@@ -858,10 +878,11 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
-  const visibleAppTileCount = 4 + (showDevTile ? 1 : 0);
+  const showAdminTile = Boolean(user && isAdminEmail(user.email));
+  const visibleAppTileCount = 4 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const appTilePlaceholderCount = Math.max(0, 9 - visibleAppTileCount);
-  const totalOperationalApps = (driverReady ? 1 : 0) + 3 + (showDevTile ? 1 : 0);
-  const totalVisibleApps = 4 + (showDevTile ? 1 : 0);
+  const totalOperationalApps = (driverReady ? 1 : 0) + 3 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
+  const totalVisibleApps = 4 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const authTokenUserLabel =
     profile?.lastName?.trim() && profile?.firstName?.trim()
       ? `${profile.lastName.trim().toUpperCase()}, ${profile.firstName.trim().toUpperCase()}${profile.rank?.trim() ? ` (${profile.rank.trim()})` : ""}`
@@ -1640,6 +1661,7 @@ export default function HomePage() {
                   <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="Q&A" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : null}
+                  {showAdminTile ? <AppTile href="/admin" icon={<AdminIcon />} label="Admin Dashboard" /> : null}
                   {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (
                     <PlaceholderTile key={index} />
                   ))}
@@ -1761,24 +1783,6 @@ export default function HomePage() {
                 }}
               >
                 Current Ride Status
-              </Link>
-            </div>
-          ) : null}
-
-          {user && isAdminEmail(user.email) && !driverActiveRide && !riderActiveRide ? (
-            <div style={{ marginTop: 20 }}>
-              <Link
-                href="/admin"
-                style={{
-                  display: "inline-block",
-                  padding: "10px 16px",
-                  backgroundColor: "#7c3aed",
-                  color: "white",
-                  textDecoration: "none",
-                  borderRadius: 8,
-                }}
-              >
-                Admin Dashboard
               </Link>
             </div>
           ) : null}

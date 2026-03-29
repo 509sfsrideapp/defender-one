@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v301",
+    title: "Homepage Admin App Tile",
+    summary: "Moved the admin dashboard entry onto the homepage Applications grid as the last app tile, while keeping it visible only to the admin account and removing the old separate button.",
+  },
+  {
     commit: "v300",
     title: "Anonymous Q&A Posts",
     summary: "Added a Post Anonymously option to the Q&A composer so posts can show as Anon to normal users, while admin view still reveals the real author on the feed and post detail pages.",
