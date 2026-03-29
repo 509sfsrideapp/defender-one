@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v299",
+    title: "Signup Permission Auto Prompts",
+    summary: "Updated the signup App Permissions step so notification and location permission prompts attempt to open automatically when the page loads, and new accounts carry the resulting location preference while notification setup completes immediately after signup when allowed.",
+  },
+  {
     commit: "v298",
     title: "Admin Account Rank Sorting",
     summary: "Updated the admin account viewer to sort accounts by rank from highest to lowest, with the rank filter list using the same hierarchy.",

@@ -170,6 +170,7 @@ export async function finalizeSignupFromDraft(
   draft: SignupDraft,
   options?: {
     emergencyRideAddressConsent?: boolean;
+    locationServicesEnabled?: boolean;
   }
 ) {
   const validation = await validateSignupDraft(draft);
@@ -224,6 +225,7 @@ export async function finalizeSignupFromDraft(
       carColor: normalizedCarColor,
       carPlate: formatVehiclePlate(""),
       emergencyRideAddressConsent: Boolean(options?.emergencyRideAddressConsent),
+      locationServicesEnabled: options?.locationServicesEnabled !== false,
       available: false,
       createdAt: new Date(),
     });
