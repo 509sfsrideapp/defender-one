@@ -85,6 +85,7 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [creatorDirectory, setCreatorDirectory] = useState<Record<string, EventCreatorProfile>>({});
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [selectedType, setSelectedType] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -217,51 +218,80 @@ export default function EventsPage() {
         </div>
 
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <div style={{ display: "grid", minWidth: 0 }}>
               <strong style={{ fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
-                Upcoming Events
+                Filter
               </strong>
             </div>
 
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedType("all");
-                  setDateFrom("");
-                  setDateTo("");
-                }}
-                style={secondaryButtonStyle}
-              >
-                Clear Filters
-              </button>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => setFiltersExpanded((current) => !current)}
+              aria-expanded={filtersExpanded}
+              aria-label={filtersExpanded ? "Collapse filters" : "Expand filters"}
+              style={{
+                width: 40,
+                minWidth: 40,
+                height: 40,
+                borderRadius: 12,
+                border: "1px solid rgba(126, 142, 160, 0.2)",
+                background: "linear-gradient(180deg, rgba(24, 31, 40, 0.98) 0%, rgba(11, 16, 22, 0.99) 100%)",
+                color: "#dbe7f5",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 20px rgba(0, 0, 0, 0.22)",
+                fontFamily: "var(--font-display)",
+                fontSize: 20,
+                lineHeight: 1,
+                padding: 0,
+              }}
+            >
+              {filtersExpanded ? "−" : "+"}
+            </button>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-            <label style={{ display: "grid", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#94a3b8" }}>Event Type</span>
-              <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
-                <option value="all">All types</option>
-                {EVENT_TYPE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+          {filtersExpanded ? (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+                <label style={{ display: "grid", gap: 6 }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>Event Type</span>
+                  <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
+                    <option value="all">All types</option>
+                    {EVENT_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            <label style={{ display: "grid", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#94a3b8" }}>From Date</span>
-              <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-            </label>
+                <label style={{ display: "grid", gap: 6 }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>From Date</span>
+                  <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
+                </label>
 
-            <label style={{ display: "grid", gap: 6 }}>
-              <span style={{ fontSize: 12, color: "#94a3b8" }}>To Date</span>
-              <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
-            </label>
-          </div>
+                <label style={{ display: "grid", gap: 6 }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8" }}>To Date</span>
+                  <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+                </label>
+              </div>
+
+              {hasActiveFilters ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType("all");
+                      setDateFrom("");
+                      setDateTo("");
+                    }}
+                    style={secondaryButtonStyle}
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </section>
 
         <section style={{ display: "grid", gap: 14 }}>
