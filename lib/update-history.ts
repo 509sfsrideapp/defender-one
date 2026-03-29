@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v276",
+    title: "Admin Messages Tool Consolidation",
+    summary: "Moved the admin inbox composer and sent-message manager off the main admin dashboard and behind a dedicated Admin Messages entry with separate send and review pages.",
+  },
+  {
     commit: "v275",
     title: "Q&A App Placeholder",
     summary: "Added a new Q&A app tile on the homepage with a question-mark icon and connected it to a live placeholder page for future buildout.",

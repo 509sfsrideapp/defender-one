@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
-import InboxPostComposer from "../components/InboxPostComposer";
-import InboxPostManager from "../components/InboxPostManager";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { auth, db } from "../../lib/firebase";
 import { formatRideTimestamp, getRideStatusLabel } from "../../lib/ride-lifecycle";
@@ -52,6 +50,24 @@ type AppUser = {
   carColor?: string;
   carPlate?: string;
   driverPhotoUrl?: string;
+};
+
+const featureCardStyle: React.CSSProperties = {
+  padding: 18,
+  borderRadius: 16,
+  border: "1px solid rgba(148, 163, 184, 0.18)",
+  backgroundColor: "rgba(9, 15, 25, 0.88)",
+  boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
+};
+
+const featureLinkStyle: React.CSSProperties = {
+  display: "inline-block",
+  padding: "10px 16px",
+  backgroundColor: "#0f172a",
+  color: "white",
+  textDecoration: "none",
+  borderRadius: 10,
+  border: "1px solid rgba(96, 165, 250, 0.18)",
 };
 
 export default function AdminPage() {
@@ -347,21 +363,16 @@ export default function AdminPage() {
       </div>
 
       <section style={{ marginTop: 28 }}>
-        <InboxPostComposer
-          endpoint="/api/admin/inbox-posts"
-          threadId="admin"
-          heading="Send Admin Message"
-          description="Publish an administrative message to the user inbox. Title and message text are required, and an optional photo appears on the left side of the post."
-          submitLabel="Send Message"
-        />
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Admin Messages</h2>
+          <p style={{ maxWidth: 520, color: "#94a3b8" }}>
+            Open the admin inbox tools to send official messages, then review and manage everything from one place.
+          </p>
+          <Link href="/admin/inbox" style={featureLinkStyle}>
+            Open Admin Messages
+          </Link>
+        </div>
       </section>
-
-      <InboxPostManager
-        threadId="admin"
-        endpointBase="/api/admin/inbox-posts"
-        heading="Manage Admin Messages"
-        description="Review previous Admin messages and edit or delete them as needed."
-      />
 
       <section style={{ marginTop: 32 }}>
         <h2>Available Drivers</h2>
