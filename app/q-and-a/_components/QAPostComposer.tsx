@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 type QAPostComposerProps = {
-  onSubmit: (input: { title: string; body: string }) => Promise<void>;
+  onSubmit: (input: { title: string; body: string; anonymous: boolean }) => Promise<void>;
   submittingLabel?: string;
   submitLabel?: string;
   cancelHref?: string;
@@ -57,6 +57,7 @@ export default function QAPostComposer({
 }: QAPostComposerProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -72,6 +73,7 @@ export default function QAPostComposer({
       await onSubmit({
         title: title.trim(),
         body: body.trim(),
+        anonymous,
       });
     } catch (error) {
       console.error(error);
@@ -130,6 +132,35 @@ export default function QAPostComposer({
           style={{ ...inputStyle, minHeight: 220 }}
           disabled={submitting}
         />
+      </label>
+
+      <label
+        style={{
+          display: "flex",
+          alignItems: "start",
+          gap: 10,
+          padding: "12px 14px",
+          borderRadius: 14,
+          border: "1px solid rgba(126, 142, 160, 0.16)",
+          background: "rgba(12, 18, 26, 0.72)",
+          color: "#dbe7f5",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={anonymous}
+          onChange={(event) => setAnonymous(event.target.checked)}
+          disabled={submitting}
+          style={{ marginTop: 2 }}
+        />
+        <span style={{ display: "grid", gap: 4 }}>
+          <span style={{ fontSize: 13, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+            Post Anonymously
+          </span>
+          <span style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5 }}>
+            Your post will show the author as Anon. Admin can still see who posted it.
+          </span>
+        </span>
       </label>
 
       {statusMessage ? (

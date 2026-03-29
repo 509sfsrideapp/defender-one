@@ -1,15 +1,18 @@
 import Link from "next/link";
-import { formatRelativeTimestamp, type QAPostRecord } from "../../../lib/q-and-a";
+import { formatRelativeTimestamp, getVisibleQAPostAuthorLabel, type QAPostRecord } from "../../../lib/q-and-a";
 import QAVoteControls from "./QAVoteControls";
 
 type QAPostCardProps = {
   post: QAPostRecord;
   currentVote?: number;
   onVote?: (value: 1 | -1) => Promise<void>;
+  showAdminIdentity?: boolean;
 };
 
-export default function QAPostCard({ post, currentVote = 0, onVote }: QAPostCardProps) {
+export default function QAPostCard({ post, currentVote = 0, onVote, showAdminIdentity = false }: QAPostCardProps) {
   const preview = post.snippet?.trim() || post.body?.trim() || "";
+  const visibleAuthorLabel = getVisibleQAPostAuthorLabel(post, { showAdminIdentity });
+  const adminAuthorLabel = post.authorAdminLabel?.trim() || post.authorLabel;
 
   return (
     <Link
@@ -39,10 +42,24 @@ export default function QAPostCard({ post, currentVote = 0, onVote }: QAPostCard
             fontFamily: "var(--font-display)",
             }}
           >
-            {post.authorLabel}
+            {visibleAuthorLabel}
             {" // "}
             {formatRelativeTimestamp(post.createdAt)}
           </p>
+          {post.anonymous && showAdminIdentity ? (
+            <p
+              style={{
+                margin: 0,
+                color: "#fca5a5",
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              Admin View // Posted by {adminAuthorLabel}
+            </p>
+          ) : null}
         </div>
         <span
           style={{

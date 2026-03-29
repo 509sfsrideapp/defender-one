@@ -44,7 +44,7 @@ export default function NewQAPostPage() {
         </div>
 
         <QAPostComposer
-          onSubmit={async ({ title, body }) => {
+          onSubmit={async ({ title, body, anonymous }) => {
             const idToken = await auth.currentUser?.getIdToken();
 
             if (!idToken) {
@@ -60,6 +60,7 @@ export default function NewQAPostPage() {
               body: JSON.stringify({
                 title,
                 body,
+                anonymous,
               }),
             });
 

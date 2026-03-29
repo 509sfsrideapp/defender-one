@@ -35,13 +35,16 @@ export async function createQAPost(input: {
   authorEmail?: string | null;
   title: string;
   body: string;
+  anonymous?: boolean;
 }) {
   const actorData = await buildQAActorData(input.authorId, input.authorEmail || null);
 
   const created = (await createFirestoreDocument("qaPosts", {
     authorId: input.authorId,
     authorLabel: actorData.authorLabel,
+    authorAdminLabel: actorData.authorLabel,
     authorPhotoUrl: actorData.authorPhotoUrl,
+    anonymous: Boolean(input.anonymous),
     title: input.title.trim(),
     body: input.body.trim() || "",
     snippet: buildQAPostSnippet(input.body),

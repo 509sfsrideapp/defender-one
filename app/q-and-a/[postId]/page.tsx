@@ -8,9 +8,11 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
+import { isAdminEmail } from "../../../lib/admin";
 import {
   buildQACommentTree,
   formatRelativeTimestamp,
+  getVisibleQAPostAuthorLabel,
   normalizeQAVoteValue,
   type QACommentRecord,
   type QACommentSortMode,
@@ -155,6 +157,9 @@ export default function QAPostDetailPage() {
 
   const commentTree = useMemo(() => buildQACommentTree(comments, commentSortMode), [commentSortMode, comments]);
   const canManagePost = Boolean(user && postRecord && !postRecord.deleted && postRecord.authorId === user.uid);
+  const showAdminIdentity = isAdminEmail(user?.email);
+  const visibleAuthorLabel = postRecord ? getVisibleQAPostAuthorLabel(postRecord, { showAdminIdentity }) : "";
+  const adminAuthorLabel = postRecord ? (postRecord.authorAdminLabel?.trim() || postRecord.authorLabel) : "";
 
   useEffect(() => {
     if (!postRecord || editingPost) {
@@ -497,10 +502,24 @@ export default function QAPostDetailPage() {
                     fontFamily: "var(--font-display)",
                   }}
                 >
-                  {postRecord.authorLabel}
+                  {visibleAuthorLabel}
                   {" // "}
                   {formatRelativeTimestamp(postRecord.createdAt)}
                 </p>
+                {postRecord.anonymous && showAdminIdentity ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      color: "#fca5a5",
+                      fontSize: 11,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    Admin View // Posted by {adminAuthorLabel}
+                  </p>
+                ) : null}
               </div>
 
               <p style={{ margin: 0, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>

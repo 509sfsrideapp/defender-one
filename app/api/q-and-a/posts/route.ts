@@ -6,6 +6,7 @@ import { createQAPost } from "../../../../lib/server/q-and-a";
 type RequestBody = {
   title?: string;
   body?: string;
+  anonymous?: boolean;
 };
 
 export async function POST(request: NextRequest) {
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as RequestBody;
     const title = body.title?.trim() || "";
     const postBody = body.body?.trim() || "";
+    const anonymous = Boolean(body.anonymous);
 
     if (!title) {
       return NextResponse.json({ error: "Post title is required." }, { status: 400 });
@@ -31,6 +33,7 @@ export async function POST(request: NextRequest) {
       authorEmail: decoded.email || null,
       title,
       body: postBody,
+      anonymous,
     });
 
     await writeAuditLog({
@@ -42,6 +45,7 @@ export async function POST(request: NextRequest) {
       message: "Created Q&A post.",
       details: {
         hasBody: Boolean(postBody),
+        anonymous,
       },
     });
 

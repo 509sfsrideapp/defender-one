@@ -7,6 +7,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
+import { isAdminEmail } from "../../../lib/admin";
 import { normalizeQAVoteValue, sortQAPosts, type QAPostRecord, type QAPostSortMode, type QAVoteDocument } from "../../../lib/q-and-a";
 import QAPostCard from "../_components/QAPostCard";
 
@@ -117,6 +118,7 @@ export default function QAMyPostsPage() {
     () => sortQAPosts(posts.filter((post) => post.authorId === user?.uid), sortMode),
     [posts, sortMode, user?.uid]
   );
+  const showAdminIdentity = isAdminEmail(user?.email);
 
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading My Posts" caption="Gathering the posts tied to your account." /></main>;
@@ -228,6 +230,7 @@ export default function QAMyPostsPage() {
                   key={post.id}
                   post={post}
                   currentVote={postVotesById[post.id] || 0}
+                  showAdminIdentity={showAdminIdentity}
                   onVote={async (value) => {
                     const idToken = await auth.currentUser?.getIdToken();
 

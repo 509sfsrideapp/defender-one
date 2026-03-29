@@ -7,6 +7,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
+import { isAdminEmail } from "../../lib/admin";
 import { normalizeQAVoteValue, sortQAPosts, type QAPostRecord, type QAPostSortMode, type QAVoteDocument } from "../../lib/q-and-a";
 import QAPostCard from "./_components/QAPostCard";
 
@@ -114,6 +115,7 @@ export default function QAndAPage() {
   }, [user]);
 
   const visiblePosts = useMemo(() => sortQAPosts(posts, sortMode), [posts, sortMode]);
+  const showAdminIdentity = isAdminEmail(user?.email);
 
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading Q&A" caption="Opening the discussion feed." /></main>;
@@ -225,6 +227,7 @@ export default function QAndAPage() {
                   key={post.id}
                   post={post}
                   currentVote={postVotesById[post.id] || 0}
+                  showAdminIdentity={showAdminIdentity}
                   onVote={async (value) => {
                     const idToken = await auth.currentUser?.getIdToken();
 

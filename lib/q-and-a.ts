@@ -21,7 +21,9 @@ export type QAAuthorProfile = {
 export type QAPostDocument = {
   authorId: string;
   authorLabel: string;
+  authorAdminLabel?: string;
   authorPhotoUrl?: string | null;
+  anonymous?: boolean;
   title: string;
   body?: string | null;
   snippet?: string | null;
@@ -102,6 +104,17 @@ export function buildQAPostSnippet(body?: string | null, maxLength = 180) {
   }
 
   return `${normalized.slice(0, maxLength).trimEnd()}...`;
+}
+
+export function getVisibleQAPostAuthorLabel(
+  post: Pick<QAPostDocument, "anonymous" | "authorLabel" | "authorAdminLabel">,
+  options?: { showAdminIdentity?: boolean }
+) {
+  if (post.anonymous && !options?.showAdminIdentity) {
+    return "Anon";
+  }
+
+  return post.authorAdminLabel?.trim() || post.authorLabel;
 }
 
 export function toTimestampMillis(value: TimestampLike) {
