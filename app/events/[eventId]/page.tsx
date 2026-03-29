@@ -20,6 +20,13 @@ type UserProfile = {
   name?: string | null;
 };
 
+type EventCreatorProfile = {
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  rank?: string | null;
+};
+
 type EventAttendeeRecord = {
   id: string;
   eventId: string;
@@ -75,6 +82,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [eventRecord, setEventRecord] = useState<EventRecord | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [creatorDirectory, setCreatorDirectory] = useState<Record<string, EventCreatorProfile>>({});
   const [attendees, setAttendees] = useState<EventAttendeeRecord[]>([]);
   const [attendanceSaving, setAttendanceSaving] = useState(false);
   const [attendanceStatus, setAttendanceStatus] = useState("");
@@ -147,6 +155,25 @@ export default function EventDetailPage() {
     return () => unsubscribe();
   }, [params.eventId, user]);
 
+  useEffect(() => {
+    if (!user) {
+      setCreatorDirectory({});
+      return;
+    }
+
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const nextDirectory: Record<string, EventCreatorProfile> = {};
+
+      snapshot.docs.forEach((docSnap) => {
+        nextDirectory[docSnap.id] = docSnap.data() as EventCreatorProfile;
+      });
+
+      setCreatorDirectory(nextDirectory);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
   const scheduleLines = useMemo(() => {
     if (!eventRecord) {
       return [];
@@ -180,6 +207,35 @@ export default function EventDetailPage() {
 
     return getEventCardDateLabel(eventRecord);
   }, [eventRecord]);
+
+  const organizerLabel = useMemo(() => {
+    if (!eventRecord) {
+      return "POC: Not listed";
+    }
+
+    const creator = eventRecord.createdByUid ? creatorDirectory[eventRecord.createdByUid] : null;
+    const rank = creator?.rank?.trim() || "";
+    const lastName = creator?.lastName?.trim() || "";
+    const firstInitial = creator?.firstName?.trim()?.charAt(0).toUpperCase() || "";
+
+    if (rank && lastName && firstInitial) {
+      return `POC: ${rank} ${lastName}, ${firstInitial}`;
+    }
+
+    if (rank && lastName) {
+      return `POC: ${rank} ${lastName}`;
+    }
+
+    if (creator?.name?.trim()) {
+      return `POC: ${creator.name.trim()}`;
+    }
+
+    if (eventRecord.createdByEmail?.trim()) {
+      return `POC: ${eventRecord.createdByEmail.trim()}`;
+    }
+
+    return "POC: Not listed";
+  }, [creatorDirectory, eventRecord]);
 
   const currentUserAttending = useMemo(() => {
     if (!user) {
@@ -350,6 +406,18 @@ export default function EventDetailPage() {
               )}
             </div>
             <h1 style={{ margin: 0 }}>{eventRecord.name}</h1>
+            <p
+              style={{
+                margin: 0,
+                color: "#dbe7f5",
+                fontFamily: "var(--font-display)",
+                fontSize: 12,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              {organizerLabel}
+            </p>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{eventRecord.location}</p>
             {eventRecord.address ? (
               <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{eventRecord.address}</p>
