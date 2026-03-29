@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v305",
+    title: "Admin Event and Q&A Delete Controls",
+    summary: "Added admin delete access on live Event and Q&A detail pages so the admin account can remove user-created posts directly; ISO and Marketplace remain placeholders with no post system yet.",
+  },
+  {
     commit: "v304",
     title: "Admin Inbox Read Visibility",
     summary: "Added server-side read tracking for private user inbox posts, plus a new View Inbox action on admin account cards so admins can review each user’s sent inbox messages with read versus unread status and response completion.",

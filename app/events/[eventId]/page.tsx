@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
+import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
 import { formatEventDateEntry, formatEventLocationLabel, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
 
@@ -107,6 +108,7 @@ const metaPillStyle: React.CSSProperties = {
 
 export default function EventDetailPage() {
   const params = useParams<{ eventId: string }>();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [eventRecord, setEventRecord] = useState<EventRecord | null>(null);
@@ -116,6 +118,7 @@ export default function EventDetailPage() {
   const [attendanceSaving, setAttendanceSaving] = useState(false);
   const [attendanceStatus, setAttendanceStatus] = useState("");
   const [photoExpanded, setPhotoExpanded] = useState(false);
+  const [deletingEvent, setDeletingEvent] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -278,6 +281,7 @@ export default function EventDetailPage() {
   }, [attendees, user]);
 
   const currentUserAttendanceId = user && params.eventId ? `${params.eventId}_${user.uid}` : null;
+  const isAdminViewer = isAdminEmail(user?.email);
 
   const currentUserAttendanceLabel = useMemo(() => {
     const rank = profile?.rank?.trim() || "";
@@ -332,6 +336,31 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!isAdminViewer || !params.eventId || deletingEvent) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete this event? This will remove the event and its attendance roster."
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingEvent(true);
+      setAttendanceStatus("");
+      await Promise.all(attendees.map((attendee) => deleteDoc(doc(db, "eventAttendees", attendee.id))));
+      await deleteDoc(doc(db, "events", params.eventId));
+      router.replace("/events");
+    } catch (error) {
+      console.error(error);
+      setAttendanceStatus(error instanceof Error ? error.message : "Could not delete event.");
+      setDeletingEvent(false);
+    }
+  };
+
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading Event" caption="Opening event details and schedule." /></main>;
   }
@@ -370,6 +399,33 @@ export default function EventDetailPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <HomeIconLink style={{ marginBottom: 0 }} />
             <Link href="/events" style={primaryButtonStyle}>Back to Events</Link>
+            {isAdminViewer ? (
+              <button
+                type="button"
+                onClick={() => void handleDeleteEvent()}
+                disabled={deletingEvent}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: 38,
+                  padding: "8px 13px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(248, 113, 113, 0.34)",
+                  background: "linear-gradient(180deg, rgba(95, 28, 38, 0.9) 0%, rgba(59, 17, 25, 0.96) 100%)",
+                  color: "#fecaca",
+                  fontFamily: "var(--font-display)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontSize: 10.5,
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 28px rgba(41, 10, 16, 0.3)",
+                  cursor: deletingEvent ? "wait" : "pointer",
+                  opacity: deletingEvent ? 0.7 : 1,
+                }}
+              >
+                {deletingEvent ? "Deleting..." : "Admin Delete"}
+              </button>
+            ) : null}
           </div>
 
           <span

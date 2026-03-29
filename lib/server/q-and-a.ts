@@ -88,14 +88,14 @@ export async function updateQAPost(input: {
   });
 }
 
-export async function deleteQAPost(input: { postId: string; authorId: string }) {
+export async function deleteQAPost(input: { postId: string; authorId: string; allowAdminDelete?: boolean }) {
   const postRecord = await getFirestoreDocument<QAPostEditableRecord>(`qaPosts/${input.postId}`);
 
   if (!postRecord || postRecord.deleted) {
     throw new Error("That post is unavailable.");
   }
 
-  if (postRecord.authorId !== input.authorId) {
+  if (postRecord.authorId !== input.authorId && !input.allowAdminDelete) {
     throw new Error("You can only delete your own posts.");
   }
 

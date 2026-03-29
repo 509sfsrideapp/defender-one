@@ -156,8 +156,14 @@ export default function QAPostDetailPage() {
   }, [params.postId, user]);
 
   const commentTree = useMemo(() => buildQACommentTree(comments, commentSortMode), [commentSortMode, comments]);
-  const canManagePost = Boolean(user && postRecord && !postRecord.deleted && postRecord.authorId === user.uid);
   const showAdminIdentity = isAdminEmail(user?.email);
+  const canEditPost = Boolean(user && postRecord && !postRecord.deleted && postRecord.authorId === user.uid);
+  const canDeletePost = Boolean(
+    user &&
+      postRecord &&
+      !postRecord.deleted &&
+      (postRecord.authorId === user.uid || showAdminIdentity)
+  );
   const visibleAuthorLabel = postRecord ? getVisibleQAPostAuthorLabel(postRecord, { showAdminIdentity }) : "";
   const adminAuthorLabel = postRecord ? (postRecord.authorAdminLabel?.trim() || postRecord.authorLabel) : "";
 
@@ -287,93 +293,97 @@ export default function QAPostDetailPage() {
                 compact
               />
             </div>
-            {canManagePost ? (
+            {canEditPost || canDeletePost ? (
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPostDraftTitle(postRecord.title || "");
-                    setPostDraftBody(postRecord.body || "");
-                    setPostActionError("");
-                    setEditingPost((current) => !current);
-                  }}
-                  style={{
-                    minHeight: 38,
-                    padding: "8px 12px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(126, 142, 160, 0.22)",
-                    background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
-                    color: "#e5edf7",
-                    fontFamily: "var(--font-display)",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    fontSize: 11,
-                  }}
-                >
-                  {editingPost ? "Cancel Edit" : "Edit Post"}
-                </button>
-                <button
-                  type="button"
-                  disabled={deletingPost}
-                  onClick={async () => {
-                    const confirmed = window.confirm("Delete this post? It will be removed from the feed.");
+                {canEditPost ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPostDraftTitle(postRecord.title || "");
+                      setPostDraftBody(postRecord.body || "");
+                      setPostActionError("");
+                      setEditingPost((current) => !current);
+                    }}
+                    style={{
+                      minHeight: 38,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(126, 142, 160, 0.22)",
+                      background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
+                      color: "#e5edf7",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontSize: 11,
+                    }}
+                  >
+                    {editingPost ? "Cancel Edit" : "Edit Post"}
+                  </button>
+                ) : null}
+                {canDeletePost ? (
+                  <button
+                    type="button"
+                    disabled={deletingPost}
+                    onClick={async () => {
+                      const confirmed = window.confirm("Delete this post? It will be removed from the feed.");
 
-                    if (!confirmed) {
-                      return;
-                    }
-
-                    const idToken = await auth.currentUser?.getIdToken();
-
-                    if (!idToken) {
-                      setPostActionError("You need to sign in again before deleting.");
-                      return;
-                    }
-
-                    setDeletingPost(true);
-                    setPostActionError("");
-
-                    try {
-                      const response = await fetch(`/api/q-and-a/posts/${postRecord.id}`, {
-                        method: "DELETE",
-                        headers: {
-                          Authorization: `Bearer ${idToken}`,
-                        },
-                      });
-
-                      const payload = (await response.json().catch(() => ({}))) as { error?: string };
-
-                      if (!response.ok) {
-                        throw new Error(payload.error || "Could not delete the post.");
+                      if (!confirmed) {
+                        return;
                       }
 
-                      router.replace("/q-and-a");
-                    } catch (error) {
-                      setPostActionError(error instanceof Error ? error.message : "Could not delete the post.");
-                    } finally {
-                      setDeletingPost(false);
-                    }
-                  }}
-                  style={{
-                    minHeight: 38,
-                    padding: "8px 12px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(248, 113, 113, 0.28)",
-                    background: "linear-gradient(180deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.98) 100%)",
-                    color: "#fee2e2",
-                    fontFamily: "var(--font-display)",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    fontSize: 11,
-                    opacity: deletingPost ? 0.7 : 1,
-                  }}
-                >
-                  {deletingPost ? "Deleting..." : "Delete Post"}
-                </button>
+                      const idToken = await auth.currentUser?.getIdToken();
+
+                      if (!idToken) {
+                        setPostActionError("You need to sign in again before deleting.");
+                        return;
+                      }
+
+                      setDeletingPost(true);
+                      setPostActionError("");
+
+                      try {
+                        const response = await fetch(`/api/q-and-a/posts/${postRecord.id}`, {
+                          method: "DELETE",
+                          headers: {
+                            Authorization: `Bearer ${idToken}`,
+                          },
+                        });
+
+                        const payload = (await response.json().catch(() => ({}))) as { error?: string };
+
+                        if (!response.ok) {
+                          throw new Error(payload.error || "Could not delete the post.");
+                        }
+
+                        router.replace("/q-and-a");
+                      } catch (error) {
+                        setPostActionError(error instanceof Error ? error.message : "Could not delete the post.");
+                      } finally {
+                        setDeletingPost(false);
+                      }
+                    }}
+                    style={{
+                      minHeight: 38,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(248, 113, 113, 0.28)",
+                      background: "linear-gradient(180deg, rgba(127, 29, 29, 0.92) 0%, rgba(69, 10, 10, 0.98) 100%)",
+                      color: "#fee2e2",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontSize: 11,
+                      opacity: deletingPost ? 0.7 : 1,
+                    }}
+                  >
+                    {deletingPost ? "Deleting..." : canEditPost ? "Delete Post" : "Admin Delete"}
+                  </button>
+                ) : null}
               </div>
             ) : null}
           </div>
 
-          {editingPost && canManagePost ? (
+          {editingPost && canEditPost ? (
             <div style={{ display: "grid", gap: 12 }}>
               <label style={{ display: "grid", gap: 6 }}>
                 <span style={{ color: "#94a3b8", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>

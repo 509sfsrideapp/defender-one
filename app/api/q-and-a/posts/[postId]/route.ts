@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminEmail } from "../../../../../lib/admin";
 import { verifyFirebaseIdToken } from "../../../../../lib/server/firebase-auth";
 import { writeAuditLog } from "../../../../../lib/server/audit-log";
 import { deleteQAPost, updateQAPost } from "../../../../../lib/server/q-and-a";
@@ -81,6 +82,7 @@ export async function DELETE(
     await deleteQAPost({
       postId,
       authorId: decoded.sub,
+      allowAdminDelete: isAdminEmail(decoded.email),
     });
 
     await writeAuditLog({
