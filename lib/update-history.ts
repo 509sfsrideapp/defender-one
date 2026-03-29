@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v263",
+    title: "Event Form Status Box Cleanup",
+    summary: "Stopped event photo cropper messages from feeding into the bottom-of-page status panel on the add-event screen, so image-ready notices stay with the uploader instead of showing up in a separate box at the bottom.",
+  },
+  {
     commit: "v262",
     title: "Event Form Description Header Trim",
     summary: "Simplified the add-event form so that section now just says Description and no longer shows the extra helper sentence underneath it.",

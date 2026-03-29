@@ -100,6 +100,7 @@ export default function NewEventPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [photoStatusMessage, setPhotoStatusMessage] = useState("");
   const [eventName, setEventName] = useState("");
   const [eventType, setEventType] = useState<EventType>("fun");
   const [location, setLocation] = useState("");
@@ -378,8 +379,8 @@ export default function NewEventPage() {
               outputSize={960}
               maxEncodedLength={220000}
               helperText="Optional event image for the card and detail page. Crop uses a 2:1 landscape frame so the banner stays consistent."
-              statusMessage=""
-              onStatusMessageChange={(message) => setStatusMessage(message)}
+              statusMessage={photoStatusMessage}
+              onStatusMessageChange={setPhotoStatusMessage}
             />
           </div>
 
