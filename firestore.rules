@@ -60,6 +60,16 @@ service cloud.firestore {
       ];
     }
 
+    function validMarketplaceExchangeMethod() {
+      return (
+        request.resource.data.exchangeMethod is string &&
+        request.resource.data.exchangeMethod in ["buyer_pickup", "seller_dropoff", "set_meet"]
+      ) || (
+        request.resource.data.location is string &&
+        request.resource.data.location.size() > 0
+      );
+    }
+
     function ownerEditableUserFields() {
       return [
         "name",
@@ -289,8 +299,7 @@ service cloud.firestore {
         request.resource.data.createdByUid == request.auth.uid &&
         request.resource.data.title is string &&
         request.resource.data.title.size() > 0 &&
-        request.resource.data.location is string &&
-        request.resource.data.location.size() > 0 &&
+        validMarketplaceExchangeMethod() &&
         request.resource.data.description is string &&
         request.resource.data.description.size() > 0;
 

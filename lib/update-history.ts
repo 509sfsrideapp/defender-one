@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v324",
+    title: "Marketplace Create Permission Fix",
+    summary: "Fixed the Marketplace write-rule mismatch so new listings using the exchange-method dropdown are allowed by Firestore instead of being rejected for missing the old location field.",
+  },
+  {
     commit: "v323",
     title: "Marketplace Handoff Method Picker",
     summary: "Replaced Marketplace location and address entry with a simple buyer pickup, seller dropoff, or set meet dropdown on new listings, and updated listing displays to show that handoff method more cleanly.",
