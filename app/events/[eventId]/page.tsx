@@ -8,8 +8,10 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
+import { ReportableTarget } from "../../components/MisconductReporting";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
+import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import { formatEventDateEntry, formatEventLocationLabel, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
 
 type UserProfile = {
@@ -445,6 +447,16 @@ export default function EventDetailPage() {
           </span>
         </div>
 
+        <ReportableTarget
+          target={{
+            targetType: "event",
+            targetId: eventRecord.id,
+            targetLabel: eventRecord.name,
+            targetPreview: buildMisconductPreviewText(eventRecord.description),
+            targetPath: `/events/${eventRecord.id}`,
+            targetOwnerUid: eventRecord.createdByUid || null,
+          }}
+        >
         <section style={{ ...sectionStyle, display: "grid", gap: 18 }}>
           {eventRecord.photoUrl ? (
             <>
@@ -663,6 +675,7 @@ export default function EventDetailPage() {
             )}
           </div>
         </section>
+        </ReportableTarget>
       </div>
     </main>
   );

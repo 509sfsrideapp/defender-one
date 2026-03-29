@@ -6,7 +6,9 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
+import { ReportableTarget } from "../components/MisconductReporting";
 import { auth, db } from "../../lib/firebase";
+import { buildMisconductPreviewText } from "../../lib/misconduct";
 import {
   formatIsoCategoryLabel,
   formatIsoLocationLabel,
@@ -303,8 +305,18 @@ export default function ISOPage() {
 
         <section style={{ display: "grid", gap: 14 }}>
           {filteredRequests.length > 0 ? filteredRequests.map((request) => (
-            <Link
+            <ReportableTarget
               key={request.id}
+              target={{
+                targetType: "iso_request",
+                targetId: request.id,
+                targetLabel: request.title,
+                targetPreview: buildMisconductPreviewText(request.description),
+                targetPath: `/iso/${request.id}`,
+                targetOwnerUid: request.createdByUid || null,
+              }}
+            >
+            <Link
               href={`/iso/${request.id}`}
               style={{
                 ...cardStyle,
@@ -397,6 +409,7 @@ export default function ISOPage() {
                 </p>
               </div>
             </Link>
+            </ReportableTarget>
           )) : (
             <div style={{ ...cardStyle, padding: "1rem 1rem 1.1rem" }}>
               <strong style={{ display: "block", marginBottom: 8 }}>No ISO requests match this filter set</strong>

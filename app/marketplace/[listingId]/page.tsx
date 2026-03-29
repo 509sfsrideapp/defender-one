@@ -8,8 +8,10 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
+import { ReportableTarget } from "../../components/MisconductReporting";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
+import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
@@ -236,6 +238,16 @@ export default function MarketplaceDetailPage() {
           <span style={metaPillStyle}>{formatMarketplaceCategoryLabel(listingRecord.category)}</span>
         </div>
 
+        <ReportableTarget
+          target={{
+            targetType: "marketplace_listing",
+            targetId: listingRecord.id,
+            targetLabel: listingRecord.title,
+            targetPreview: buildMisconductPreviewText(listingRecord.description),
+            targetPath: `/marketplace/${listingRecord.id}`,
+            targetOwnerUid: listingRecord.createdByUid || null,
+          }}
+        >
         <section style={{ ...sectionStyle, display: "grid", gap: 18 }}>
           {listingRecord.photoUrl ? (
             <>
@@ -322,6 +334,7 @@ export default function MarketplaceDetailPage() {
 
           {statusMessage ? <p style={{ margin: 0, color: "#fca5a5" }}>{statusMessage}</p> : null}
         </section>
+        </ReportableTarget>
       </div>
     </main>
   );

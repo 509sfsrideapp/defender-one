@@ -7,8 +7,10 @@ import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
+import { ReportableTarget } from "../../components/MisconductReporting";
 import { auth, db } from "../../../lib/firebase";
 import { isAdminEmail } from "../../../lib/admin";
+import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   buildQACommentTree,
   formatRelativeTimestamp,
@@ -260,6 +262,16 @@ export default function QAPostDetailPage() {
           </Link>
         </div>
 
+        <ReportableTarget
+          target={{
+            targetType: "qa_post",
+            targetId: postRecord.id,
+            targetLabel: postRecord.title,
+            targetPreview: buildMisconductPreviewText(postRecord.body || postRecord.snippet || postRecord.title),
+            targetPath: `/q-and-a/${postRecord.id}`,
+            targetOwnerUid: postRecord.authorId,
+          }}
+        >
         <section style={{ ...sectionStyle, display: "grid", gap: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 12, flexWrap: "wrap" }}>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -539,6 +551,7 @@ export default function QAPostDetailPage() {
             </>
           )}
         </section>
+        </ReportableTarget>
 
         <section style={{ ...sectionStyle, display: "grid", gap: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, flexWrap: "wrap" }}>

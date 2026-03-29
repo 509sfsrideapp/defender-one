@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v308",
+    title: "Misconduct Reporting and Admin Review",
+    summary: "Added a bottom Report Misconduct flow with tap-to-select reporting on Q&A posts and comments plus Event, Marketplace, and ISO items, then wired those reports into a new admin moderation queue with allow/delete actions and reporter follow-up sent into the Admin inbox.",
+  },
+  {
     commit: "v307",
     title: "Marketplace and ISO Framework Pass",
     summary: "Replaced the Marketplace and ISO placeholders with real first-pass board, create, and detail flows modeled after Events, including filters, photo support, Firestore-backed records, admin delete controls, and account-cleanup coverage.",

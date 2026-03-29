@@ -388,6 +388,18 @@ export default function AdminPage() {
         </div>
       </section>
 
+      <section style={{ marginTop: 18 }}>
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Misconduct Queue</h2>
+          <p style={{ maxWidth: 520, color: "#94a3b8" }}>
+            Review user misconduct reports, decide whether the selected content stays live or gets removed, and send the result back into the reporter&apos;s Admin inbox.
+          </p>
+          <Link href="/admin/misconduct" style={featureLinkStyle}>
+            Open Misconduct Queue
+          </Link>
+        </div>
+      </section>
+
       <section style={{ marginTop: 32 }}>
         <h2>Available Drivers</h2>
         {availableDrivers.length === 0 ? (

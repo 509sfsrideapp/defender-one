@@ -23,6 +23,7 @@ const ACCOUNT_CLEANUP_TARGETS: AccountCleanupTarget[] = [
   { collection: "eventAttendees", ownerField: "attendeeUid", label: "event attendance records" },
   { collection: "qaPostVotes", ownerField: "userId", label: "Q&A post votes" },
   { collection: "qaCommentVotes", ownerField: "userId", label: "Q&A comment votes" },
+  { collection: "misconductReports", ownerField: "reporterUid", label: "misconduct reports" },
 ];
 
 export async function deleteUserOwnedDocuments(userId: string) {

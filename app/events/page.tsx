@@ -6,7 +6,9 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
+import { ReportableTarget } from "../components/MisconductReporting";
 import { auth, db } from "../../lib/firebase";
+import { buildMisconductPreviewText } from "../../lib/misconduct";
 import { EVENT_TYPE_OPTIONS, eventMatchesDateRange, eventMatchesType, formatEventLocationLabel, formatEventTypeLabel, getEventCardDateLabel, isUpcomingEvent, sortEventsByUpcomingDate, type EventRecord } from "../../lib/events";
 
 type EventCreatorProfile = {
@@ -306,8 +308,18 @@ export default function EventsPage() {
 
         <section style={{ display: "grid", gap: 14 }}>
           {filteredEvents.length > 0 ? filteredEvents.map((event) => (
-            <Link
+            <ReportableTarget
               key={event.id}
+              target={{
+                targetType: "event",
+                targetId: event.id,
+                targetLabel: event.name,
+                targetPreview: buildMisconductPreviewText(event.description),
+                targetPath: `/events/${event.id}`,
+                targetOwnerUid: event.createdByUid || null,
+              }}
+            >
+            <Link
               href={`/events/${event.id}`}
               style={{
                 ...cardStyle,
@@ -402,6 +414,7 @@ export default function EventsPage() {
                 </p>
               </div>
             </Link>
+            </ReportableTarget>
           )) : (
             <div style={{ ...cardStyle, padding: "1rem 1rem 1.1rem" }}>
               <strong style={{ display: "block", marginBottom: 8 }}>No matching upcoming events</strong>

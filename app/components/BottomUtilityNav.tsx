@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { ReportMisconductButton } from "./MisconductReporting";
 
 const linkStyle: CSSProperties = {
   display: "inline-block",
@@ -22,6 +23,7 @@ export default function BottomUtilityNav() {
         flexWrap: "wrap",
       }}
     >
+      <ReportMisconductButton />
       <Link href="/report-bug" style={linkStyle}>Report Bug</Link>
       <Link href="/suggestions" style={linkStyle}>Suggestions</Link>
     </nav>

@@ -8,8 +8,10 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
+import { ReportableTarget } from "../../components/MisconductReporting";
 import { isAdminEmail } from "../../../lib/admin";
 import { auth, db } from "../../../lib/firebase";
+import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   formatIsoCategoryLabel,
   formatIsoLocationLabel,
@@ -237,6 +239,16 @@ export default function ISORequestDetailPage() {
           <span style={metaPillStyle}>{formatIsoCategoryLabel(requestRecord.category)}</span>
         </div>
 
+        <ReportableTarget
+          target={{
+            targetType: "iso_request",
+            targetId: requestRecord.id,
+            targetLabel: requestRecord.title,
+            targetPreview: buildMisconductPreviewText(requestRecord.description),
+            targetPath: `/iso/${requestRecord.id}`,
+            targetOwnerUid: requestRecord.createdByUid || null,
+          }}
+        >
         <section style={{ ...sectionStyle, display: "grid", gap: 18 }}>
           {requestRecord.photoUrl ? (
             <>
@@ -325,6 +337,7 @@ export default function ISORequestDetailPage() {
 
           {statusMessage ? <p style={{ margin: 0, color: "#fca5a5" }}>{statusMessage}</p> : null}
         </section>
+        </ReportableTarget>
       </div>
     </main>
   );

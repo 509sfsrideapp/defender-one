@@ -6,7 +6,9 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
+import { ReportableTarget } from "../components/MisconductReporting";
 import { auth, db } from "../../lib/firebase";
+import { buildMisconductPreviewText } from "../../lib/misconduct";
 import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
@@ -303,8 +305,18 @@ export default function MarketplacePage() {
 
         <section style={{ display: "grid", gap: 14 }}>
           {filteredListings.length > 0 ? filteredListings.map((listing) => (
-            <Link
+            <ReportableTarget
               key={listing.id}
+              target={{
+                targetType: "marketplace_listing",
+                targetId: listing.id,
+                targetLabel: listing.title,
+                targetPreview: buildMisconductPreviewText(listing.description),
+                targetPath: `/marketplace/${listing.id}`,
+                targetOwnerUid: listing.createdByUid || null,
+              }}
+            >
+            <Link
               href={`/marketplace/${listing.id}`}
               style={{
                 ...cardStyle,
@@ -396,6 +408,7 @@ export default function MarketplacePage() {
                 </p>
               </div>
             </Link>
+            </ReportableTarget>
           )) : (
             <div style={{ ...cardStyle, padding: "1rem 1rem 1.1rem" }}>
               <strong style={{ display: "block", marginBottom: 8 }}>No listings match this filter set</strong>
