@@ -3,13 +3,31 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { doc, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
 import { formatEventDateEntry, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
+
+type UserProfile = {
+  firstName?: string | null;
+  lastName?: string | null;
+  rank?: string | null;
+  riderPhotoUrl?: string | null;
+  driverPhotoUrl?: string | null;
+  name?: string | null;
+};
+
+type EventAttendeeRecord = {
+  id: string;
+  eventId: string;
+  attendeeUid: string;
+  attendeeLabel: string;
+  attendeePhotoUrl?: string | null;
+  createdAt?: { seconds?: number; nanoseconds?: number } | Date | null;
+};
 
 const sectionStyle: React.CSSProperties = {
   borderRadius: 18,
@@ -56,6 +74,10 @@ export default function EventDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [eventRecord, setEventRecord] = useState<EventRecord | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [attendees, setAttendees] = useState<EventAttendeeRecord[]>([]);
+  const [attendanceSaving, setAttendanceSaving] = useState(false);
+  const [attendanceStatus, setAttendanceStatus] = useState("");
   const [photoExpanded, setPhotoExpanded] = useState(false);
 
   useEffect(() => {
@@ -81,6 +103,46 @@ export default function EventDetailPage() {
         ...(snapshot.data() as Omit<EventRecord, "id">),
       });
     });
+
+    return () => unsubscribe();
+  }, [params.eventId, user]);
+
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (snapshot) => {
+      if (!snapshot.exists()) {
+        setProfile(null);
+        return;
+      }
+
+      setProfile(snapshot.data() as UserProfile);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !params.eventId) {
+      setAttendees([]);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(
+      query(collection(db, "eventAttendees"), where("eventId", "==", params.eventId)),
+      (snapshot) => {
+        const nextAttendees = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<EventAttendeeRecord, "id">),
+        }));
+
+        nextAttendees.sort((a, b) => a.attendeeLabel.localeCompare(b.attendeeLabel));
+        setAttendees(nextAttendees);
+      }
+    );
 
     return () => unsubscribe();
   }, [params.eventId, user]);
@@ -118,6 +180,69 @@ export default function EventDetailPage() {
 
     return getEventCardDateLabel(eventRecord);
   }, [eventRecord]);
+
+  const currentUserAttending = useMemo(() => {
+    if (!user) {
+      return false;
+    }
+
+    return attendees.some((attendee) => attendee.attendeeUid === user.uid);
+  }, [attendees, user]);
+
+  const currentUserAttendanceId = user && params.eventId ? `${params.eventId}_${user.uid}` : null;
+
+  const currentUserAttendanceLabel = useMemo(() => {
+    const rank = profile?.rank?.trim() || "";
+    const lastName = profile?.lastName?.trim() || "";
+    const firstInitial = profile?.firstName?.trim()?.charAt(0).toUpperCase() || "";
+
+    if (rank && lastName && firstInitial) {
+      return `${rank} ${lastName}, ${firstInitial}`;
+    }
+
+    if (rank && lastName) {
+      return `${rank} ${lastName}`;
+    }
+
+    if (profile?.name?.trim()) {
+      return profile.name.trim();
+    }
+
+    return user?.email?.split("@")[0] || "Attendee";
+  }, [profile, user]);
+
+  const currentUserPhotoUrl = profile?.riderPhotoUrl?.trim() || profile?.driverPhotoUrl?.trim() || "";
+
+  const toggleAttendance = async () => {
+    if (!user || !params.eventId || !currentUserAttendanceId) {
+      return;
+    }
+
+    try {
+      setAttendanceSaving(true);
+      setAttendanceStatus("");
+
+      if (currentUserAttending) {
+        await deleteDoc(doc(db, "eventAttendees", currentUserAttendanceId));
+        setAttendanceStatus("You have been removed from the attendance list.");
+        return;
+      }
+
+      await setDoc(doc(db, "eventAttendees", currentUserAttendanceId), {
+        eventId: params.eventId,
+        attendeeUid: user.uid,
+        attendeeLabel: currentUserAttendanceLabel,
+        attendeePhotoUrl: currentUserPhotoUrl || null,
+        createdAt: new Date(),
+      });
+      setAttendanceStatus("You are on the attendance list.");
+    } catch (error) {
+      console.error(error);
+      setAttendanceStatus(error instanceof Error ? error.message : "Could not update attendance.");
+    } finally {
+      setAttendanceSaving(false);
+    }
+  };
 
   if (loading) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading Event" caption="Opening event details and schedule." /></main>;
@@ -304,6 +429,85 @@ export default function EventDetailPage() {
             <p style={{ margin: 0, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.65 }}>
               {eventRecord.description}
             </p>
+          </div>
+
+          <div
+            style={{
+              borderRadius: 14,
+              border: "1px solid rgba(126, 142, 160, 0.14)",
+              background: "linear-gradient(180deg, rgba(13, 18, 24, 0.96) 0%, rgba(7, 10, 14, 0.98) 100%)",
+              padding: 14,
+              display: "grid",
+              gap: 14,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 14, flexWrap: "wrap" }}>
+              <div style={{ display: "grid", gap: 4 }}>
+                <strong style={{ display: "block" }}>Attendance Roster</strong>
+                <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
+                  Let people know you are going, then see who else is already on the list.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void toggleAttendance()}
+                disabled={attendanceSaving}
+                style={{
+                  ...primaryButtonStyle,
+                  minHeight: 40,
+                  padding: "9px 15px",
+                  background: currentUserAttending
+                    ? "linear-gradient(180deg, rgba(32, 51, 79, 0.96) 0%, rgba(18, 31, 48, 0.99) 100%)"
+                    : primaryButtonStyle.background,
+                }}
+              >
+                {attendanceSaving ? "Saving..." : currentUserAttending ? "Attending" : "I'll Attend"}
+              </button>
+            </div>
+
+            {attendanceStatus ? (
+              <p style={{ margin: 0, color: "#cbd5e1" }}>{attendanceStatus}</p>
+            ) : null}
+
+            {attendees.length > 0 ? (
+              <div style={{ display: "grid", gap: 10 }}>
+                {attendees.map((attendee) => (
+                  <div
+                    key={attendee.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "40px minmax(0, 1fr)",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 999,
+                        background: attendee.attendeePhotoUrl
+                          ? `center / cover no-repeat url(${attendee.attendeePhotoUrl})`
+                          : "linear-gradient(180deg, rgba(47, 60, 79, 0.82) 0%, rgba(24, 33, 45, 0.95) 100%)",
+                        border: "1px solid rgba(126, 142, 160, 0.18)",
+                        display: "grid",
+                        placeItems: "center",
+                        color: "#dbe7f5",
+                        fontFamily: "var(--font-display)",
+                        fontSize: 14,
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {!attendee.attendeePhotoUrl ? attendee.attendeeLabel.charAt(0).toUpperCase() : null}
+                    </div>
+                    <p style={{ margin: 0, color: "#cbd5e1" }}>{attendee.attendeeLabel}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: "#94a3b8" }}>Nobody has signed up for this event yet.</p>
+            )}
           </div>
         </section>
       </div>

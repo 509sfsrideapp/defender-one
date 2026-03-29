@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v261",
+    title: "Event Attendance Sign-Up",
+    summary: "Added an I’ll Attend RSVP action to event detail pages along with a live attendee roster that shows each attendee’s profile photo and formatted rank/last-name label, and deployed the matching Firestore rules for event attendance records.",
+  },
+  {
     commit: "v260",
     title: "Event Card Duplicate Info Cleanup",
     summary: "Removed the duplicate When and Where lines from the Events board cards so those cards now rely on the cleaner info bubbles for schedule and location.",

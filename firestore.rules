@@ -276,6 +276,29 @@ service cloud.firestore {
       );
     }
 
+    match /eventAttendees/{attendanceId} {
+      allow read: if signedIn();
+
+      allow create: if signedIn() &&
+        request.resource.data.attendeeUid == request.auth.uid &&
+        request.resource.data.eventId is string &&
+        request.resource.data.eventId.size() > 0 &&
+        request.resource.data.attendeeLabel is string &&
+        request.resource.data.attendeeLabel.size() > 0;
+
+      allow update: if isAdmin() || (
+        signedIn() &&
+        resource.data.attendeeUid == request.auth.uid &&
+        request.resource.data.attendeeUid == resource.data.attendeeUid &&
+        request.resource.data.eventId == resource.data.eventId
+      );
+
+      allow delete: if isAdmin() || (
+        signedIn() &&
+        resource.data.attendeeUid == request.auth.uid
+      );
+    }
+
     match /auditLogs/{entryId} {
       allow read: if isAdmin();
       allow write: if false;
