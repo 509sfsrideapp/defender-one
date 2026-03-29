@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v306",
+    title: "Developer Submission Replies and Titles",
+    summary: "Made bug reports and suggestions require both a title and description, and added developer reply plus delete controls so dev follow-up can be sent back into the user Dev inbox with automatic RE: titles.",
+  },
+  {
     commit: "v305",
     title: "Admin Event and Q&A Delete Controls",
     summary: "Added admin delete access on live Event and Q&A detail pages so the admin account can remove user-created posts directly; ISO and Marketplace remain placeholders with no post system yet.",

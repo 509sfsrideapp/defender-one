@@ -229,6 +229,9 @@ service cloud.firestore {
     match /bugReports/{reportId} {
       allow create: if signedIn() &&
         request.resource.data.reporterUid == request.auth.uid &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 200 &&
         request.resource.data.description is string &&
         request.resource.data.description.size() > 0 &&
         request.resource.data.description.size() <= 4000 &&
@@ -242,6 +245,9 @@ service cloud.firestore {
     match /suggestions/{suggestionId} {
       allow create: if signedIn() &&
         request.resource.data.reporterUid == request.auth.uid &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 200 &&
         request.resource.data.description is string &&
         request.resource.data.description.size() > 0 &&
         request.resource.data.description.size() <= 4000 &&

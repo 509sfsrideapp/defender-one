@@ -18,6 +18,7 @@ export default function SuggestionsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [contactConsent, setContactConsent] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -34,6 +35,11 @@ export default function SuggestionsPage() {
   const submitSuggestion = async () => {
     if (!user) {
       setStatusMessage("You need to log in before sending a suggestion.");
+      return;
+    }
+
+    if (!title.trim()) {
+      setStatusMessage("Enter a title before submitting.");
       return;
     }
 
@@ -55,6 +61,7 @@ export default function SuggestionsPage() {
         "Unknown User";
 
       await addDoc(collection(db, "suggestions"), {
+        title: title.trim(),
         description: description.trim(),
         contactConsentByPhone: contactConsent,
         reporterUid: user.uid,
@@ -64,6 +71,7 @@ export default function SuggestionsPage() {
         createdAt: serverTimestamp(),
       });
 
+      setTitle("");
       setDescription("");
       setContactConsent(false);
       setStatusMessage("Suggestion submitted.");
@@ -105,6 +113,20 @@ export default function SuggestionsPage() {
           boxShadow: "0 12px 32px rgba(2, 6, 23, 0.18)",
         }}
       >
+        <input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Suggestion title"
+          style={{
+            width: "100%",
+            padding: 12,
+            borderRadius: 12,
+            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            color: "white",
+            border: "1px solid rgba(148, 163, 184, 0.2)",
+            marginBottom: 12,
+          }}
+        />
         <textarea
           value={description}
           onChange={(event) => setDescription(event.target.value)}
