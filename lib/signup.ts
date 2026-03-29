@@ -2,6 +2,7 @@ import { auth, db } from "./firebase";
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { buildHomeAddress } from "./home-address";
+import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate } from "./text-format";
 import { isValidUsername, normalizeUsername } from "./username";
 
 export const SIGNUP_DRAFT_STORAGE_KEY = "defender-drivers-signup-draft";
@@ -178,11 +179,19 @@ export async function finalizeSignupFromDraft(
   }
 
   const normalizedUsername = validation.normalizedUsername;
+  const normalizedHomeStreet = formatAddressPart(draft.homeStreet);
+  const normalizedHomeCity = formatAddressPart(draft.homeCity);
+  const normalizedHomeState = formatStateCode(draft.homeState);
+  const normalizedHomeZip = draft.homeZip.trim();
+  const normalizedCarYear = draft.carYear.trim();
+  const normalizedCarMake = formatVehicleField(draft.carMake);
+  const normalizedCarModel = formatVehicleField(draft.carModel);
+  const normalizedCarColor = formatVehicleField(draft.carColor);
   const normalizedHomeAddress = buildHomeAddress({
-    street: draft.homeStreet,
-    city: draft.homeCity,
-    state: draft.homeState,
-    zip: draft.homeZip,
+    street: normalizedHomeStreet,
+    city: normalizedHomeCity,
+    state: normalizedHomeState,
+    zip: normalizedHomeZip,
   });
   const formattedPhone = formatUsPhoneNumber(draft.phone);
 
@@ -203,17 +212,17 @@ export async function finalizeSignupFromDraft(
       phone: formattedPhone,
       email: draft.email.trim(),
       homeAddress: normalizedHomeAddress,
-      homeStreet: draft.homeStreet.trim(),
-      homeCity: draft.homeCity.trim(),
-      homeState: draft.homeState.trim().toUpperCase(),
-      homeZip: draft.homeZip.trim(),
+      homeStreet: normalizedHomeStreet,
+      homeCity: normalizedHomeCity,
+      homeState: normalizedHomeState,
+      homeZip: normalizedHomeZip,
       riderPhotoUrl: trimmedPhoto,
       driverPhotoUrl: trimmedPhoto,
-      carYear: draft.carYear.trim(),
-      carMake: draft.carMake.trim(),
-      carModel: draft.carModel.trim(),
-      carColor: draft.carColor.trim(),
-      carPlate: "",
+      carYear: normalizedCarYear,
+      carMake: normalizedCarMake,
+      carModel: normalizedCarModel,
+      carColor: normalizedCarColor,
+      carPlate: formatVehiclePlate(""),
       emergencyRideAddressConsent: Boolean(options?.emergencyRideAddressConsent),
       available: false,
       createdAt: new Date(),

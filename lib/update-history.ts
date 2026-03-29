@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v285",
+    title: "Structured Text Formatting",
+    summary: "Added shared formatting for structured user-entered fields so saved address, location, vehicle, and plate data now auto-clean into more consistent capitalization and casing.",
+  },
+  {
     commit: "v284",
     title: "Admin Account Messaging",
     summary: "Added a Message User action to expanded admin account cards so admins can send private account-related messages directly into that user’s Admin inbox thread.",

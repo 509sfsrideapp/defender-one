@@ -9,6 +9,7 @@ import ImageCropField from "../components/ImageCropField";
 import { auth, db } from "../../lib/firebase";
 import { isAdminEmail } from "../../lib/admin";
 import { buildHomeAddress, splitHomeAddress } from "../../lib/home-address";
+import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate } from "../../lib/text-format";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { EmailAuthProvider, onAuthStateChanged, reauthenticateWithCredential, User } from "firebase/auth";
 import { collection, doc, getDoc, onSnapshot, query, where, writeBatch } from "firebase/firestore";
@@ -248,10 +249,10 @@ export default function AccountPage() {
       }
 
       const rawHomeAddress = buildHomeAddress({
-        street: form.homeStreet,
-        city: form.homeCity,
-        state: form.homeState,
-        zip: form.homeZip,
+        street: formatAddressPart(form.homeStreet),
+        city: formatAddressPart(form.homeCity),
+        state: formatStateCode(form.homeState),
+        zip: form.homeZip.trim(),
       });
       const hasAnyAddressField = Boolean(
         form.homeStreet.trim() || form.homeCity.trim() || form.homeState.trim() || form.homeZip.trim()
@@ -267,6 +268,15 @@ export default function AccountPage() {
 
       const batch = writeBatch(db);
       const profilePhotoUrl = form.profilePhotoUrl.trim();
+      const normalizedHomeStreet = formatAddressPart(form.homeStreet);
+      const normalizedHomeCity = formatAddressPart(form.homeCity);
+      const normalizedHomeState = formatStateCode(form.homeState);
+      const normalizedHomeZip = form.homeZip.trim();
+      const normalizedCarYear = form.carYear.trim();
+      const normalizedCarMake = formatVehicleField(form.carMake);
+      const normalizedCarModel = formatVehicleField(form.carModel);
+      const normalizedCarColor = formatVehicleField(form.carColor);
+      const normalizedCarPlate = formatVehiclePlate(form.carPlate);
       const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || user.email?.split("@")[0] || "Admin";
       batch.set(
         doc(db, "users", user.uid),
@@ -278,20 +288,20 @@ export default function AccountPage() {
           jobDescription: form.jobDescription.trim(),
           phone: form.phone.trim(),
           homeAddress: normalizedHomeAddress,
-          homeStreet: form.homeStreet.trim(),
-          homeCity: form.homeCity.trim(),
-          homeState: form.homeState.trim().toUpperCase(),
-          homeZip: form.homeZip.trim(),
+          homeStreet: normalizedHomeStreet,
+          homeCity: normalizedHomeCity,
+          homeState: normalizedHomeState,
+          homeZip: normalizedHomeZip,
           rank: form.rank.trim(),
           flight: form.flight.trim(),
           rankOrRole: form.rank.trim(),
           riderPhotoUrl: profilePhotoUrl,
           bio: form.bio.trim(),
-          carYear: form.carYear.trim(),
-          carMake: form.carMake.trim(),
-          carModel: form.carModel.trim(),
-          carColor: form.carColor.trim(),
-          carPlate: form.carPlate.trim(),
+          carYear: normalizedCarYear,
+          carMake: normalizedCarMake,
+          carModel: normalizedCarModel,
+          carColor: normalizedCarColor,
+          carPlate: normalizedCarPlate,
           driverPhotoUrl: profilePhotoUrl,
           available: false,
           updatedAt: new Date(),
@@ -317,10 +327,15 @@ export default function AccountPage() {
       setOriginalUsername(normalizedUsername);
       setForm((prev) => ({
         ...prev,
-        homeStreet: form.homeStreet.trim(),
-        homeCity: form.homeCity.trim(),
-        homeState: form.homeState.trim().toUpperCase(),
-        homeZip: form.homeZip.trim(),
+        homeStreet: normalizedHomeStreet,
+        homeCity: normalizedHomeCity,
+        homeState: normalizedHomeState,
+        homeZip: normalizedHomeZip,
+        carYear: normalizedCarYear,
+        carMake: normalizedCarMake,
+        carModel: normalizedCarModel,
+        carColor: normalizedCarColor,
+        carPlate: normalizedCarPlate,
       }));
       setStatusMessage("Account details saved.");
     } catch (error) {

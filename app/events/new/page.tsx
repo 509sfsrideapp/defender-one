@@ -9,6 +9,7 @@ import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import ImageCropField from "../../components/ImageCropField";
 import { auth, db } from "../../../lib/firebase";
+import { formatAddressPart, formatStructuredText } from "../../../lib/text-format";
 import {
   createEmptyEventDateEntry,
   EVENT_TYPE_OPTIONS,
@@ -264,12 +265,14 @@ export default function NewEventPage() {
     try {
       setSaving(true);
       setStatusMessage("Saving event...");
+      const normalizedLocation = formatStructuredText(location);
+      const normalizedAddress = formatAddressPart(address);
 
       const createdRef = await addDoc(collection(db, "events"), {
         name: eventName.trim(),
         type: eventType,
-        location: location.trim(),
-        address: address.trim() || null,
+        location: normalizedLocation,
+        address: normalizedAddress || null,
         description: description.trim(),
         photoUrl: photoUrl.trim() || null,
         neededPeople: neededPeople.trim() ? Number(neededPeople) : null,
