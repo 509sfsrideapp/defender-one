@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v280",
+    title: "Homepage Applications Grid Lock",
+    summary: "Adjusted the homepage applications layout so it always fills as a clean 3x3 grid instead of spilling into an extra row.",
+  },
+  {
     commit: "v279",
     title: "Initial Splash Steam Removal",
     summary: "Removed the vault-door steam vent effect from the first-open loading screen while keeping the newer crest artwork in place.",

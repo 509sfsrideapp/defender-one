@@ -71,7 +71,6 @@ type OpenRideBadgeRecord = {
   createdAt?: { seconds?: number; nanoseconds?: number } | null;
 };
 
-const appTilePlaceholderCount = 5;
 const homepageCardStyle: React.CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(126, 142, 160, 0.18)",
@@ -625,6 +624,8 @@ export default function HomePage() {
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
   const showDevTile = Boolean(user);
+  const visibleAppTileCount = 4 + (showDevTile ? 1 : 0);
+  const appTilePlaceholderCount = Math.max(0, 9 - visibleAppTileCount);
   const totalOperationalApps = (driverReady ? 1 : 0) + 3 + (showDevTile ? 1 : 0);
   const totalVisibleApps = 4 + (showDevTile ? 1 : 0);
   const authTokenUserLabel =
@@ -1403,8 +1404,8 @@ export default function HomePage() {
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
                   <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="Q&A" />
-                  {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : <PlaceholderTile />}
-                  {Array.from({ length: showDevTile ? appTilePlaceholderCount : appTilePlaceholderCount + 1 }).map((_, index) => (
+                  {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : null}
+                  {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (
                     <PlaceholderTile key={index} />
                   ))}
                 </div>
