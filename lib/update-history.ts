@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v317",
+    title: "Anonymous Forum Comments",
+    summary: "Added anonymous comment support to the forum thread flow with a new Anon Comment action beside Post Comment, plus anonymous reply support and public Anon labels while preserving the underlying author record.",
+  },
+  {
     commit: "v316",
     title: "Admin Account Editor Scroll Fix",
     summary: "Raised the collapsible height limits inside the admin account viewer so the full Edit Account form no longer gets cut off and can expand far enough to reach the lower fields.",

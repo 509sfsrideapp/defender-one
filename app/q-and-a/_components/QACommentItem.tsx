@@ -5,6 +5,7 @@ import {
   buildQAPostSnippet,
   countQACommentDescendants,
   formatRelativeTimestamp,
+  getVisibleQACommentAuthorLabel,
   type QACommentNode,
 } from "../../../lib/q-and-a";
 import { ReportableTarget } from "../../components/MisconductReporting";
@@ -17,7 +18,8 @@ type QACommentItemProps = {
   currentUserId: string | null;
   currentVote?: number;
   voteByCommentId?: Record<string, number>;
-  onReply: (parentCommentId: string, body: string) => Promise<void>;
+  showAdminIdentity?: boolean;
+  onReply: (parentCommentId: string, body: string, anonymous?: boolean) => Promise<void>;
   onUpdate: (commentId: string, body: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
   onVote: (commentId: string, value: 1 | -1) => Promise<void>;
@@ -29,6 +31,7 @@ export default function QACommentItem({
   currentUserId,
   currentVote = 0,
   voteByCommentId = {},
+  showAdminIdentity = false,
   onReply,
   onUpdate,
   onDelete,
@@ -40,6 +43,7 @@ export default function QACommentItem({
   const descendantCount = countQACommentDescendants(comment);
   const canReply = !comment.deleted;
   const isAuthor = currentUserId === comment.authorId;
+  const visibleAuthorLabel = getVisibleQACommentAuthorLabel(comment, { showAdminIdentity });
   const leftOffset = Math.min(depth, 4) * 10;
   const utilityChipStyle: React.CSSProperties = {
     minHeight: 26,
@@ -64,7 +68,7 @@ export default function QACommentItem({
         target={{
           targetType: "qa_comment",
           targetId: comment.id,
-          targetLabel: comment.deleted ? "[deleted] comment" : `${comment.authorLabel} comment`,
+          targetLabel: comment.deleted ? "[deleted] comment" : `${visibleAuthorLabel} comment`,
           targetPreview: buildQAPostSnippet(comment.body, 200),
           targetPath: `/q-and-a/${comment.postId}`,
           targetOwnerUid: comment.authorId,
@@ -84,7 +88,7 @@ export default function QACommentItem({
             <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap", alignItems: "start" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", minWidth: 0, flex: "1 1 180px" }}>
                 <strong style={{ color: comment.deleted ? "#94a3b8" : "#dbe7f5", fontSize: 13, lineHeight: 1.2 }}>
-                  {comment.deleted ? "[deleted]" : comment.authorLabel}
+                  {comment.deleted ? "[deleted]" : visibleAuthorLabel}
                 </strong>
                 <span
                   style={{
@@ -191,10 +195,11 @@ export default function QACommentItem({
             <QACommentComposer
               placeholder="Write a reply..."
               submitLabel="Post Reply"
+              anonymousSubmitLabel="Anon Reply"
               compact
               onCancel={() => setReplyOpen(false)}
-              onSubmit={async (body) => {
-                await onReply(comment.id, body);
+              onSubmit={async (body, anonymous) => {
+                await onReply(comment.id, body, anonymous);
                 setReplyOpen(false);
                 setCollapsed(false);
               }}
@@ -222,6 +227,7 @@ export default function QACommentItem({
               currentUserId={currentUserId}
               currentVote={voteByCommentId[child.id] || 0}
               voteByCommentId={voteByCommentId}
+              showAdminIdentity={showAdminIdentity}
               onReply={onReply}
               onUpdate={onUpdate}
               onDelete={onDelete}

@@ -3,12 +3,13 @@
 import { useState } from "react";
 
 type QACommentComposerProps = {
-  onSubmit: (body: string) => Promise<void>;
+  onSubmit: (body: string, anonymous?: boolean) => Promise<void>;
   submitLabel: string;
   placeholder: string;
   initialValue?: string;
   onCancel?: () => void;
   compact?: boolean;
+  anonymousSubmitLabel?: string;
 };
 
 export default function QACommentComposer({
@@ -18,12 +19,13 @@ export default function QACommentComposer({
   initialValue = "",
   onCancel,
   compact = false,
+  anonymousSubmitLabel,
 }: QACommentComposerProps) {
   const [body, setBody] = useState(initialValue);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const submitComment = async () => {
+  const submitComment = async (anonymous = false) => {
     if (!body.trim()) {
       setErrorMessage("Comment text is required.");
       return;
@@ -32,7 +34,7 @@ export default function QACommentComposer({
     try {
       setSubmitting(true);
       setErrorMessage("");
-      await onSubmit(body.trim());
+      await onSubmit(body.trim(), anonymous);
       setBody("");
     } catch (error) {
       console.error(error);
@@ -67,7 +69,7 @@ export default function QACommentComposer({
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         <button
           type="button"
-          onClick={() => void submitComment()}
+          onClick={() => void submitComment(false)}
           disabled={submitting}
           style={{
             display: "inline-flex",
@@ -89,6 +91,32 @@ export default function QACommentComposer({
         >
           {submitting ? "Submitting..." : submitLabel}
         </button>
+        {anonymousSubmitLabel ? (
+          <button
+            type="button"
+            onClick={() => void submitComment(true)}
+            disabled={submitting}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: compact ? 34 : 36,
+              padding: compact ? "7px 11px" : "8px 13px",
+              borderRadius: 9,
+              textDecoration: "none",
+              background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
+              color: "#dbe7f5",
+              border: "1px solid rgba(126, 142, 160, 0.2)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 20px rgba(0, 0, 0, 0.22)",
+              fontFamily: "var(--font-display)",
+              letterSpacing: "0.07em",
+              textTransform: "uppercase",
+              fontSize: compact ? 10 : 10.5,
+            }}
+          >
+            {submitting ? "Submitting..." : anonymousSubmitLabel}
+          </button>
+        ) : null}
         {onCancel ? (
           <button
             type="button"

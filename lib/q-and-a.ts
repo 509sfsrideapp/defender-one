@@ -44,7 +44,9 @@ export type QACommentDocument = {
   parentCommentId?: string | null;
   authorId: string;
   authorLabel: string;
+  authorAdminLabel?: string;
   authorPhotoUrl?: string | null;
+  anonymous?: boolean;
   body: string;
   createdAt?: TimestampLike;
   updatedAt?: TimestampLike;
@@ -115,6 +117,17 @@ export function getVisibleQAPostAuthorLabel(
   }
 
   return post.authorAdminLabel?.trim() || post.authorLabel;
+}
+
+export function getVisibleQACommentAuthorLabel(
+  comment: Pick<QACommentDocument, "anonymous" | "authorLabel" | "authorAdminLabel">,
+  options?: { showAdminIdentity?: boolean }
+) {
+  if (comment.anonymous && !options?.showAdminIdentity) {
+    return "Anon";
+  }
+
+  return comment.authorAdminLabel?.trim() || comment.authorLabel;
 }
 
 export function toTimestampMillis(value: TimestampLike) {

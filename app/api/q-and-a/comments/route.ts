@@ -8,6 +8,7 @@ type RequestBody = {
   postId?: string;
   parentCommentId?: string | null;
   body?: string;
+  anonymous?: boolean;
 };
 
 type QAPostRecord = {
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
     const postId = body.postId?.trim() || "";
     const parentCommentId = body.parentCommentId?.trim() || null;
     const commentBody = body.body?.trim() || "";
+    const anonymous = Boolean(body.anonymous);
 
     if (!postId || !commentBody) {
       return NextResponse.json({ error: "postId and comment body are required." }, { status: 400 });
@@ -58,7 +60,9 @@ export async function POST(request: NextRequest) {
       parentCommentId,
       authorId: decoded.sub,
       authorLabel: actorData.authorLabel,
+      authorAdminLabel: actorData.authorLabel,
       authorPhotoUrl: actorData.authorPhotoUrl,
+      anonymous,
       body: commentBody,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -85,6 +89,7 @@ export async function POST(request: NextRequest) {
       details: {
         postId,
         parentCommentId,
+        anonymous,
       },
     });
 

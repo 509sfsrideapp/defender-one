@@ -582,7 +582,8 @@ export default function QAPostDetailPage() {
             <QACommentComposer
               placeholder="Add a top-level comment..."
               submitLabel="Post Comment"
-              onSubmit={async (body) => {
+              anonymousSubmitLabel="Anon Comment"
+              onSubmit={async (body, anonymous) => {
                 const idToken = await auth.currentUser?.getIdToken();
 
                 if (!idToken) {
@@ -599,6 +600,7 @@ export default function QAPostDetailPage() {
                     postId: postRecord.id,
                     parentCommentId: null,
                     body,
+                    anonymous: Boolean(anonymous),
                   }),
                 });
 
@@ -623,7 +625,8 @@ export default function QAPostDetailPage() {
                   currentUserId={user.uid}
                   currentVote={commentVotesById[comment.id] || 0}
                   voteByCommentId={commentVotesById}
-                  onReply={async (parentCommentId, body) => {
+                  showAdminIdentity={showAdminIdentity}
+                  onReply={async (parentCommentId, body, anonymous) => {
                     const idToken = await auth.currentUser?.getIdToken();
 
                     if (!idToken) {
@@ -640,6 +643,7 @@ export default function QAPostDetailPage() {
                         postId: postRecord.id,
                         parentCommentId,
                         body,
+                        anonymous: Boolean(anonymous),
                       }),
                     });
 
