@@ -7,6 +7,12 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v292",
+    title: "Homepage Console Line Addition",
+    summary: "Added the new EFD_STATUS//ERROR404:NOT-FOUND line into the homepage app-status console rotation.",
+  },
+  {
+>>>>>>> 58fb2c7 (Add EFD status console line v293)
     commit: "v291",
     title: "Q&A Post and Comment Voting",
     summary: "Added simple thumbs up and thumbs down voting to Q&A posts and comments, with compact controls that fit into the existing cards and live score syncing backed by new vote records and Firestore rules.",

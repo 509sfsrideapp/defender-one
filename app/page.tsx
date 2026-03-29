@@ -318,6 +318,7 @@ function createHomepageStatusScenario(): HomepageStatusScenario {
     { value: `THREAT_MODEL_DRIFT//CAUSE:TOO_MUCH_FREE_WILL//LEVEL:AMBER`, weight: 2 },
     { value: `MISSION_ABORTED//CAUSE:MONSTER_ZERO_REFUSED_TAXI`, weight: 2 },
     { value: `QUEUE_GHOSTING//CAUSE:PHANTOM_RIDER//SECTOR:${sector}`, weight: 2 },
+    { value: `EFD_STATUS//ERROR404:NOT-FOUND`, weight: 3 },
     { value: `STATUS_AUDIT//STATE:${statusPool}//PRIORITY:${priorityPool}//SOURCE:${sourcePool}`, weight: 4 },
     { value: `OPS_RESULT_SUMMARY//RESULT:${resultPool}//PRIORITY:${priorityPool}`, weight: 4 },
   ];
