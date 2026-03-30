@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v351",
+    title: "Realtime Presence and Message Live State",
+    summary: "Moved the remaining message live-state pieces onto Realtime Database by adding online presence, thread-view presence, typing indicators, and RTDB-backed conversation/message subscriptions, while also adding driver heartbeat and visible-queue presence publishing for clocked-in drivers plus a live Messages unread badge on the homepage tile.",
+  },
+  {
     commit: "v350",
     title: "Message Thread Auto-Scroll",
     summary: "Updated the direct-message thread view so opening a conversation automatically jumps to the most recent message, and sending or receiving messages keeps the thread pinned to the newest message instead of leaving the view stranded higher in the list.",

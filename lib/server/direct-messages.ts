@@ -69,12 +69,16 @@ function buildInitialConversationRecord(input: {
   const participantProfiles = Object.fromEntries(
     input.participantProfiles.map((profile) => [profile.uid, profile])
   );
+  const participantMap = Object.fromEntries(
+    participantIds.map((participantId) => [participantId, true as const])
+  );
 
   return {
     id: input.conversationId,
     type: input.type,
     participantIds,
     participantKey: buildParticipantKey(participantIds),
+    participantMap,
     participantProfiles,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -117,7 +121,14 @@ function fromStoredMessage(messageId: string, message: StoredDirectMessageRecord
 }
 
 async function syncConversationSummary(conversation: DirectMessageConversationRecord) {
-  const storedConversation = toStoredConversation(conversation);
+  const storedConversation = toStoredConversation({
+    ...conversation,
+    participantMap:
+      conversation.participantMap ||
+      Object.fromEntries(
+        (conversation.participantIds || []).map((participantId) => [participantId, true as const])
+      ),
+  });
 
   await setRealtimeDatabaseValue(`${DM_CONVERSATIONS_PATH}/${conversation.id}`, storedConversation);
   await Promise.all(

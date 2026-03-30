@@ -3,24 +3,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "../../lib/firebase";
+import {
+  subscribeToDirectMessagePresence,
+  subscribeToUserDirectMessageConversations,
+} from "../../lib/direct-message-live";
 import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount } from "../../lib/firestore-read-debug";
 import {
+  type DirectMessagePresenceRecord,
   formatConversationTimestamp,
   getOtherConversationParticipant,
   sortDirectMessageConversations,
   type DirectMessageBucket,
   type DirectMessageConversationRecord,
 } from "../../lib/direct-messages";
-
-const MESSAGE_LIST_REFRESH_INTERVAL_MS = 60000;
-
-function shouldRefreshMessagesData() {
-  if (typeof document === "undefined") {
-    return true;
-  }
-
-  return document.visibilityState === "visible";
-}
 
 function getFriendlyMessagesErrorMessage(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
@@ -48,14 +43,17 @@ function getBucketTabs() {
 function ConversationRow({
   conversation,
   currentUserId,
+  otherUserPresence,
   onOpen,
 }: {
   conversation: DirectMessageConversationRecord;
   currentUserId: string;
+  otherUserPresence: DirectMessagePresenceRecord | null;
   onOpen: () => void;
 }) {
   const otherParticipant = getOtherConversationParticipant(conversation, currentUserId);
   const unreadCount = Number(conversation.unreadCounts?.[currentUserId] || 0) || 0;
+  const isOtherUserOnline = Boolean(otherUserPresence?.online);
   const rowTitle =
     conversation.type === "direct"
       ? otherParticipant?.displayName || "Unknown User"
@@ -122,6 +120,19 @@ function ConversationRow({
           >
             {rowTitle}
           </strong>
+          {conversation.type === "direct" ? (
+            <span
+              title={isOtherUserOnline ? "Online now" : "Offline"}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 999,
+                backgroundColor: isOtherUserOnline ? "#22c55e" : "rgba(148, 163, 184, 0.38)",
+                boxShadow: isOtherUserOnline ? "0 0 0 3px rgba(34, 197, 94, 0.14)" : "none",
+                flexShrink: 0,
+              }}
+            />
+          ) : null}
           {unreadCount > 0 ? (
             <span
               style={{
@@ -186,6 +197,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const [allConversations, setAllConversations] = useState<DirectMessageConversationRecord[]>([]);
   const [conversationLoading, setConversationLoading] = useState(true);
   const [conversationError, setConversationError] = useState("");
+  const [presenceByUserId, setPresenceByUserId] = useState<
+    Record<string, DirectMessagePresenceRecord | null>
+  >({});
 
   const setQueryParams = useCallback(
     (updates: Record<string, string | null | undefined>) => {
@@ -206,10 +220,25 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    const unsubscribeRealtime = subscribeToUserDirectMessageConversations(
+      userId,
+      (conversations) => {
+        if (cancelled) {
+          return;
+        }
 
-    const loadConversations = async (showLoadingState: boolean) => {
+        logFirestoreQueryResult("messages.list.conversations.realtime", {
+          userId,
+          count: conversations.length,
+        });
+        setAllConversations(conversations);
+        setConversationLoading(false);
+      }
+    );
+
+    const hydrateConversations = async () => {
       try {
-        if (showLoadingState && !cancelled) {
+        if (!cancelled) {
           setConversationLoading(true);
           setConversationError("");
         }
@@ -224,7 +253,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
           return;
         }
 
-        logFirestoreQueryRun("messages.list.conversations", { userId });
+        logFirestoreQueryRun("messages.list.conversations.hydrate", { userId });
         const response = await fetch("/api/messages/conversations", {
           headers: {
             Authorization: `Bearer ${idToken}`,
@@ -241,7 +270,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
         }
 
         if (!cancelled) {
-          logFirestoreQueryResult("messages.list.conversations", {
+          logFirestoreQueryResult("messages.list.conversations.hydrate", {
             userId,
             count: (payload.conversations || []).length,
           });
@@ -259,19 +288,43 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       }
     };
 
-    void loadConversations(true);
-    const interval = window.setInterval(() => {
-      if (!shouldRefreshMessagesData()) {
-        return;
-      }
-      void loadConversations(false);
-    }, MESSAGE_LIST_REFRESH_INTERVAL_MS);
+    void hydrateConversations();
 
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      unsubscribeRealtime();
     };
   }, [userId]);
+
+  useEffect(() => {
+    const otherParticipantIds = [
+      ...new Set(
+        allConversations
+          .map((conversation) =>
+            getOtherConversationParticipant(conversation, userId)?.uid || ""
+          )
+          .filter(Boolean)
+      ),
+    ];
+
+    if (otherParticipantIds.length === 0) {
+      setPresenceByUserId({});
+      return;
+    }
+
+    const unsubs = otherParticipantIds.map((otherUserId) =>
+      subscribeToDirectMessagePresence(otherUserId, (presence) => {
+        setPresenceByUserId((current) => ({
+          ...current,
+          [otherUserId]: presence,
+        }));
+      })
+    );
+
+    return () => {
+      unsubs.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [allConversations, userId]);
 
   const searchText = (searchParams.get("search") || "").trim();
   const activeTab: DirectMessageBucket = requestedBucket;
@@ -472,6 +525,11 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                 key={conversation.id}
                 conversation={conversation}
                 currentUserId={userId}
+                otherUserPresence={
+                  presenceByUserId[
+                    getOtherConversationParticipant(conversation, userId)?.uid || ""
+                  ] || null
+                }
                 onOpen={() => router.push(`/messages/${conversation.id}?tab=${conversation.type}`)}
               />
             ))

@@ -1,4 +1,5 @@
 import ForegroundNotificationBridge from "./components/ForegroundNotificationBridge";
+import MessagePresenceBridge from "./components/MessagePresenceBridge";
 import AccountAccessGate from "./components/AccountAccessGate";
 import BottomHomeButton from "./components/BottomHomeButton";
 import BottomUtilityNav from "./components/BottomUtilityNav";
@@ -69,6 +70,7 @@ export default function RootLayout({
         <SelfDestructOverlay />
         <PullToRefresh />
         <ForegroundNotificationBridge />
+        <MessagePresenceBridge />
         <NotificationNavigationBridge />
         <DeveloperAccessCleaner />
         <AccountAccessGate />

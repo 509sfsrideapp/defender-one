@@ -7,6 +7,8 @@ import AppLoadingState from "./components/AppLoadingState";
 import { useRouter } from "next/navigation";
 import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
+import { beginDriverPresenceSession, clearDriverPresence, publishDriverPresence } from "../lib/driver-presence";
+import { subscribeToUserDirectMessageConversations } from "../lib/direct-message-live";
 import { isAdminEmail } from "../lib/admin";
 import { canDrive, canRequestRide, getDriverReadinessIssues, getRideReadinessIssues } from "../lib/profile-readiness";
 import { getInboxUnreadCount, INBOX_READ_EVENT, loadInboxReadState } from "../lib/inbox-badges";
@@ -711,6 +713,7 @@ export default function HomePage() {
   const [userInboxPosts, setUserInboxPosts] = useState<InboxPost[]>([]);
   const [inboxReadVersion, setInboxReadVersion] = useState(0);
   const [driverOpenRideBadgeRecords, setDriverOpenRideBadgeRecords] = useState<OpenRideBadgeRecord[]>([]);
+  const [messageUnreadCount, setMessageUnreadCount] = useState(0);
   const [appStatusHistory, setAppStatusHistory] = useState<string[]>([]);
   const [appStatusScenario, setAppStatusScenario] = useState<HomepageStatusScenario>(() => createHomepageStatusScenario());
   const [appStatusPhase, setAppStatusPhase] = useState<"command" | "response">("command");
@@ -883,6 +886,23 @@ export default function HomePage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user) {
+      setMessageUnreadCount(0);
+      return;
+    }
+
+    return subscribeToUserDirectMessageConversations(user.uid, (conversations) => {
+      setMessageUnreadCount(
+        conversations.reduce(
+          (sum, conversation) =>
+            sum + (Number(conversation.unreadCounts?.[user.uid] || 0) || 0),
+          0
+        )
+      );
+    });
+  }, [user]);
+
+  useEffect(() => {
     if (!user || !profile?.available || !canDrive(profile)) {
       setDriverOpenRideBadgeRecords([]);
       return;
@@ -978,6 +998,52 @@ export default function HomePage() {
             })
         ).length
       : 0;
+
+  useEffect(() => {
+    if (!user || !profile?.available || !driverReady) {
+      if (user?.uid) {
+        void clearDriverPresence(user.uid).catch(() => undefined);
+      }
+      return;
+    }
+
+    let cancelled = false;
+    let disposeSession: (() => Promise<void>) | null = null;
+
+    const publishHeartbeat = async () => {
+      await publishDriverPresence(user.uid, {
+        available: true,
+        flight: profile.flight?.trim() || null,
+        visibleOpenRideCount: visibleDriverRequestCount,
+        source: "home",
+      }).catch(() => undefined);
+    };
+
+    void (async () => {
+      disposeSession = await beginDriverPresenceSession(user.uid).catch(() => null);
+      if (cancelled) {
+        if (disposeSession) {
+          await disposeSession().catch(() => undefined);
+        }
+        return;
+      }
+      await publishHeartbeat();
+    })();
+
+    const interval = window.setInterval(() => {
+      void publishHeartbeat();
+    }, 45000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      if (disposeSession) {
+        void disposeSession().catch(() => undefined);
+      }
+      void clearDriverPresence(user.uid).catch(() => undefined);
+    };
+  }, [driverReady, profile?.available, profile?.flight, user, visibleDriverRequestCount]);
+
   const emergencyRideBlockers = [
     !emergencyRideEnabled ? "One-tap emergency ride is off until you accept the App Permissions emergency ride setting." : null,
     profile?.locationServicesEnabled === false
@@ -1719,7 +1785,7 @@ export default function HomePage() {
                   />
                   <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
                   <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="FORUMS" />
-                  <AppTile href="/messages" icon={<MessagesIcon />} label="MESSAGES" />
+                  <AppTile href="/messages" icon={<MessagesIcon />} label="MESSAGES" badgeCount={messageUnreadCount} />
                   <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
                   <AppTile href="/iso" icon={<IsoIcon />} label="ISO" />
                   {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : null}

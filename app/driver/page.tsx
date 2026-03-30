@@ -7,6 +7,7 @@ import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import PushNotificationsCard from "../components/PushNotificationsCard";
 import { auth, db } from "../../lib/firebase";
+import { beginDriverPresenceSession, clearDriverPresence, publishDriverPresence } from "../../lib/driver-presence";
 import { logFirestoreListenerAttach, logFirestoreListenerDetach, logFirestoreQueryResult, logFirestoreScreenMount } from "../../lib/firestore-read-debug";
 import { canDrive, getDriverReadinessIssues } from "../../lib/profile-readiness";
 import {
@@ -190,6 +191,51 @@ export default function DriverPage() {
       expandedAt: ride.dispatchExpandedAt,
     })
   );
+
+  useEffect(() => {
+    if (!user || !profile?.available || !canDrive(profile)) {
+      if (user?.uid) {
+        void clearDriverPresence(user.uid).catch(() => undefined);
+      }
+      return;
+    }
+
+    let cancelled = false;
+    let disposeSession: (() => Promise<void>) | null = null;
+
+    const publishHeartbeat = async () => {
+      await publishDriverPresence(user.uid, {
+        available: true,
+        flight: profile.flight?.trim() || null,
+        visibleOpenRideCount: visibleOpenRides.length,
+        source: "driver-dashboard",
+      }).catch(() => undefined);
+    };
+
+    void (async () => {
+      disposeSession = await beginDriverPresenceSession(user.uid).catch(() => null);
+      if (cancelled) {
+        if (disposeSession) {
+          await disposeSession().catch(() => undefined);
+        }
+        return;
+      }
+      await publishHeartbeat();
+    })();
+
+    const interval = window.setInterval(() => {
+      void publishHeartbeat();
+    }, 45000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      if (disposeSession) {
+        void disposeSession().catch(() => undefined);
+      }
+      void clearDriverPresence(user.uid).catch(() => undefined);
+    };
+  }, [profile, user, visibleOpenRides.length]);
 
   useEffect(() => {
     if (!user || !profile?.available) {

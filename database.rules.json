@@ -1,6 +1,58 @@
 {
   "rules": {
     ".read": false,
-    ".write": false
+    ".write": false,
+    "dmUserConversations": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "dmConversations": {
+      "$conversationId": {
+        ".read": "auth != null && data.child('participantMap').child(auth.uid).val() === true",
+        ".write": false
+      }
+    },
+    "dmMessages": {
+      "$conversationId": {
+        ".read": "auth != null && root.child('dmConversations').child($conversationId).child('participantMap').child(auth.uid).val() === true",
+        ".write": false
+      }
+    },
+    "dmTyping": {
+      "$conversationId": {
+        ".read": "auth != null && root.child('dmConversations').child($conversationId).child('participantMap').child(auth.uid).val() === true",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('dmConversations').child($conversationId).child('participantMap').child(auth.uid).val() === true"
+        }
+      }
+    },
+    "dmThreadPresence": {
+      "$conversationId": {
+        ".read": "auth != null && root.child('dmConversations').child($conversationId).child('participantMap').child(auth.uid).val() === true",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('dmConversations').child($conversationId).child('participantMap').child(auth.uid).val() === true"
+        }
+      }
+    },
+    "dmPresence": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "driverPresence": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "rideLive": {
+      "$rideId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
   }
 }

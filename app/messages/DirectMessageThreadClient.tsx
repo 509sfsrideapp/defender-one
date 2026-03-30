@@ -3,24 +3,26 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { auth } from "../../lib/firebase";
+import {
+  beginDirectMessageThreadViewingSession,
+  setDirectMessageTypingState,
+  subscribeToConversationThreadPresence,
+  subscribeToConversationTyping,
+  subscribeToDirectMessageConversation,
+  subscribeToDirectMessagePresence,
+  subscribeToDirectMessageRecords,
+} from "../../lib/direct-message-live";
 import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount } from "../../lib/firestore-read-debug";
 import {
+  type DirectMessagePresenceRecord,
+  type DirectMessageThreadPresenceRecord,
   formatConversationTimestamp,
   getOtherConversationParticipant,
   type DirectMessageBucket,
   type DirectMessageConversationRecord,
   type DirectMessageRecord,
+  type DirectMessageTypingRecord,
 } from "../../lib/direct-messages";
-
-const MESSAGE_THREAD_REFRESH_INTERVAL_MS = 60000;
-
-function shouldRefreshMessageThread() {
-  if (typeof document === "undefined") {
-    return true;
-  }
-
-  return document.visibilityState === "visible";
-}
 
 function getFriendlyThreadErrorMessage(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
@@ -162,8 +164,17 @@ export default function DirectMessageThreadClient({
   const [messageError, setMessageError] = useState("");
   const [threadError, setThreadError] = useState("");
   const [sending, setSending] = useState(false);
+  const [typingByUserId, setTypingByUserId] = useState<
+    Record<string, DirectMessageTypingRecord>
+  >({});
+  const [viewingByUserId, setViewingByUserId] = useState<
+    Record<string, DirectMessageThreadPresenceRecord>
+  >({});
+  const [otherParticipantPresence, setOtherParticipantPresence] =
+    useState<DirectMessagePresenceRecord | null>(null);
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const bottomAnchorRef = useRef<HTMLDivElement | null>(null);
+  const lastTypingActiveRef = useRef(false);
 
   useEffect(() => {
     logFirestoreScreenMount("messages.thread", { userId, conversationId });
@@ -172,9 +183,21 @@ export default function DirectMessageThreadClient({
   useEffect(() => {
     let cancelled = false;
 
-    const loadConversation = async (showLoadingState: boolean) => {
+    const unsubscribeRealtime = subscribeToDirectMessageConversation(
+      conversationId,
+      (nextConversation) => {
+        if (cancelled) {
+          return;
+        }
+
+        setConversation(nextConversation);
+        setConversationLoading(false);
+      }
+    );
+
+    const loadConversation = async () => {
       try {
-        if (showLoadingState && !cancelled) {
+        if (!cancelled) {
           setConversationLoading(true);
           setThreadError("");
         }
@@ -223,19 +246,32 @@ export default function DirectMessageThreadClient({
       }
     };
 
-    void loadConversation(true);
+    void loadConversation();
 
     return () => {
       cancelled = true;
+      unsubscribeRealtime();
     };
   }, [conversationId, userId]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadMessages = async (showLoadingState: boolean) => {
+    const unsubscribeRealtime = subscribeToDirectMessageRecords(
+      conversationId,
+      (nextMessages) => {
+        if (cancelled) {
+          return;
+        }
+
+        setMessages(nextMessages);
+        setMessageLoading(false);
+      }
+    );
+
+    const loadMessages = async () => {
       try {
-        if (showLoadingState && !cancelled) {
+        if (!cancelled) {
           setMessageLoading(true);
           setThreadError("");
         }
@@ -286,18 +322,11 @@ export default function DirectMessageThreadClient({
       }
     };
 
-    void loadMessages(true);
-    const interval = window.setInterval(() => {
-      if (!shouldRefreshMessageThread()) {
-        return;
-      }
-
-      void loadMessages(false);
-    }, MESSAGE_THREAD_REFRESH_INTERVAL_MS);
+    void loadMessages();
 
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      unsubscribeRealtime();
     };
   }, [conversationId, userId]);
 
@@ -329,9 +358,91 @@ export default function DirectMessageThreadClient({
     () => (conversation ? getOtherConversationParticipant(conversation, userId) : null),
     [conversation, userId]
   );
+  const otherParticipantTyping = otherParticipant?.uid
+    ? typingByUserId[otherParticipant.uid]
+    : null;
+  const otherParticipantViewingThread = otherParticipant?.uid
+    ? Boolean(viewingByUserId[otherParticipant.uid]?.viewing)
+    : false;
 
   const activeTab = conversation?.type || requestedTab || "direct";
   const backHref = `/messages?tab=${activeTab}`;
+
+  useEffect(() => {
+    if (!otherParticipant?.uid) {
+      setOtherParticipantPresence(null);
+      return;
+    }
+
+    return subscribeToDirectMessagePresence(otherParticipant.uid, (presence) => {
+      setOtherParticipantPresence(presence);
+    });
+  }, [otherParticipant?.uid]);
+
+  useEffect(() => {
+    return subscribeToConversationTyping(conversationId, setTypingByUserId);
+  }, [conversationId]);
+
+  useEffect(() => {
+    return subscribeToConversationThreadPresence(conversationId, setViewingByUserId);
+  }, [conversationId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let disposeViewingSession: (() => Promise<void>) | null = null;
+
+    void (async () => {
+      disposeViewingSession = await beginDirectMessageThreadViewingSession({
+        conversationId,
+        userId,
+      }).catch(() => null);
+
+      if (cancelled && disposeViewingSession) {
+        await disposeViewingSession().catch(() => undefined);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (disposeViewingSession) {
+        void disposeViewingSession().catch(() => undefined);
+      }
+    };
+  }, [conversationId, userId]);
+
+  useEffect(() => {
+    const normalizedDraft = messageDraft.trim();
+    const nextActive = Boolean(normalizedDraft);
+
+    if (lastTypingActiveRef.current === nextActive) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      lastTypingActiveRef.current = nextActive;
+      void setDirectMessageTypingState({
+        conversationId,
+        userId,
+        active: nextActive,
+        preview: nextActive ? normalizedDraft.slice(0, 60) : null,
+      }).catch(() => undefined);
+    }, 180);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [conversationId, messageDraft, userId]);
+
+  useEffect(() => {
+    return () => {
+      lastTypingActiveRef.current = false;
+      void setDirectMessageTypingState({
+        conversationId,
+        userId,
+        active: false,
+      }).catch(() => undefined);
+    };
+  }, [conversationId, userId]);
 
   useEffect(() => {
     if (messageLoading) {
@@ -371,21 +482,12 @@ export default function DirectMessageThreadClient({
       const payload = (await response.json().catch(() => ({}))) as { error?: string };
       if (!response.ok) throw new Error(payload.error || "Could not send the message.");
       setMessageDraft("");
-
-      const refreshedResponse = await fetch(
-        `/api/messages/conversations/${conversationId}/messages`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
-      const refreshedPayload = (await refreshedResponse.json().catch(() => ({}))) as {
-        messages?: DirectMessageRecord[];
-      };
-      if (refreshedResponse.ok && refreshedPayload.messages) {
-        setMessages(refreshedPayload.messages);
-      }
+      lastTypingActiveRef.current = false;
+      void setDirectMessageTypingState({
+        conversationId,
+        userId,
+        active: false,
+      }).catch(() => undefined);
     } catch (error) {
       setMessageError(getFriendlyThreadErrorMessage(error, "Could not send the message."));
     } finally {
@@ -521,6 +623,17 @@ export default function DirectMessageThreadClient({
                     .join(" // ") || "Direct message thread"
                 : `${conversation.type === "marketplace" ? "Marketplace" : "ISO"} conversation`}
             </p>
+            {conversation.type === "direct" ? (
+              <p style={{ margin: 0, color: "#7dd3fc", fontSize: 11, lineHeight: 1.4 }}>
+                {otherParticipantTyping?.active
+                  ? `${otherParticipant?.displayName || "They"} is typing...`
+                  : otherParticipantViewingThread
+                    ? `${otherParticipant?.displayName || "They"} is viewing this thread`
+                    : otherParticipantPresence?.online
+                      ? "Active now"
+                      : "Offline"}
+              </p>
+            ) : null}
           </div>
           <Link href={backHref} style={inboxNavButtonStyle}>
             Back to List

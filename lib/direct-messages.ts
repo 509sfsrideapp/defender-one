@@ -27,6 +27,7 @@ export type DirectMessageConversationDocument = {
   type: DirectMessageConversationType;
   participantIds: string[];
   participantKey: string;
+  participantMap?: Record<string, true>;
   participantProfiles: Record<string, DirectMessageParticipantProfile>;
   createdAt?: { seconds?: number; nanoseconds?: number } | string | null;
   updatedAt?: { seconds?: number; nanoseconds?: number } | string | null;
@@ -51,6 +52,24 @@ export type DirectMessageRecord = {
   createdAt?: { seconds?: number; nanoseconds?: number } | string | null;
   updatedAt?: { seconds?: number; nanoseconds?: number } | string | null;
   type?: "text" | "system";
+};
+
+export type DirectMessagePresenceRecord = {
+  online?: boolean;
+  currentThreadId?: string | null;
+  lastActiveAt?: { ".sv"?: string } | string | null;
+  updatedAt?: { ".sv"?: string } | string | null;
+};
+
+export type DirectMessageTypingRecord = {
+  active?: boolean;
+  preview?: string | null;
+  startedAt?: { ".sv"?: string } | string | null;
+};
+
+export type DirectMessageThreadPresenceRecord = {
+  viewing?: boolean;
+  updatedAt?: { ".sv"?: string } | string | null;
 };
 
 export function buildParticipantKey(userIds: string[]) {
