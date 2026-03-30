@@ -28,6 +28,7 @@ import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
   buildQACommentTree,
   dedupeQARecordsById,
+  formatQAPostTagLabel,
   formatRelativeTimestamp,
   getVisibleQAPostAuthorLabel,
   normalizeQAVoteValue,
@@ -761,6 +762,23 @@ export default function QAPostDetailPage() {
                   </p>
                 ) : null}
               </div>
+
+              {postRecord.tags?.length ? (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {postRecord.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        ...infoPillStyle,
+                        color: "#bae6fd",
+                        border: "1px solid rgba(125, 211, 252, 0.18)",
+                      }}
+                    >
+                      {formatQAPostTagLabel(tag)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
 
               <p style={{ margin: 0, color: "#cbd5e1", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
                 {postRecord.deleted ? "[deleted]" : postRecord.body?.trim() || "No body text was added to this post."}

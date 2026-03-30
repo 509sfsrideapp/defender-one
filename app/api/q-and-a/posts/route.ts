@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { createQAPost } from "../../../../lib/server/q-and-a";
+import { normalizeQAPostTags, type QAPostTag } from "../../../../lib/q-and-a";
 
 type RequestBody = {
   title?: string;
   body?: string;
   anonymous?: boolean;
+  tags?: string[];
 };
 
 export async function POST(request: NextRequest) {
@@ -23,6 +25,7 @@ export async function POST(request: NextRequest) {
     const title = body.title?.trim() || "";
     const postBody = body.body?.trim() || "";
     const anonymous = Boolean(body.anonymous);
+    const tags = normalizeQAPostTags(body.tags) as QAPostTag[];
 
     if (!title) {
       return NextResponse.json({ error: "Post title is required." }, { status: 400 });
@@ -34,6 +37,7 @@ export async function POST(request: NextRequest) {
       title,
       body: postBody,
       anonymous,
+      tags,
     });
 
     await writeAuditLog({
@@ -46,6 +50,7 @@ export async function POST(request: NextRequest) {
       details: {
         hasBody: Boolean(postBody),
         anonymous,
+        tags,
       },
     });
 

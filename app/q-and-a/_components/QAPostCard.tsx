@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { formatRelativeTimestamp, getVisibleQAPostAuthorLabel, type QAPostRecord } from "../../../lib/q-and-a";
+import {
+  formatQAPostTagLabel,
+  formatRelativeTimestamp,
+  getVisibleQAPostAuthorLabel,
+  type QAPostRecord,
+} from "../../../lib/q-and-a";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import { ReportableTarget } from "../../components/MisconductReporting";
 import QAVoteControls from "./QAVoteControls";
@@ -108,6 +113,31 @@ export default function QAPostCard({ post, currentVote = 0, onVote, showAdminIde
           >
             {preview}
           </p>
+        ) : null}
+
+        {post.tags?.length ? (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(125, 211, 252, 0.18)",
+                  background: "rgba(12, 18, 26, 0.72)",
+                  color: "#bae6fd",
+                  fontSize: 10.5,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                {formatQAPostTagLabel(tag)}
+              </span>
+            ))}
+          </div>
         ) : null}
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

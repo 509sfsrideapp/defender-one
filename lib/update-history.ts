@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v356",
+    title: "Forum Tags and Feed Filtering",
+    summary: "Added selectable tags to forum post creation, stored those tags on each post, surfaced them in the forum feed and post detail view, and added a tag filter to the main forums feed for Help, Question, Discussion, Info, Announcement, Advice, Guide, and Off Topic posts.",
+  },
+  {
     commit: "v355",
     title: "Marketplace Listing Form Refresh",
     summary: "Replaced the Marketplace category list with the expanded real-world set, removed manual status selection from listing creation, changed sale-price entry to a dollar-prefixed input, and added support for up to three square listing photos while keeping the first photo as the primary board/detail image.",

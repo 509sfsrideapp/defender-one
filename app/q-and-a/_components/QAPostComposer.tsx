@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+  QA_POST_TAG_OPTIONS,
+  formatQAPostTagLabel,
+  type QAPostTag,
+} from "../../../lib/q-and-a";
 
 type QAPostComposerProps = {
-  onSubmit: (input: { title: string; body: string; anonymous: boolean }) => Promise<void>;
+  onSubmit: (input: { title: string; body: string; anonymous: boolean; tags: QAPostTag[] }) => Promise<void>;
   submittingLabel?: string;
   submitLabel?: string;
   cancelHref?: string;
@@ -58,6 +63,7 @@ export default function QAPostComposer({
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [anonymous, setAnonymous] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<QAPostTag[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -74,6 +80,7 @@ export default function QAPostComposer({
         title: title.trim(),
         body: body.trim(),
         anonymous,
+        tags: selectedTags,
       });
     } catch (error) {
       console.error(error);
@@ -133,6 +140,51 @@ export default function QAPostComposer({
           disabled={submitting}
         />
       </label>
+
+      <div style={{ display: "grid", gap: 8 }}>
+        <span>Tags</span>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {QA_POST_TAG_OPTIONS.map((tag) => {
+            const active = selectedTags.includes(tag.value);
+
+            return (
+              <button
+                key={tag.value}
+                type="button"
+                disabled={submitting}
+                onClick={() =>
+                  setSelectedTags((current) =>
+                    current.includes(tag.value)
+                      ? current.filter((value) => value !== tag.value)
+                      : [...current, tag.value]
+                  )
+                }
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: 36,
+                  padding: "8px 12px",
+                  borderRadius: 999,
+                  border: active
+                    ? "1px solid rgba(125, 211, 252, 0.34)"
+                    : "1px solid rgba(126, 142, 160, 0.18)",
+                  background: active
+                    ? "linear-gradient(180deg, rgba(31, 48, 72, 0.96) 0%, rgba(17, 29, 44, 0.99) 100%)"
+                    : "rgba(12, 18, 26, 0.72)",
+                  color: active ? "#e0f2fe" : "#dbe7f5",
+                  fontFamily: "var(--font-display)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontSize: 11,
+                }}
+              >
+                {formatQAPostTagLabel(tag.value)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <label
         style={{

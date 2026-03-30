@@ -9,7 +9,14 @@ import HomeIconLink from "../components/HomeIconLink";
 import { auth, db } from "../../lib/firebase";
 import { isAdminEmail } from "../../lib/admin";
 import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount } from "../../lib/firestore-read-debug";
-import { normalizeQAVoteValue, sortQAPosts, type QAPostRecord, type QAPostSortMode, type QAVoteDocument } from "../../lib/q-and-a";
+import {
+  normalizeQAVoteValue,
+  QA_POST_TAG_OPTIONS,
+  sortQAPosts,
+  type QAPostRecord,
+  type QAPostSortMode,
+  type QAVoteDocument,
+} from "../../lib/q-and-a";
 import QAPostCard from "./_components/QAPostCard";
 
 const pageShellStyle: React.CSSProperties = {
@@ -77,6 +84,7 @@ export default function QAndAPage() {
   const [posts, setPosts] = useState<QAPostRecord[]>([]);
   const [postVotesById, setPostVotesById] = useState<Record<string, number>>({});
   const [sortMode, setSortMode] = useState<QAPostSortMode>("newest");
+  const [selectedTagFilter, setSelectedTagFilter] = useState("all");
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const lastPostCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -179,7 +187,15 @@ export default function QAndAPage() {
     };
   }, [user]);
 
-  const visiblePosts = useMemo(() => sortQAPosts(posts, sortMode), [posts, sortMode]);
+  const visiblePosts = useMemo(
+    () =>
+      sortQAPosts(posts, sortMode).filter((post) =>
+        selectedTagFilter === "all"
+          ? true
+          : (post.tags || []).some((tag) => tag === selectedTagFilter)
+      ),
+    [posts, selectedTagFilter, sortMode]
+  );
   const showAdminIdentity = isAdminEmail(user?.email);
 
   if (loading) {
@@ -254,6 +270,17 @@ export default function QAndAPage() {
             </strong>
 
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span style={{ color: "#94a3b8", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
+                Tag
+              </span>
+              <select value={selectedTagFilter} onChange={(event) => setSelectedTagFilter(event.target.value)}>
+                <option value="all">All tags</option>
+                {QA_POST_TAG_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <span style={{ color: "#94a3b8", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "var(--font-display)" }}>
                 Sort
               </span>

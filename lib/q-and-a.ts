@@ -8,6 +8,15 @@ export type TimestampLike =
 export type QAPostSortMode = "newest" | "oldest" | "top";
 export type QACommentSortMode = "newest" | "oldest" | "top";
 export type QAVoteValue = -1 | 0 | 1;
+export type QAPostTag =
+  | "help"
+  | "question"
+  | "discussion"
+  | "info"
+  | "announcement"
+  | "advice"
+  | "guide"
+  | "off_topic";
 
 export type QAAuthorProfile = {
   firstName?: string | null;
@@ -32,7 +41,7 @@ export type QAPostDocument = {
   commentCount?: number;
   score?: number;
   deleted?: boolean;
-  tags?: string[];
+  tags?: QAPostTag[];
 };
 
 export type QAPostRecord = QAPostDocument & {
@@ -74,6 +83,28 @@ export function dedupeQARecordsById<T extends { id: string }>(records: T[]) {
     seen.add(record.id);
     return true;
   });
+}
+
+export const QA_POST_TAG_OPTIONS: Array<{ value: QAPostTag; label: string }> = [
+  { value: "help", label: "Help" },
+  { value: "question", label: "Question" },
+  { value: "discussion", label: "Discussion" },
+  { value: "info", label: "Info" },
+  { value: "announcement", label: "Announcement" },
+  { value: "advice", label: "Advice" },
+  { value: "guide", label: "Guide" },
+  { value: "off_topic", label: "Off Topic" },
+];
+
+export function formatQAPostTagLabel(tag: QAPostTag | string) {
+  return QA_POST_TAG_OPTIONS.find((option) => option.value === tag)?.label || "Other";
+}
+
+export function normalizeQAPostTags(tags: string[] | undefined | null) {
+  const validTags = new Set(QA_POST_TAG_OPTIONS.map((option) => option.value));
+
+  return [...new Set((tags || []).map((tag) => tag.trim().toLowerCase()).filter(Boolean))]
+    .filter((tag): tag is QAPostTag => validTags.has(tag as QAPostTag));
 }
 
 export type QAVoteDocument = {

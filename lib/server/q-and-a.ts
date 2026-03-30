@@ -10,8 +10,10 @@ import {
   buildQACommentVoteId,
   buildQAPostSnippet,
   buildQAPostVoteId,
+  normalizeQAPostTags,
   normalizeQAVoteValue,
   type QAAuthorProfile,
+  type QAPostTag,
   type QAVoteValue,
 } from "../q-and-a";
 
@@ -36,6 +38,7 @@ export async function createQAPost(input: {
   title: string;
   body: string;
   anonymous?: boolean;
+  tags?: QAPostTag[];
 }) {
   const actorData = await buildQAActorData(input.authorId, input.authorEmail || null);
 
@@ -53,7 +56,7 @@ export async function createQAPost(input: {
     commentCount: 0,
     score: 0,
     deleted: false,
-    tags: [],
+    tags: normalizeQAPostTags(input.tags),
   })) as { name?: string };
 
   return created.name?.split("/").pop() || "";
