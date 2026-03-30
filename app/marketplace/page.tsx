@@ -12,6 +12,7 @@ import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
   formatMarketplaceFulfillmentLabel,
+  getMarketplacePhotoUrls,
   formatMarketplaceStatusLabel,
   formatMarketplacePriceLabel,
   getMarketplacePreviewText,
@@ -395,13 +396,13 @@ export default function MarketplacePage() {
                 color: "#e5edf7",
               }}
             >
-              {listing.photoUrl ? (
+              {getMarketplacePhotoUrls(listing)[0] ? (
                 <div
                   style={{
                     width: "100%",
                     aspectRatio: "1 / 1",
                     borderRadius: 14,
-                    backgroundImage: `url(${listing.photoUrl})`,
+                    backgroundImage: `url(${getMarketplacePhotoUrls(listing)[0]})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     border: "1px solid rgba(126, 142, 160, 0.16)",

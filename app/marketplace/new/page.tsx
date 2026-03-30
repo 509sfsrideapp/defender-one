@@ -13,11 +13,9 @@ import {
   MARKETPLACE_CATEGORY_OPTIONS,
   MARKETPLACE_CONDITION_OPTIONS,
   MARKETPLACE_EXCHANGE_METHOD_OPTIONS,
-  MARKETPLACE_STATUS_OPTIONS,
   type MarketplaceCategory,
   type MarketplaceCondition,
   type MarketplaceExchangeMethod,
-  type MarketplaceStatus,
 } from "../../../lib/marketplace";
 
 const sectionStyle: React.CSSProperties = {
@@ -70,17 +68,16 @@ export default function NewMarketplaceListingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [photoStatusMessage, setPhotoStatusMessage] = useState("");
+  const [photoStatusMessages, setPhotoStatusMessages] = useState(["", "", ""]);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<MarketplaceCategory>("gear");
+  const [category, setCategory] = useState<MarketplaceCategory>("furniture");
   const [exchangeMethod, setExchangeMethod] = useState<MarketplaceExchangeMethod>("buyer_pickup");
   const [isTrade, setIsTrade] = useState(false);
   const [priceAmount, setPriceAmount] = useState("");
   const [tradeForText, setTradeForText] = useState("");
   const [condition, setCondition] = useState<MarketplaceCondition>("good");
-  const [status, setStatus] = useState<MarketplaceStatus>("available");
   const [description, setDescription] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [photoUrls, setPhotoUrls] = useState(["", "", ""]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -121,6 +118,10 @@ export default function NewMarketplaceListingPage() {
       setSaving(true);
       setStatusMessage("Saving listing...");
       const idToken = await user.getIdToken();
+      const normalizedPhotoUrls = photoUrls
+        .map((photoUrl) => photoUrl.trim())
+        .filter(Boolean)
+        .slice(0, 3);
       const response = await fetch("/api/marketplace", {
         method: "POST",
         headers: {
@@ -132,12 +133,12 @@ export default function NewMarketplaceListingPage() {
           category,
           exchangeMethod,
           description: description.trim(),
-          photoUrl: photoUrl.trim() || null,
+          photoUrl: normalizedPhotoUrls[0] || null,
+          photoUrls: normalizedPhotoUrls,
           isTrade,
           priceAmount: isTrade ? null : Number(priceAmount),
           tradeForText: isTrade ? formatStructuredText(tradeForText) : null,
           condition,
-          status,
         }),
       });
 
@@ -196,7 +197,7 @@ export default function NewMarketplaceListingPage() {
               Listing Basics
             </strong>
             <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>
-              Build the first-pass marketplace card with the item identity, status, and seller-facing detail.
+              Build the first-pass marketplace card with the item identity, pricing, and seller-facing detail.
             </p>
           </div>
 
@@ -219,15 +220,6 @@ export default function NewMarketplaceListingPage() {
               <span>Condition</span>
               <select value={condition} onChange={(event) => setCondition(event.target.value as MarketplaceCondition)}>
                 {MARKETPLACE_CONDITION_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-
-            <label style={{ display: "grid", gap: 6 }}>
-              <span>Status</span>
-              <select value={status} onChange={(event) => setStatus(event.target.value as MarketplaceStatus)}>
-                {MARKETPLACE_STATUS_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
@@ -262,15 +254,42 @@ export default function NewMarketplaceListingPage() {
             {!isTrade ? (
               <label style={{ display: "grid", gap: 6 }}>
                 <span>Price</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
-                  value={priceAmount}
-                  onChange={(event) => setPriceAmount(event.target.value)}
-                  placeholder="40.00"
-                />
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "auto minmax(0, 1fr)",
+                    alignItems: "center",
+                    border: "1px solid rgba(126, 142, 160, 0.2)",
+                    borderRadius: 12,
+                    background: "rgba(15, 23, 42, 0.72)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <span
+                    style={{
+                      padding: "0 14px",
+                      color: "#dbe7f5",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={priceAmount}
+                    onChange={(event) => setPriceAmount(event.target.value)}
+                    placeholder="40.00"
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      borderRadius: 0,
+                    }}
+                  />
+                </div>
               </label>
             ) : (
               <label style={{ display: "grid", gap: 6 }}>
@@ -285,19 +304,40 @@ export default function NewMarketplaceListingPage() {
           </div>
 
           <div style={{ display: "grid", gap: 8 }}>
-            <span>Photo</span>
-            <ImageCropField
-              value={photoUrl}
-              onChange={setPhotoUrl}
-              cropShape="square"
-              cropAspectRatio={1}
-              previewSize={120}
-              outputSize={960}
-              maxEncodedLength={220000}
-              helperText="Optional listing photo for the card and detail page. Crop uses a square frame for consistency."
-              statusMessage={photoStatusMessage}
-              onStatusMessageChange={setPhotoStatusMessage}
-            />
+            <span>Photos</span>
+            <div style={{ display: "grid", gap: 12 }}>
+              {photoUrls.map((photoUrl, index) => (
+                <ImageCropField
+                  key={index}
+                  value={photoUrl}
+                  onChange={(nextValue) =>
+                    setPhotoUrls((current) =>
+                      current.map((value, valueIndex) =>
+                        valueIndex === index ? nextValue : value
+                      )
+                    )
+                  }
+                  cropShape="square"
+                  cropAspectRatio={1}
+                  previewSize={120}
+                  outputSize={960}
+                  maxEncodedLength={220000}
+                  helperText={
+                    index === 0
+                      ? "Primary listing photo. You can add up to three square photos."
+                      : `Optional additional photo ${index + 1}.`
+                  }
+                  statusMessage={photoStatusMessages[index] || ""}
+                  onStatusMessageChange={(nextStatusMessage) =>
+                    setPhotoStatusMessages((current) =>
+                      current.map((value, valueIndex) =>
+                        valueIndex === index ? nextStatusMessage : value
+                      )
+                    )
+                  }
+                />
+              ))}
+            </div>
           </div>
 
           <label style={{ display: "grid", gap: 6 }}>

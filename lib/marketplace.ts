@@ -1,9 +1,18 @@
 export type MarketplaceCategory =
-  | "gear"
-  | "electronics"
   | "furniture"
-  | "vehicle"
-  | "uniform"
+  | "electronics"
+  | "clothing"
+  | "home"
+  | "appliances"
+  | "tools"
+  | "outdoor"
+  | "vehicles"
+  | "baby_kids"
+  | "sports"
+  | "pets"
+  | "gaming"
+  | "military_gear"
+  | "free"
   | "other";
 
 export type MarketplaceCondition =
@@ -24,6 +33,7 @@ export type MarketplaceListingDocument = {
   address?: string | null;
   description: string;
   photoUrl?: string | null;
+  photoUrls?: string[] | null;
   priceAmount?: number | null;
   isTrade?: boolean | null;
   tradeForText?: string | null;
@@ -47,11 +57,20 @@ export type MarketplaceListingRecord = MarketplaceListingDocument & {
 };
 
 export const MARKETPLACE_CATEGORY_OPTIONS: Array<{ value: MarketplaceCategory; label: string }> = [
-  { value: "gear", label: "Gear" },
-  { value: "electronics", label: "Electronics" },
   { value: "furniture", label: "Furniture" },
-  { value: "vehicle", label: "Vehicle" },
-  { value: "uniform", label: "Uniform" },
+  { value: "electronics", label: "Electronics" },
+  { value: "clothing", label: "Clothing" },
+  { value: "home", label: "Home" },
+  { value: "appliances", label: "Appliances" },
+  { value: "tools", label: "Tools" },
+  { value: "outdoor", label: "Outdoor" },
+  { value: "vehicles", label: "Vehicles" },
+  { value: "baby_kids", label: "Baby & Kids" },
+  { value: "sports", label: "Sports" },
+  { value: "pets", label: "Pets" },
+  { value: "gaming", label: "Gaming" },
+  { value: "military_gear", label: "Military Gear" },
+  { value: "free", label: "Free" },
   { value: "other", label: "Other" },
 ];
 
@@ -128,6 +147,21 @@ export function formatMarketplaceFulfillmentLabel(listing: Pick<MarketplaceListi
 
 export function getMarketplacePreviewText(description?: string | null) {
   return description?.trim() || "Listing details pending.";
+}
+
+export function getMarketplacePhotoUrls(
+  listing: Pick<MarketplaceListingDocument, "photoUrl" | "photoUrls">
+) {
+  const normalizedPhotoUrls = (listing.photoUrls || [])
+    .map((photoUrl) => photoUrl?.trim() || "")
+    .filter(Boolean);
+
+  if (normalizedPhotoUrls.length > 0) {
+    return normalizedPhotoUrls;
+  }
+
+  const fallbackPhotoUrl = listing.photoUrl?.trim() || "";
+  return fallbackPhotoUrl ? [fallbackPhotoUrl] : [];
 }
 
 export function formatMarketplacePriceLabel(

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v355",
+    title: "Marketplace Listing Form Refresh",
+    summary: "Replaced the Marketplace category list with the expanded real-world set, removed manual status selection from listing creation, changed sale-price entry to a dollar-prefixed input, and added support for up to three square listing photos while keeping the first photo as the primary board/detail image.",
+  },
+  {
     commit: "v354",
     title: "Marketplace Messages Shortcut",
     summary: "Added a Marketplace Messages button to the top-right action area of the Marketplace board so users can jump straight into the marketplace message bucket from the main listings page.",

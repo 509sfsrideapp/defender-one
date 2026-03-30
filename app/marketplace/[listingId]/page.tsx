@@ -17,6 +17,7 @@ import {
   formatMarketplaceCategoryLabel,
   formatMarketplaceConditionLabel,
   formatMarketplaceFulfillmentLabel,
+  getMarketplacePhotoUrls,
   formatMarketplacePriceLabel,
   formatMarketplaceStatusLabel,
   type MarketplaceListingRecord,
@@ -177,6 +178,10 @@ export default function MarketplaceDetailPage() {
 
     return "Seller: Not listed";
   }, [creatorProfile]);
+  const listingPhotoUrls = useMemo(
+    () => (listingRecord ? getMarketplacePhotoUrls(listingRecord) : []),
+    [listingRecord]
+  );
 
   const handleDeleteListing = async () => {
     if (!isAdminViewer || !params.listingId || deletingListing || !user) {
@@ -295,7 +300,7 @@ export default function MarketplaceDetailPage() {
           }}
         >
         <section style={{ ...sectionStyle, display: "grid", gap: 18 }}>
-          {listingRecord.photoUrl ? (
+          {listingPhotoUrls[0] ? (
             <>
               <button
                 type="button"
@@ -308,7 +313,7 @@ export default function MarketplaceDetailPage() {
                     width: "100%",
                     aspectRatio: "1 / 1",
                     borderRadius: 16,
-                    backgroundImage: `url(${listingRecord.photoUrl})`,
+                    backgroundImage: `url(${listingPhotoUrls[0]})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     border: "1px solid rgba(126, 142, 160, 0.16)",
@@ -317,11 +322,30 @@ export default function MarketplaceDetailPage() {
               </button>
 
               <FullscreenImageViewer
-                src={listingRecord.photoUrl}
+                src={listingPhotoUrls[0]}
                 alt={listingRecord.title}
                 open={photoExpanded}
                 onClose={() => setPhotoExpanded(false)}
               />
+
+              {listingPhotoUrls.length > 1 ? (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))", gap: 10 }}>
+                  {listingPhotoUrls.slice(1).map((photoUrl, index) => (
+                    <div
+                      key={`${photoUrl}-${index}`}
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1 / 1",
+                        borderRadius: 12,
+                        backgroundImage: `url(${photoUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        border: "1px solid rgba(126, 142, 160, 0.16)",
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </>
           ) : null}
 

@@ -7,11 +7,9 @@ import {
   MARKETPLACE_CATEGORY_OPTIONS,
   MARKETPLACE_CONDITION_OPTIONS,
   MARKETPLACE_EXCHANGE_METHOD_OPTIONS,
-  MARKETPLACE_STATUS_OPTIONS,
   type MarketplaceCategory,
   type MarketplaceCondition,
   type MarketplaceExchangeMethod,
-  type MarketplaceStatus,
 } from "../../../lib/marketplace";
 
 type MarketplaceCreatorSeedProfile = {
@@ -29,9 +27,9 @@ type RequestBody = {
   isTrade?: boolean;
   tradeForText?: string;
   condition?: MarketplaceCondition;
-  status?: MarketplaceStatus;
   description?: string;
   photoUrl?: string | null;
+  photoUrls?: string[] | null;
 };
 
 function isValidOption<T extends string>(
@@ -69,7 +67,12 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as RequestBody;
     const title = body.title?.trim() || "";
     const description = body.description?.trim() || "";
-    const photoUrl = body.photoUrl?.trim() || null;
+    const rawPhotoUrls = Array.isArray(body.photoUrls) ? body.photoUrls : [];
+    const normalizedPhotoUrls = rawPhotoUrls
+      .map((photoUrl) => (typeof photoUrl === "string" ? photoUrl.trim() : ""))
+      .filter(Boolean)
+      .slice(0, 3);
+    const photoUrl = normalizedPhotoUrls[0] || body.photoUrl?.trim() || null;
     const isTrade = Boolean(body.isTrade);
     const tradeForText = body.tradeForText?.trim() || null;
     const rawPriceAmount =
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
     const category = body.category?.trim() || "";
     const exchangeMethod = body.exchangeMethod?.trim() || "";
     const condition = body.condition?.trim() || "";
-    const status = body.status?.trim() || "";
+    const status = "available";
 
     if (!title) {
       return NextResponse.json({ error: "Listing title is required." }, { status: 400 });
@@ -110,10 +113,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Choose a valid condition." }, { status: 400 });
     }
 
-    if (!isValidOption(status, MARKETPLACE_STATUS_OPTIONS)) {
-      return NextResponse.json({ error: "Choose a valid listing status." }, { status: 400 });
-    }
-
     const creatorProfile = await getFirestoreDocument<MarketplaceCreatorSeedProfile>(`users/${decoded.sub}`);
 
     const createdDocument = (await createFirestoreDocument("marketplaceListings", {
@@ -122,6 +121,7 @@ export async function POST(request: NextRequest) {
       exchangeMethod,
       description,
       photoUrl,
+      photoUrls: normalizedPhotoUrls,
       priceAmount,
       isTrade,
       tradeForText,
