@@ -8,6 +8,21 @@ import {
 } from "../../../../lib/server/direct-messages";
 import { getConversationBucket } from "../../../../lib/direct-messages";
 
+function getSafeMessagesError(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : "";
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("quota exceeded") ||
+    normalized.includes("resource_exhausted") ||
+    normalized.includes("\"code\": 429")
+  ) {
+    return "Messages are temporarily busy right now. Give it a moment and try again.";
+  }
+
+  return message || fallback;
+}
+
 type RequestBody =
   | {
       type?: "direct";
@@ -106,7 +121,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not open the conversation." },
+      { error: getSafeMessagesError(error, "Could not open the conversation.") },
       { status: 500 }
     );
   }
@@ -128,7 +143,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not load conversations." },
+      { error: getSafeMessagesError(error, "Could not load conversations.") },
       { status: 500 }
     );
   }

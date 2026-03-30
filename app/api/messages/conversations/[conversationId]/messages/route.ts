@@ -5,6 +5,21 @@ import {
   sendDirectMessage,
 } from "../../../../../../lib/server/direct-messages";
 
+function getSafeMessagesError(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : "";
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("quota exceeded") ||
+    normalized.includes("resource_exhausted") ||
+    normalized.includes("\"code\": 429")
+  ) {
+    return "Messages are temporarily busy right now. Give it a moment and try again.";
+  }
+
+  return message || fallback;
+}
+
 type RequestBody = {
   body?: string;
 };
@@ -40,7 +55,7 @@ export async function POST(
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not send the message." },
+      { error: getSafeMessagesError(error, "Could not send the message.") },
       { status: 500 }
     );
   }
@@ -69,7 +84,7 @@ export async function GET(
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not load the messages." },
+      { error: getSafeMessagesError(error, "Could not load the messages.") },
       { status: 500 }
     );
   }

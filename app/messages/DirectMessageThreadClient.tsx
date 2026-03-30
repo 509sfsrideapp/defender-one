@@ -12,6 +12,31 @@ import {
   type DirectMessageRecord,
 } from "../../lib/direct-messages";
 
+const MESSAGE_THREAD_REFRESH_INTERVAL_MS = 60000;
+
+function shouldRefreshMessageThread() {
+  if (typeof document === "undefined") {
+    return true;
+  }
+
+  return document.visibilityState === "visible";
+}
+
+function getFriendlyThreadErrorMessage(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : "";
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("quota exceeded") ||
+    normalized.includes("resource_exhausted") ||
+    normalized.includes("\"code\": 429")
+  ) {
+    return "Messages are temporarily busy right now. Give it a moment and try again.";
+  }
+
+  return message || fallback;
+}
+
 const inboxNavButtonStyle: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
@@ -189,9 +214,7 @@ export default function DirectMessageThreadClient({
       } catch (error) {
         console.error(error);
         if (!cancelled) {
-          setThreadError(
-            error instanceof Error ? error.message : "Could not load that conversation."
-          );
+          setThreadError(getFriendlyThreadErrorMessage(error, "Could not load that conversation."));
           setConversation(null);
           setConversationLoading(false);
         }
@@ -199,13 +222,9 @@ export default function DirectMessageThreadClient({
     };
 
     void loadConversation(true);
-    const interval = window.setInterval(() => {
-      void loadConversation(false);
-    }, 30000);
 
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
     };
   }, [conversationId, userId]);
 
@@ -259,9 +278,7 @@ export default function DirectMessageThreadClient({
       } catch (error) {
         console.error(error);
         if (!cancelled) {
-          setThreadError(
-            error instanceof Error ? error.message : "Could not load messages."
-          );
+          setThreadError(getFriendlyThreadErrorMessage(error, "Could not load messages."));
           setMessageLoading(false);
         }
       }
@@ -269,8 +286,12 @@ export default function DirectMessageThreadClient({
 
     void loadMessages(true);
     const interval = window.setInterval(() => {
+      if (!shouldRefreshMessageThread()) {
+        return;
+      }
+
       void loadMessages(false);
-    }, 15000);
+    }, MESSAGE_THREAD_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
@@ -349,9 +370,7 @@ export default function DirectMessageThreadClient({
         setMessages(refreshedPayload.messages);
       }
     } catch (error) {
-      setMessageError(
-        error instanceof Error ? error.message : "Could not send the message."
-      );
+      setMessageError(getFriendlyThreadErrorMessage(error, "Could not send the message."));
     } finally {
       setSending(false);
     }

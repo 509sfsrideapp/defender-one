@@ -12,6 +12,31 @@ import {
   type DirectMessageConversationRecord,
 } from "../../lib/direct-messages";
 
+const MESSAGE_LIST_REFRESH_INTERVAL_MS = 60000;
+
+function shouldRefreshMessagesData() {
+  if (typeof document === "undefined") {
+    return true;
+  }
+
+  return document.visibilityState === "visible";
+}
+
+function getFriendlyMessagesErrorMessage(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : "";
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("quota exceeded") ||
+    normalized.includes("resource_exhausted") ||
+    normalized.includes("\"code\": 429")
+  ) {
+    return "Messages are temporarily busy right now. Give it a moment and try again.";
+  }
+
+  return message || fallback;
+}
+
 function getBucketTabs() {
   return [
     { id: "direct", label: "Direct" },
@@ -160,6 +185,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
 
   const [allConversations, setAllConversations] = useState<DirectMessageConversationRecord[]>([]);
   const [conversationLoading, setConversationLoading] = useState(true);
+  const [conversationError, setConversationError] = useState("");
 
   const setQueryParams = useCallback(
     (updates: Record<string, string | null | undefined>) => {
@@ -185,6 +211,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       try {
         if (showLoadingState && !cancelled) {
           setConversationLoading(true);
+          setConversationError("");
         }
 
         const idToken = await auth.currentUser?.getIdToken();
@@ -224,6 +251,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
       } catch (error) {
         console.error(error);
         if (!cancelled) {
+          setConversationError(
+            getFriendlyMessagesErrorMessage(error, "Could not load conversations.")
+          );
           setConversationLoading(false);
         }
       }
@@ -231,8 +261,11 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
 
     void loadConversations(true);
     const interval = window.setInterval(() => {
+      if (!shouldRefreshMessagesData()) {
+        return;
+      }
       void loadConversations(false);
-    }, 30000);
+    }, MESSAGE_LIST_REFRESH_INTERVAL_MS);
 
     return () => {
       cancelled = true;
@@ -408,6 +441,19 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
         </label>
 
         <div style={{ display: "grid", gap: 10 }}>
+          {conversationError ? (
+            <div
+              style={{
+                padding: 14,
+                borderRadius: 14,
+                border: "1px solid rgba(248, 113, 113, 0.18)",
+                backgroundColor: "rgba(69, 10, 10, 0.28)",
+                color: "#fecaca",
+              }}
+            >
+              {conversationError}
+            </div>
+          ) : null}
           {conversationLoading ? (
             <div
               style={{
