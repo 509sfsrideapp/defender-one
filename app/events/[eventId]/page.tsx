@@ -335,6 +335,26 @@ export default function EventDetailPage() {
         attendeePhotoUrl: currentUserPhotoUrl || null,
         createdAt: new Date(),
       });
+
+      const idToken = await user.getIdToken().catch(() => null);
+
+      if (idToken) {
+        await fetch("/api/events/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            action: "rsvp",
+            eventId: params.eventId,
+            attendeeLabel: currentUserAttendanceLabel,
+          }),
+        }).catch((error) => {
+          console.error("Event RSVP notification dispatch failed", error);
+        });
+      }
+
       setAttendanceStatus("You are on the attendance list.");
     } catch (error) {
       console.error(error);

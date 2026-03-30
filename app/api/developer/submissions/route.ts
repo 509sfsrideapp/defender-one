@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
-import { createFirestoreDocument, deleteFirestoreDocument, getFirestoreDocument, listFirestoreDocuments, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { deleteFirestoreDocument, getFirestoreDocument, listFirestoreDocuments, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { createUserInboxPostAndMaybeNotify } from "../../../../lib/server/user-notification-settings";
 
 const DEVELOPER_COOKIE_NAME = "developer_access";
 
@@ -93,23 +94,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This submission is missing its reporter account reference." }, { status: 400 });
     }
 
-    await createFirestoreDocument("userInboxPosts", {
+    await createUserInboxPostAndMaybeNotify({
       userId,
       threadId: "dev",
       senderLabel: "Dev",
       senderType: "developer",
       title: responseTitle,
       body: messageBody,
-      imageUrl: null,
-      requiresResponse: false,
-      responsePrompt: null,
-      responseText: null,
-      responseSubmittedAt: null,
-      readAt: null,
-      readByUserId: null,
-      createdAt: new Date(),
       createdByUid: "developer_access",
       createdByEmail: null,
+      link: "/inbox/dev",
+      origin: new URL(request.url).origin,
     });
 
     await patchFirestoreDocument(`${collectionName}/${submissionId}`, {

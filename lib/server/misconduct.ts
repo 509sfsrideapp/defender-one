@@ -1,6 +1,6 @@
 import { deleteQAPost } from "./q-and-a";
+import { createUserInboxPostAndMaybeNotify } from "./user-notification-settings";
 import {
-  createFirestoreDocument,
   deleteFirestoreDocument,
   getFirestoreDocument,
   listFirestoreDocuments,
@@ -64,23 +64,16 @@ export async function createMisconductResolutionMessage(input: {
     bodyLines.push(detailMessage);
   }
 
-  await createFirestoreDocument("userInboxPosts", {
+  await createUserInboxPostAndMaybeNotify({
     userId: input.report.reporterUid,
     threadId: "admin",
     senderLabel: "Admin",
     senderType: "admin",
     title: `Report Review // ${actionLabel}`,
     body: bodyLines.join("\n"),
-    imageUrl: null,
-    requiresResponse: false,
-    responsePrompt: null,
-    responseText: null,
-    responseSubmittedAt: null,
-    readAt: null,
-    readByUserId: null,
-    createdAt: new Date(),
     createdByUid: input.resolvedByUid,
     createdByEmail: input.resolvedByEmail || null,
+    link: "/inbox/admin",
   });
 }
 

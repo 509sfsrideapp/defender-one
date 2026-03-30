@@ -338,6 +338,24 @@ export default function NewEventPage() {
         createdAt: new Date(),
       });
 
+      const idToken = await user.getIdToken().catch(() => null);
+
+      if (idToken) {
+        await fetch("/api/events/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            action: "created",
+            eventId: createdRef.id,
+          }),
+        }).catch((error) => {
+          console.error("Event creation notification dispatch failed", error);
+        });
+      }
+
       router.push(`/events/${createdRef.id}`);
     } catch (error) {
       console.error(error);

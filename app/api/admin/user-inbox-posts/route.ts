@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminRequest } from "../../../../lib/server/admin-access";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
-import { createFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { createUserInboxPostAndMaybeNotify } from "../../../../lib/server/user-notification-settings";
 
 type RequestBody = {
   userId?: string;
@@ -21,23 +21,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "userId, title, and body are required." }, { status: 400 });
     }
 
-    await createFirestoreDocument("userInboxPosts", {
+    await createUserInboxPostAndMaybeNotify({
       userId,
       threadId: "admin",
       senderLabel: "Admin",
       senderType: "admin",
       title,
       body: messageBody,
-      imageUrl: null,
-      requiresResponse: false,
-      responsePrompt: null,
-      responseText: null,
-      responseSubmittedAt: null,
-      readAt: null,
-      readByUserId: null,
-      createdAt: new Date(),
       createdByUid: adminToken.sub,
       createdByEmail: adminToken.email || null,
+      link: "/inbox/admin",
+      origin: new URL(request.url).origin,
     });
 
     await writeAuditLog({

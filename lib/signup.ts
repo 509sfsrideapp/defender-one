@@ -2,6 +2,7 @@ import { auth, db } from "./firebase";
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { buildHomeAddress } from "./home-address";
+import { DEFAULT_USER_NOTIFICATION_PREFERENCES } from "./notification-preferences";
 import { normalizeOfficeValue } from "./offices";
 import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear } from "./text-format";
 import { isValidUsername, normalizeUsername } from "./username";
@@ -234,6 +235,7 @@ export async function finalizeSignupFromDraft(
       carPlate: formatVehiclePlate(""),
       emergencyRideAddressConsent: Boolean(options?.emergencyRideAddressConsent),
       locationServicesEnabled: options?.locationServicesEnabled !== false,
+      notificationPreferences: DEFAULT_USER_NOTIFICATION_PREFERENCES,
       available: false,
       createdAt: new Date(),
     });

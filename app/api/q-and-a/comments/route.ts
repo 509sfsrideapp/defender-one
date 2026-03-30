@@ -3,6 +3,7 @@ import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { buildQAActorData, recountQACommentReplies, recountQAPostComments } from "../../../../lib/server/q-and-a";
 import { createFirestoreDocument, getFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { sendUserPushNotification } from "../../../../lib/server/user-notification-settings";
 
 type RequestBody = {
   postId?: string;
@@ -12,11 +13,16 @@ type RequestBody = {
 };
 
 type QAPostRecord = {
+  id: string;
+  title?: string;
+  authorId?: string;
   deleted?: boolean;
 };
 
 type QACommentRecord = {
+  id: string;
   postId?: string;
+  authorId?: string;
   deleted?: boolean;
 };
 
@@ -78,6 +84,42 @@ export async function POST(request: NextRequest) {
     await recountQAPostComments(postId);
 
     const commentId = created.name?.split("/").pop() || "";
+
+    const notificationOrigin = new URL(request.url).origin;
+    const postTitle = postRecord.title?.trim() || "Forum Post";
+
+    if (parentCommentId) {
+      const parentComment = await getFirestoreDocument<QACommentRecord>(`qaComments/${parentCommentId}`);
+      const parentAuthorId = parentComment?.authorId?.trim() || "";
+
+      if (parentAuthorId && parentAuthorId !== decoded.sub) {
+        await sendUserPushNotification({
+          userId: parentAuthorId,
+          preference: "forums",
+          title: "New Forum Reply",
+          body: `${actorData.authorLabel} replied to your comment on "${postTitle}".`,
+          link: `/q-and-a/${postId}`,
+          origin: notificationOrigin,
+        }).catch((error) => {
+          console.error("Forum reply notification failed", error);
+        });
+      }
+    } else {
+      const postAuthorId = postRecord.authorId?.trim() || "";
+
+      if (postAuthorId && postAuthorId !== decoded.sub) {
+        await sendUserPushNotification({
+          userId: postAuthorId,
+          preference: "forums",
+          title: "New Forum Comment",
+          body: `${actorData.authorLabel} commented on your post "${postTitle}".`,
+          link: `/q-and-a/${postId}`,
+          origin: notificationOrigin,
+        }).catch((error) => {
+          console.error("Forum post notification failed", error);
+        });
+      }
+    }
 
     await writeAuditLog({
       action: "q_and_a.comment.create",

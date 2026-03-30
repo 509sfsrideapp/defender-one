@@ -49,6 +49,7 @@ export async function POST(
       conversationId,
       senderId: decoded.sub,
       body: messageBody,
+      origin: new URL(request.url).origin,
     });
 
     return NextResponse.json({ ok: true });

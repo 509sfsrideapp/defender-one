@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { createFirestoreDocument, getFirestoreDocument, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
+import { getFirestoreDocument, patchFirestoreDocument } from "../../../../lib/server/firestore-admin";
 import { writeAuditLog } from "../../../../lib/server/audit-log";
 import { getAvailableDriverNotificationTokens, getUserNotificationTokens } from "../../../../lib/server/firestore-rest";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import { sendPushMessage } from "../../../../lib/server/fcm";
+import { createUserInboxPostAndMaybeNotify } from "../../../../lib/server/user-notification-settings";
 
 type RideRecord = {
   id: string;
@@ -48,18 +49,15 @@ async function createUserNotificationPost(input: {
   requiresResponse?: boolean;
   responsePrompt?: string;
 }) {
-  await createFirestoreDocument("userInboxPosts", {
+  await createUserInboxPostAndMaybeNotify({
     userId: input.userId,
     threadId: "notifications",
     senderLabel: "Notifications",
     title: input.title,
     body: input.body,
-    rideId: input.rideId,
     requiresResponse: input.requiresResponse === true,
     responsePrompt: input.responsePrompt || null,
-    responseText: null,
-    responseSubmittedAt: null,
-    createdAt: new Date(),
+    link: input.rideId ? `/ride-status?rideId=${input.rideId}` : "/inbox/notifications",
   });
 }
 

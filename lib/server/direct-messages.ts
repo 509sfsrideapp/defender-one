@@ -9,6 +9,7 @@ import {
   pushRealtimeDatabaseValue,
   setRealtimeDatabaseValue,
 } from "./realtime-database";
+import { sendUserPushNotification } from "./user-notification-settings";
 import {
   buildDirectConversationId,
   buildIsoConversationId,
@@ -430,6 +431,7 @@ export async function sendDirectMessage(input: {
   conversationId: string;
   senderId: string;
   body: string;
+  origin?: string;
 }) {
   const conversation = await getDirectMessageConversation(input.conversationId);
 
@@ -491,6 +493,30 @@ export async function sendDirectMessage(input: {
   };
 
   await syncConversationSummary(nextConversation);
+
+  const messageLink = `/messages/${input.conversationId}?tab=${conversation.type}`;
+
+  await Promise.all(
+    conversation.participantIds
+      .filter((participantId) => participantId !== input.senderId)
+      .map((participantId) =>
+        sendUserPushNotification({
+          userId: participantId,
+          preference: "directMessages",
+          title:
+            conversation.type === "marketplace"
+              ? "New Marketplace Message"
+              : conversation.type === "iso"
+                ? "New ISO Message"
+                : "New Direct Message",
+          body: `${senderProfile?.displayName || "Someone"}: ${buildMessagePreview(normalizedBody)}`,
+          link: messageLink,
+          origin: input.origin,
+        }).catch((error) => {
+          console.error("Direct message push notification failed", error);
+        })
+      )
+  );
 }
 
 export async function markDirectConversationRead(input: {
