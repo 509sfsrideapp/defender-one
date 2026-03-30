@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v361",
+    title: "Homepage Status Weight Tuning",
+    summary: "Increased the homepage app-status console weight for the INITIATE_POST_CHECK line so that post-check status messages appear more often in the rotating tactical console feed.",
+  },
+  {
     commit: "v360",
     title: "Post-Ride Follow-Up Notifications",
     summary: "Added automatic Notifications inbox check-ins for both riders and drivers after a ride is completed, with optional comment boxes that do not require a response and still mark as read as soon as the message is opened.",

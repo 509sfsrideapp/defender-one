@@ -355,7 +355,7 @@ function createHomepageStatusScenario(): HomepageStatusScenario {
     { value: `MISSION_ABORTED//CAUSE:MONSTER_ZERO_REFUSED_TAXI`, weight: 2 },
     { value: `QUEUE_GHOSTING//CAUSE:PHANTOM_RIDER//SECTOR:${sector}`, weight: 2 },
     { value: `EFD_STATUS//ERROR404:NOT-FOUND`, weight: 3 },
-    { value: `INITIATE_POST_CHECK//POST:${chooseRandom(HOMEPAGE_STATUS_POSTS)}//STATUS:CODE-${randomInt(1, 22)}`, weight: 4 },
+    { value: `INITIATE_POST_CHECK//POST:${chooseRandom(HOMEPAGE_STATUS_POSTS)}//STATUS:CODE-${randomInt(1, 22)}`, weight: 9 },
     { value: `STATUS_AUDIT//STATE:${statusPool}//PRIORITY:${priorityPool}//SOURCE:${sourcePool}`, weight: 4 },
     { value: `OPS_RESULT_SUMMARY//RESULT:${resultPool}//PRIORITY:${priorityPool}`, weight: 4 },
   ];
