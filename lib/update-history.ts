@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v354",
+    title: "Marketplace Messages Shortcut",
+    summary: "Added a Marketplace Messages button to the top-right action area of the Marketplace board so users can jump straight into the marketplace message bucket from the main listings page.",
+  },
+  {
     commit: "v353",
     title: "Message Composer Copy Cleanup",
     summary: "Removed the extra helper sentence above the send button in the direct-message composer so the messaging send area stays cleaner without changing the surrounding layout.",

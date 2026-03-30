@@ -252,10 +252,15 @@ export default function MarketplacePage() {
             </div>
           </div>
 
-          <Link href="/marketplace/new" style={{ ...primaryButtonStyle, gap: 8 }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-            <span>Add Listing</span>
-          </Link>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/messages?tab=marketplace" style={secondaryButtonStyle}>
+              Marketplace Messages
+            </Link>
+            <Link href="/marketplace/new" style={{ ...primaryButtonStyle, gap: 8 }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+              <span>Add Listing</span>
+            </Link>
+          </div>
         </div>
 
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>
