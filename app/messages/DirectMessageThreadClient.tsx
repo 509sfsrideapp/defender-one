@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { auth } from "../../lib/firebase";
 import { logFirestoreQueryResult, logFirestoreQueryRun, logFirestoreScreenMount } from "../../lib/firestore-read-debug";
 import {
@@ -162,6 +162,8 @@ export default function DirectMessageThreadClient({
   const [messageError, setMessageError] = useState("");
   const [threadError, setThreadError] = useState("");
   const [sending, setSending] = useState(false);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const bottomAnchorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     logFirestoreScreenMount("messages.thread", { userId, conversationId });
@@ -330,6 +332,21 @@ export default function DirectMessageThreadClient({
 
   const activeTab = conversation?.type || requestedTab || "direct";
   const backHref = `/messages?tab=${activeTab}`;
+
+  useEffect(() => {
+    if (messageLoading) {
+      return;
+    }
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      bottomAnchorRef.current?.scrollIntoView({
+        behavior: "auto",
+        block: "end",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [messageLoading, messages]);
 
   const handleSubmitMessage = async (event?: FormEvent<HTMLFormElement>) => {
     event?.preventDefault();
@@ -561,6 +578,7 @@ export default function DirectMessageThreadClient({
       </div>
 
       <div
+        ref={messageListRef}
         style={{
           padding: "0.9rem 0.8rem",
           display: "flex",
@@ -602,6 +620,7 @@ export default function DirectMessageThreadClient({
             </p>
           </div>
         )}
+        <div ref={bottomAnchorRef} />
       </div>
 
       <form

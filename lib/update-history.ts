@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v350",
+    title: "Message Thread Auto-Scroll",
+    summary: "Updated the direct-message thread view so opening a conversation automatically jumps to the most recent message, and sending or receiving messages keeps the thread pinned to the newest message instead of leaving the view stranded higher in the list.",
+  },
+  {
     commit: "v349",
     title: "Messages, Marketplace, and ISO Restored",
     summary: "Moved Messages, Marketplace, and ISO back onto the main homepage applications grid and removed their temporary developer-only route and API restrictions, while keeping the newer Realtime Database messaging and live-ride backend improvements in place underneath.",
