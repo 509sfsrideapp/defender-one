@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v365",
+    title: "Forum Comment Visibility Fix",
+    summary: "Fixed the forum post detail thread loader so older comments still appear even when they are missing legacy score fields, by keeping the visible Top sorting client-side instead of using a Firestore orderBy on score that filtered those comments out.",
+  },
+  {
     commit: "v364",
     title: "Admin Delete Reason Notices",
     summary: "Added optional admin reason prompts to admin-delete flows for Events, ISO, Marketplace, and Forums, then sent inbox-only Notifications messages to the affected content owners with the admin note when provided. Misconduct-driven admin deletions now send the same owner notice too.",

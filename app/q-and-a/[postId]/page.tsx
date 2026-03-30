@@ -157,9 +157,7 @@ export default function QAPostDetailPage() {
     const sortConstraints =
       commentSortMode === "oldest"
         ? [orderBy("createdAt", "asc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)]
-        : commentSortMode === "top"
-          ? [orderBy("score", "desc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)]
-          : [orderBy("createdAt", "desc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)];
+        : [orderBy("createdAt", "desc"), limit(FORUM_TOP_LEVEL_COMMENTS_PAGE_SIZE)];
 
     setLoadingMoreComments(true);
     try {
