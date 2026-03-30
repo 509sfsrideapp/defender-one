@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v342",
+    title: "Marketplace, ISO, and Messages Restored",
+    summary: "Moved Messages, Marketplace, and ISO back onto the live homepage applications grid and removed the route-level developer-access gates, so those three apps are directly reachable again without going through Developer Tools.",
+  },
+  {
     commit: "v341",
     title: "Forums Pagination",
     summary: "Added incremental loading to the Forums feed, My Posts, and forum comment threads so posts and top-level comments now load in smaller cursor-based batches, while replies only load when a branch is expanded and can continue with their own load-more steps without changing the existing forum layout.",

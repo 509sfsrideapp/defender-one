@@ -79,7 +79,7 @@ export default async function DeveloperPage() {
 
         <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>Messages</h2>
-          <p style={{ maxWidth: 320 }}>Keep the direct-message feature available here while it stays off the live user dashboard.</p>
+          <p style={{ maxWidth: 320 }}>Open the direct-message feature from here too while we keep building on top of it.</p>
           <Link href="/messages/direct" style={featureLinkStyle}>
             Open Messages
           </Link>
@@ -87,7 +87,7 @@ export default async function DeveloperPage() {
 
         <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>Marketplace</h2>
-          <p style={{ maxWidth: 320 }}>Open the Marketplace feature from here while we keep it behind developer access.</p>
+          <p style={{ maxWidth: 320 }}>Open the Marketplace feature from here for quick testing and iteration.</p>
           <Link href="/marketplace" style={featureLinkStyle}>
             Open Marketplace
           </Link>
@@ -95,7 +95,7 @@ export default async function DeveloperPage() {
 
         <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>ISO</h2>
-          <p style={{ maxWidth: 320 }}>Open the ISO board from here while we keep it behind developer access.</p>
+          <p style={{ maxWidth: 320 }}>Open the ISO board from here for quick testing and iteration.</p>
           <Link href="/iso" style={featureLinkStyle}>
             Open ISO
           </Link>
