@@ -401,6 +401,467 @@ button:disabled {
   }
 }
 
+.app-access-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 28px);
+  background:
+    radial-gradient(circle at top, rgba(42, 74, 108, 0.16), transparent 32%),
+    linear-gradient(180deg, rgba(4, 8, 14, 0.98) 0%, rgba(2, 5, 10, 0.995) 100%);
+  overflow: hidden;
+}
+
+.app-access-screen-closing {
+  animation: app-access-digitize-out 720ms cubic-bezier(0.16, 0.84, 0.22, 1) forwards;
+}
+
+.app-access-grid,
+.app-access-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-access-grid {
+  background-image:
+    linear-gradient(rgba(124, 166, 214, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 166, 214, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.28;
+}
+
+.app-access-scan {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(125, 211, 252, 0.08) 48%, transparent 100%);
+  transform: translateY(-100%);
+  animation: app-access-scan 2.4s ease-in-out infinite;
+}
+
+.app-access-shell {
+  position: relative;
+  width: min(100%, 760px);
+  display: grid;
+  gap: 12px;
+}
+
+.app-access-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0 4px;
+  color: #8fb3d9;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-panel {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 4vw, 28px);
+  border-radius: 22px;
+  border: 1px solid rgba(126, 142, 160, 0.18);
+  background:
+    linear-gradient(180deg, rgba(11, 17, 25, 0.97) 0%, rgba(6, 10, 16, 0.985) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 28px 56px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.app-access-panel::before,
+.app-access-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-access-panel::before {
+  background:
+    linear-gradient(90deg, rgba(125, 211, 252, 0.07), transparent 16%, transparent 84%, rgba(125, 211, 252, 0.07)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%);
+}
+
+.app-access-panel::after {
+  inset: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(126, 142, 160, 0.08);
+}
+
+.app-access-panel-copy {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.app-access-kicker,
+.app-access-module-label {
+  margin: 0;
+  color: #86bce8;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-title {
+  margin: 0;
+  font-size: clamp(2.2rem, 7vw, 3.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-access-subtitle {
+  margin: 0;
+  color: #9fb3c8;
+  font-size: 0.96rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-runtime,
+.app-access-pin-layout {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+
+.app-access-status-stack {
+  display: grid;
+  gap: 10px;
+  min-height: 186px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(126, 142, 160, 0.14);
+  background:
+    linear-gradient(180deg, rgba(7, 12, 18, 0.98) 0%, rgba(3, 7, 12, 0.995) 100%);
+}
+
+.app-access-status-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 18px;
+  color: #dbe7f5;
+  font-size: 12px;
+  line-height: 1.4;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  animation: app-access-line-in 240ms ease-out both;
+}
+
+.app-access-status-line-active {
+  color: #f8fbff;
+}
+
+.app-access-status-prompt {
+  color: #67e8f9;
+  flex-shrink: 0;
+}
+
+.app-access-identity-card,
+.app-access-terminal-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(126, 142, 160, 0.16);
+  background:
+    linear-gradient(180deg, rgba(16, 24, 35, 0.96) 0%, rgba(8, 13, 19, 0.99) 100%);
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.app-access-terminal-card {
+  grid-template-columns: 1fr;
+}
+
+.app-access-identity-card-visible,
+.app-access-terminal-card-visible {
+  animation: app-access-card-in 340ms ease-out forwards;
+}
+
+.app-access-identity-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(47, 60, 79, 0.82) 0%, rgba(24, 33, 45, 0.95) 100%);
+  border: 1px solid rgba(129, 145, 164, 0.24);
+  color: #e5edf7;
+  font-size: 24px;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+}
+
+.app-access-identity-photo-fill {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+
+.app-access-identity-copy,
+.app-access-terminal-card {
+  display: grid;
+  gap: 4px;
+}
+
+.app-access-identity-copy strong,
+.app-access-terminal-card strong {
+  color: #f8fbff;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-identity-copy span,
+.app-access-terminal-card span,
+.app-access-pin-caption {
+  color: #9fb3c8;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.app-access-granted {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.app-access-granted-visible {
+  animation: app-access-card-in 300ms ease-out forwards;
+}
+
+.app-access-granted-label {
+  color: #b8f7c7;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-granted-subtitle {
+  color: #9fb3c8;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-console {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  background:
+    linear-gradient(180deg, rgba(6, 15, 24, 0.98) 0%, rgba(3, 9, 16, 0.995) 100%);
+  color: #b8dbf8;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-console-error {
+  border-color: rgba(248, 113, 113, 0.22);
+  color: #fecaca;
+}
+
+.app-access-pin-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.app-access-pin-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(126, 142, 160, 0.16);
+  color: #dbe7f5;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.app-access-pin-display {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(126, 142, 160, 0.14);
+  background:
+    linear-gradient(180deg, rgba(7, 12, 18, 0.98) 0%, rgba(3, 7, 12, 0.995) 100%);
+}
+
+.app-access-pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.42);
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.app-access-pin-dot-filled {
+  border-color: rgba(125, 211, 252, 0.36);
+  background: radial-gradient(circle, rgba(186, 230, 253, 0.95) 0%, rgba(59, 130, 246, 0.82) 72%);
+}
+
+.app-access-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.app-access-key {
+  min-height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(126, 142, 160, 0.18);
+  background:
+    linear-gradient(180deg, rgba(32, 46, 62, 0.96) 0%, rgba(15, 23, 33, 0.98) 100%);
+  color: #f8fbff;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.app-access-key-muted {
+  color: #cbd5e1;
+}
+
+.app-access-action-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-access-submit {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 142, 160, 0.24);
+  background:
+    linear-gradient(180deg, rgba(71, 104, 145, 0.96) 0%, rgba(34, 54, 84, 0.98) 100%);
+  color: #ffffff;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-family: var(--font-display);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 30px rgba(17, 24, 39, 0.22);
+}
+
+@keyframes app-access-scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  24% { opacity: 0.6; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes app-access-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-access-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes app-access-digitize-out {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    clip-path: inset(0 0 0 0);
+  }
+  36% {
+    opacity: 0.94;
+    filter: blur(0.8px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(12px);
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.012);
+  }
+}
+
+@keyframes homepage-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes homepage-app-tile-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .app-access-panel {
+    padding: 18px;
+  }
+
+  .app-access-status-stack {
+    min-height: 168px;
+  }
+
+  .app-access-identity-card {
+    grid-template-columns: 1fr;
+  }
+
+  .app-access-identity-photo {
+    width: 58px;
+    height: 58px;
+  }
+}
+
 .loading-state {
   display: grid;
   justify-items: center;

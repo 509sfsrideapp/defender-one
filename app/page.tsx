@@ -7,6 +7,7 @@ import AppLoadingState from "./components/AppLoadingState";
 import { useRouter } from "next/navigation";
 import PushNotificationsCard from "./components/PushNotificationsCard";
 import { auth, db } from "../lib/firebase";
+import { APP_HOMEPAGE_REVEAL_KEY } from "../lib/app-pin";
 import { beginDriverPresenceSession, clearDriverPresence, publishDriverPresence } from "../lib/driver-presence";
 import { subscribeToUserDirectMessageConversations } from "../lib/direct-message-live";
 import { isAdminEmail } from "../lib/admin";
@@ -402,6 +403,8 @@ function AppTile({
   disabled = false,
   badgeCount = 0,
   pulseGreen = false,
+  revealActive = false,
+  revealDelayMs = 0,
 }: {
   href?: string;
   icon: React.ReactNode;
@@ -409,6 +412,8 @@ function AppTile({
   disabled?: boolean;
   badgeCount?: number;
   pulseGreen?: boolean;
+  revealActive?: boolean;
+  revealDelayMs?: number;
 }) {
   const sharedStyle: React.CSSProperties = {
     minHeight: 120,
@@ -457,11 +462,21 @@ function AppTile({
     </span>
   ) : null;
 
+  const revealStyle: React.CSSProperties = revealActive
+    ? {
+        opacity: 0,
+        transform: "translateY(16px) scale(0.94)",
+        animation: "homepage-app-tile-reveal 480ms cubic-bezier(0.18, 0.82, 0.24, 1) forwards",
+        animationDelay: `${revealDelayMs}ms`,
+      }
+    : {};
+
   if (disabled || !href) {
     return (
       <div
         style={{
           ...sharedStyle,
+          ...revealStyle,
           color: "#93a0b0",
           background: "linear-gradient(180deg, rgba(37, 44, 53, 0.92) 0%, rgba(21, 26, 33, 0.96) 100%)",
           border: "1px solid rgba(126, 142, 160, 0.18)",
@@ -479,6 +494,7 @@ function AppTile({
       href={href}
       style={{
         ...sharedStyle,
+        ...revealStyle,
         textDecoration: "none",
         color: "#e5edf7",
         background: "linear-gradient(180deg, rgba(20, 26, 33, 0.96) 0%, rgba(10, 13, 18, 0.99) 100%)",
@@ -493,12 +509,26 @@ function AppTile({
   );
 }
 
-function PlaceholderTile() {
+function PlaceholderTile({
+  revealActive = false,
+  revealDelayMs = 0,
+}: {
+  revealActive?: boolean;
+  revealDelayMs?: number;
+}) {
   return (
     <div
       aria-hidden="true"
       style={{
         minHeight: 120,
+        ...(revealActive
+          ? {
+              opacity: 0,
+              transform: "translateY(16px) scale(0.94)",
+              animation: "homepage-app-tile-reveal 480ms cubic-bezier(0.18, 0.82, 0.24, 1) forwards",
+              animationDelay: `${revealDelayMs}ms`,
+            }
+          : {}),
         borderRadius: 16,
         padding: "16px 12px",
         background: "linear-gradient(180deg, rgba(26, 31, 39, 0.48) 0%, rgba(13, 17, 22, 0.72) 100%)",
@@ -709,6 +739,7 @@ export default function HomePage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authWarning, setAuthWarning] = useState("");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [startupRevealActive, setStartupRevealActive] = useState(false);
   const [submittingEmergencyRide, setSubmittingEmergencyRide] = useState(false);
   const [globalInboxPosts, setGlobalInboxPosts] = useState<InboxPost[]>([]);
   const [userInboxPosts, setUserInboxPosts] = useState<InboxPost[]>([]);
@@ -720,6 +751,27 @@ export default function HomePage() {
   const [appStatusPhase, setAppStatusPhase] = useState<"command" | "response">("command");
   const [appStatusCharCount, setAppStatusCharCount] = useState(0);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const revealToken = window.sessionStorage.getItem(APP_HOMEPAGE_REVEAL_KEY);
+
+    if (!revealToken) {
+      return;
+    }
+
+    window.sessionStorage.removeItem(APP_HOMEPAGE_REVEAL_KEY);
+    setStartupRevealActive(true);
+
+    const timer = window.setTimeout(() => {
+      setStartupRevealActive(false);
+    }, 2600);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     logFirestoreScreenMount("home");
@@ -784,6 +836,16 @@ export default function HomePage() {
       unsubscribe();
     };
   }, []);
+
+  const getStartupRevealStyle = (delayMs: number): React.CSSProperties =>
+    startupRevealActive
+      ? {
+          opacity: 0,
+          transform: "translateY(14px) scale(0.985)",
+          animation: "homepage-section-reveal 560ms cubic-bezier(0.2, 0.82, 0.24, 1) forwards",
+          animationDelay: `${delayMs}ms`,
+        }
+      : {};
 
   useEffect(() => {
     if (!profileMenuOpen) {
@@ -1523,6 +1585,7 @@ export default function HomePage() {
               padding: "clamp(1.2rem, 3vw, 2rem)",
               display: "grid",
               gap: 18,
+              ...getStartupRevealStyle(140),
             }}
           >
             <div style={{ maxWidth: 760 }}>
@@ -1592,6 +1655,7 @@ export default function HomePage() {
               padding: "1.1rem 1.2rem",
               display: "grid",
               gap: 10,
+              ...getStartupRevealStyle(280),
             }}
           >
             <h2 style={{ margin: 0 }}>Core Capabilities</h2>
@@ -1708,6 +1772,7 @@ export default function HomePage() {
                   ...homepageCardStyle,
                   maxWidth: 840,
                   padding: "1.1rem 1.15rem 1.2rem",
+                  ...getStartupRevealStyle(420),
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
@@ -1790,16 +1855,18 @@ export default function HomePage() {
                     label={driverReady ? "Driver" : undefined}
                     badgeCount={visibleDriverRequestCount}
                     pulseGreen={Boolean(driverReady && profile?.available)}
+                    revealActive={startupRevealActive}
+                    revealDelayMs={520}
                   />
-                  <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" />
-                  <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="FORUMS" />
-                  <AppTile href="/messages" icon={<MessagesIcon />} label="MESSAGES" badgeCount={messageUnreadCount} />
-                  <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" />
-                  <AppTile href="/iso" icon={<IsoIcon />} label="ISO" />
-                  {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" /> : null}
-                  {showAdminTile ? <AppTile href="/admin" icon={<AdminIcon />} label="Admin Dashboard" /> : null}
+                  <AppTile href="/events" icon={<EventsIcon />} label="EVENTS" revealActive={startupRevealActive} revealDelayMs={600} />
+                  <AppTile href="/q-and-a" icon={<QuestionMarkIcon />} label="FORUMS" revealActive={startupRevealActive} revealDelayMs={680} />
+                  <AppTile href="/messages" icon={<MessagesIcon />} label="MESSAGES" badgeCount={messageUnreadCount} revealActive={startupRevealActive} revealDelayMs={760} />
+                  <AppTile href="/marketplace" icon={<MarketplaceIcon />} label="MARKETPLACE" revealActive={startupRevealActive} revealDelayMs={840} />
+                  <AppTile href="/iso" icon={<IsoIcon />} label="ISO" revealActive={startupRevealActive} revealDelayMs={920} />
+                  {showDevTile ? <AppTile href="/developer" icon={<DevIcon />} label="Dev" revealActive={startupRevealActive} revealDelayMs={1000} /> : null}
+                  {showAdminTile ? <AppTile href="/admin" icon={<AdminIcon />} label="Admin Dashboard" revealActive={startupRevealActive} revealDelayMs={1080} /> : null}
                   {Array.from({ length: appTilePlaceholderCount }).map((_, index) => (
-                    <PlaceholderTile key={index} />
+                    <PlaceholderTile key={index} revealActive={startupRevealActive} revealDelayMs={1160 + index * 80} />
                   ))}
                 </div>
               </section>
@@ -1812,6 +1879,7 @@ export default function HomePage() {
                     "linear-gradient(180deg, rgba(8, 16, 28, 0.98) 0%, rgba(4, 10, 18, 0.995) 100%)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(2, 6, 23, 0.3)",
                   overflow: "hidden",
+                  ...getStartupRevealStyle(980),
                 }}
               >
                 <div

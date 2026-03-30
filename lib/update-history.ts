@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v366",
+    title: "Mil-Tech Access Sequence and App PIN",
+    summary: "Replaced the old startup splash with a secure terminal-style access sequence, added an optional four-digit App PIN launch lock in Account Settings, and added a digitized handoff into the homepage with staggered app-tile reveal after access is granted.",
+  },
+  {
     commit: "v365",
     title: "Forum Comment Visibility Fix",
     summary: "Fixed the forum post detail thread loader so older comments still appear even when they are missing legacy score fields, by keeping the visible Top sorting client-side instead of using a Firestore orderBy on score that filtered those comments out.",
