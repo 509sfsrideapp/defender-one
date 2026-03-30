@@ -10,10 +10,11 @@ import HomeIconLink from "../components/HomeIconLink";
 import LiveRideMap, { type MapPoint } from "../components/LiveRideMap";
 import { formatEtaLabel } from "../../lib/eta";
 import { auth, db } from "../../lib/firebase";
+import { mergeRideLiveState, subscribeToRideLiveState, type RideLiveState } from "../../lib/ride-live";
 import { DEFAULT_RIDE_DISPATCH_MODE, isRideDispatchExpanded, type EmergencyRideDispatchMode, rideDispatchWindowEndsAt } from "../../lib/ride-dispatch";
 import { formatRideTimestamp, getRideLifecycleSteps, getRideStatusLabel } from "../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, doc, getDoc, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -83,17 +84,6 @@ type RiderProfile = {
 type Coordinates = {
   latitude: number;
   longitude: number;
-};
-
-type RideLiveState = {
-  riderLocation?: {
-    latitude?: number;
-    longitude?: number;
-  } | null;
-  driverLocation?: {
-    latitude?: number;
-    longitude?: number;
-  } | null;
 };
 
 const ACTIVE_RIDE_STATUSES = ["open", "accepted", "arrived", "picked_up"] as const;
@@ -250,13 +240,8 @@ export default function RideStatusPage() {
       return;
     }
 
-    const unsubscribe = onSnapshot(doc(db, "rideLive", activeRide.id), (snapshot) => {
-      if (!snapshot.exists()) {
-        setLiveRideState(null);
-        return;
-      }
-
-      setLiveRideState(snapshot.data() as RideLiveState);
+    const unsubscribe = subscribeToRideLiveState(activeRide.id, (state) => {
+      setLiveRideState(state);
     });
 
     return () => unsubscribe();
@@ -400,14 +385,10 @@ export default function RideStatusPage() {
         return;
       }
 
-      await setDoc(
-        doc(db, "rideLive", activeRide.id),
-        {
-          riderLocation: nextCoordinates,
-          riderLocationUpdatedAt: new Date(),
-        },
-        { merge: true }
-      );
+      await mergeRideLiveState(activeRide.id, {
+        riderLocation: nextCoordinates,
+        riderLocationUpdatedAt: new Date().toISOString(),
+      });
       setLocationRefreshStatus(manual ? "Pickup location refreshed." : "Pickup location updated.");
     } catch (error) {
       console.error(error);

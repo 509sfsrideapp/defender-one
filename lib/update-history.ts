@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v348",
+    title: "Realtime Ride Live State",
+    summary: "Moved the frequently changing live ride-location stream out of Firestore and onto Realtime Database for both the rider status page and the driver active-ride page, so live location refreshes keep the same behavior while reducing Firestore read and write pressure during active rides.",
+  },
+  {
     commit: "v347",
     title: "Realtime Database Auth Fix",
     summary: "Fixed the server-side Realtime Database helper to request the proper Firebase Database OAuth scopes and send the token in the RTDB request URL, which resolves the unauthorized-request failure when loading conversation summaries from dmUserConversations.",

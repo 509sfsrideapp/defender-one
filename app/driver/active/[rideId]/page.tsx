@@ -8,9 +8,10 @@ import AppLoadingState from "../../../components/AppLoadingState";
 import FullscreenImageViewer from "../../../components/FullscreenImageViewer";
 import LiveRideMap, { type MapPoint } from "../../../components/LiveRideMap";
 import { auth, db } from "../../../../lib/firebase";
+import { mergeRideLiveState, subscribeToRideLiveState, type RideLiveState } from "../../../../lib/ride-live";
 import { formatRideTimestamp, getRideLifecycleSteps } from "../../../../lib/ride-lifecycle";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc, onSnapshot, runTransaction, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, runTransaction, updateDoc } from "firebase/firestore";
 
 type Ride = {
   id: string;
@@ -90,17 +91,6 @@ type RiderProfile = {
 type Coordinates = {
   latitude: number;
   longitude: number;
-};
-
-type RideLiveState = {
-  riderLocation?: {
-    latitude?: number;
-    longitude?: number;
-  } | null;
-  driverLocation?: {
-    latitude?: number;
-    longitude?: number;
-  } | null;
 };
 
 const ACTIVE_RIDE_STATUSES = ["accepted", "arrived", "picked_up"] as const;
@@ -346,13 +336,8 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
       return;
     }
 
-    const unsubscribe = onSnapshot(doc(db, "rideLive", ride.id), (snapshot) => {
-      if (!snapshot.exists()) {
-        setLiveRideState(null);
-        return;
-      }
-
-      setLiveRideState(snapshot.data() as RideLiveState);
+    const unsubscribe = subscribeToRideLiveState(ride.id, (state) => {
+      setLiveRideState(state);
     });
 
     return () => unsubscribe();
@@ -459,14 +444,10 @@ export default function ActiveRidePage(props: PageProps<"/driver/active/[rideId]
         return;
       }
 
-      await setDoc(
-        doc(db, "rideLive", ride.id),
-        {
-          driverLocation: nextCoordinates,
-          driverLocationUpdatedAt: new Date(),
-        },
-        { merge: true }
-      );
+      await mergeRideLiveState(ride.id, {
+        driverLocation: nextCoordinates,
+        driverLocationUpdatedAt: new Date().toISOString(),
+      });
       setLocationRefreshStatus(manual ? "Driver location refreshed." : "Driver location updated.");
     } catch (error) {
       console.error(error);
