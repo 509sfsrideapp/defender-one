@@ -450,9 +450,14 @@ export default function DirectMessageThreadClient({
     }
 
     const animationFrame = window.requestAnimationFrame(() => {
-      bottomAnchorRef.current?.scrollIntoView({
+      const listElement = messageListRef.current;
+      if (!listElement) {
+        return;
+      }
+
+      listElement.scrollTo({
+        top: listElement.scrollHeight,
         behavior: "auto",
-        block: "end",
       });
     });
 

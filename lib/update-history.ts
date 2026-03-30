@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v352",
+    title: "Message Pane Scroll Fix",
+    summary: "Changed direct-message auto-scroll to move only the inner chat pane instead of calling scrollIntoView on the bottom anchor, which stops message sends and thread opens from yanking the whole page back to the top.",
+  },
+  {
     commit: "v351",
     title: "Realtime Presence and Message Live State",
     summary: "Moved the remaining message live-state pieces onto Realtime Database by adding online presence, thread-view presence, typing indicators, and RTDB-backed conversation/message subscriptions, while also adding driver heartbeat and visible-queue presence publishing for clocked-in drivers plus a live Messages unread badge on the homepage tile.",
