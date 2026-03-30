@@ -626,7 +626,13 @@ export default function DirectMessageThreadClient({
                   ]
                     .filter(Boolean)
                     .join(" // ") || "Direct message thread"
-                : `${conversation.type === "marketplace" ? "Marketplace" : "ISO"} conversation`}
+                : `${
+                    conversation.type === "marketplace"
+                      ? "Marketplace"
+                      : conversation.type === "iso"
+                        ? "ISO"
+                        : "Event"
+                  } conversation`}
             </p>
             {conversation.type === "direct" ? (
               <p style={{ margin: 0, color: "#7dd3fc", fontSize: 11, lineHeight: 1.4 }}>
@@ -671,7 +677,9 @@ export default function DirectMessageThreadClient({
               >
                 {conversation.relatedContext.type === "marketplace"
                   ? "Marketplace Context"
-                  : "ISO Context"}
+                  : conversation.relatedContext.type === "iso"
+                    ? "ISO Context"
+                    : "Event Context"}
               </p>
               <strong
                 style={{
@@ -733,7 +741,9 @@ export default function DirectMessageThreadClient({
                 ? "Direct"
                 : conversation.type === "marketplace"
                   ? "Marketplace"
-                  : "ISO"}{" "}
+                  : conversation.type === "iso"
+                    ? "ISO"
+                    : "Events"}{" "}
               inbox bucket.
             </p>
           </div>
@@ -761,7 +771,9 @@ export default function DirectMessageThreadClient({
               ? "Write a direct message..."
               : conversation.type === "marketplace"
                 ? "Write a listing message..."
-                : "Write an ISO response..."
+                : conversation.type === "iso"
+                  ? "Write an ISO response..."
+                  : "Write an event message..."
           }
           style={{ resize: "none", minHeight: 74, maxHeight: 140 }}
           onKeyDown={(event) => {

@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v362",
+    title: "Event POC Messaging",
+    summary: "Added a Message POC action on event detail pages and expanded the bucketed Messages system with an Events tab so event-related threads route and display the same way Marketplace and ISO context conversations do.",
+  },
+  {
     commit: "v361",
     title: "Homepage Status Weight Tuning",
     summary: "Increased the homepage app-status console weight for the INITIATE_POST_CHECK line so that post-check status messages appear more often in the rotating tactical console feed.",

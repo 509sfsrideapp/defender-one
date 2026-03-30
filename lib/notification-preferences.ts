@@ -31,8 +31,8 @@ export const USER_NOTIFICATION_PREFERENCE_OPTIONS: Array<{
   },
   {
     key: "directMessages",
-    title: "Messages, Marketplace, and ISO",
-    description: "Notify me when someone sends a new direct, Marketplace, or ISO message.",
+    title: "Messages, Marketplace, ISO, and Events",
+    description: "Notify me when someone sends a new direct, Marketplace, ISO, or event-related message.",
   },
   {
     key: "eventCreations",

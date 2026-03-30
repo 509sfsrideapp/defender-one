@@ -11,6 +11,7 @@ import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
 import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
+import { openEventConversation } from "../../../lib/direct-message-launch";
 import { auth, db } from "../../../lib/firebase";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import { formatEventCreatorLabel, formatEventDateEntry, formatEventLocationLabel, formatEventTypeLabel, formatRecurringRule, getEventCardDateLabel, getRecurringOccurrenceDateTexts, type EventRecord } from "../../../lib/events";
@@ -122,6 +123,7 @@ export default function EventDetailPage() {
   const [attendanceStatus, setAttendanceStatus] = useState("");
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
+  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -532,19 +534,55 @@ export default function EventDetailPage() {
               )}
             </div>
             <h1 style={{ margin: 0 }}>{eventRecord.name}</h1>
-            <UserPreviewTrigger
-              userId={eventRecord.createdByUid}
-              displayLabel={organizerLabel.replace(/^POC:\s*/, "")}
-              triggerStyle={{
-                color: "#dbe7f5",
-                fontFamily: "var(--font-display)",
-                fontSize: 12,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              <span>{organizerLabel}</span>
-            </UserPreviewTrigger>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              {eventRecord.createdByUid ? (
+                <UserPreviewTrigger
+                  userId={eventRecord.createdByUid}
+                  displayLabel={organizerLabel.replace(/^POC:\s*/, "")}
+                  triggerStyle={{
+                    color: "#dbe7f5",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 12,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <span>{organizerLabel}</span>
+                </UserPreviewTrigger>
+              ) : (
+                <span
+                  style={{
+                    color: "#dbe7f5",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 12,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {organizerLabel}
+                </span>
+              )}
+              {eventRecord.createdByUid && eventRecord.createdByUid !== user.uid ? (
+                <button
+                  type="button"
+                  disabled={messageOpening}
+                  onClick={async () => {
+                    try {
+                      setMessageOpening(true);
+                      setAttendanceStatus("");
+                      await openEventConversation(router, eventRecord.id);
+                    } catch (error) {
+                      setAttendanceStatus(error instanceof Error ? error.message : "Could not open the POC thread.");
+                    } finally {
+                      setMessageOpening(false);
+                    }
+                  }}
+                  style={primaryButtonStyle}
+                >
+                  {messageOpening ? "Opening..." : "Message POC"}
+                </button>
+              ) : null}
+            </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatEventLocationLabel(eventRecord.location)}</p>
             {eventRecord.address ? (
               <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.55 }}>{eventRecord.address}</p>

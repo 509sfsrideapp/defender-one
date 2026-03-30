@@ -20,6 +20,10 @@ type OpenConversationRequest =
   | {
       type: "iso";
       targetId: string;
+    }
+  | {
+      type: "events";
+      targetId: string;
     };
 
 type OpenConversationResponse = {
@@ -104,4 +108,15 @@ export async function openIsoConversation(
     targetId: requestId,
   });
   openConversationInMessages(router, "iso", payload.conversation.id);
+}
+
+export async function openEventConversation(
+  router: AppRouterInstance,
+  eventId: string
+) {
+  const payload = await ensureDirectMessageConversation({
+    type: "events",
+    targetId: eventId,
+  });
+  openConversationInMessages(router, "events", payload.conversation.id);
 }

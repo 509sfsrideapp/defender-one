@@ -37,6 +37,7 @@ function getBucketTabs() {
     { id: "direct", label: "Direct" },
     { id: "marketplace", label: "Marketplace" },
     { id: "iso", label: "ISO" },
+    { id: "events", label: "Events" },
   ] as const satisfies Array<{ id: DirectMessageBucket; label: string }>;
 }
 
@@ -190,7 +191,10 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const requestedBucket: DirectMessageBucket =
-    requestedTab === "marketplace" || requestedTab === "iso" || requestedTab === "direct"
+    requestedTab === "marketplace" ||
+    requestedTab === "iso" ||
+    requestedTab === "events" ||
+    requestedTab === "direct"
       ? requestedTab
       : "direct";
 
@@ -374,6 +378,13 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
             sum + (Number(conversation.unreadCounts?.[userId] || 0) || 0),
           0
         ),
+      events: allConversations
+        .filter((conversation) => conversation.type === "events")
+        .reduce(
+          (sum, conversation) =>
+            sum + (Number(conversation.unreadCounts?.[userId] || 0) || 0),
+          0
+        ),
     };
   }, [allConversations, userId]);
 
@@ -390,7 +401,7 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
             fontFamily: "var(--font-display)",
           }}
         >
-          Direct, marketplace, and ISO conversation routing
+          Direct, marketplace, ISO, and event conversation routing
         </p>
         <h1 style={{ margin: 0 }}>Messages</h1>
       </div>
@@ -488,7 +499,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
             placeholder={
               activeTab === "direct"
                 ? "Search by user, username, or thread"
-                : "Search by user or listing context"
+                : activeTab === "events"
+                  ? "Search by user or event context"
+                  : "Search by user or listing context"
             }
           />
         </label>
@@ -551,7 +564,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                     ? "No direct messages yet"
                     : activeTab === "marketplace"
                       ? "No marketplace conversations yet"
-                      : "No ISO conversations yet"}
+                      : activeTab === "iso"
+                        ? "No ISO conversations yet"
+                        : "No event conversations yet"}
               </strong>
               <p style={{ margin: 0, color: "#94a3b8", lineHeight: 1.5 }}>
                 {searchText
@@ -560,7 +575,9 @@ export default function MessagesAppClient({ userId }: { userId: string }) {
                     ? "Open a user preview anywhere in the app and press Message to start a direct thread."
                     : activeTab === "marketplace"
                       ? "Use Message Seller from a marketplace listing to start a listing-linked thread."
-                      : "Use Message Requester from an ISO post to start a request-linked thread."}
+                      : activeTab === "iso"
+                        ? "Use Message Requester from an ISO post to start a request-linked thread."
+                        : "Use Message POC from an event detail page to start an event-linked thread."}
               </p>
             </div>
           )}

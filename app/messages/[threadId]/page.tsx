@@ -72,7 +72,7 @@ export default function MessageThreadPage() {
             fontFamily: "var(--font-display)",
           }}
         >
-          Direct, marketplace, and ISO conversation routing
+          Direct, marketplace, ISO, and event conversation routing
         </p>
         <h1 style={{ margin: 0 }}>Messages</h1>
       </div>
@@ -83,7 +83,8 @@ export default function MessageThreadPage() {
           requestedTab={
             requestedTab === "direct" ||
             requestedTab === "marketplace" ||
-            requestedTab === "iso"
+            requestedTab === "iso" ||
+            requestedTab === "events"
               ? requestedTab
               : null
           }

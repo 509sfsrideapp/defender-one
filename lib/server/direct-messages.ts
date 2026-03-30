@@ -11,6 +11,7 @@ import {
 } from "./realtime-database";
 import { sendUserPushNotification } from "./user-notification-settings";
 import {
+  buildEventConversationId,
   buildDirectConversationId,
   buildIsoConversationId,
   buildMarketplaceConversationId,
@@ -22,6 +23,7 @@ import {
   type DirectMessageRecord,
   type DirectMessageRelatedContext,
 } from "../direct-messages";
+import { type EventRecord } from "../events";
 import { type IsoRequestRecord } from "../iso";
 import { type MarketplaceListingRecord } from "../marketplace";
 import { buildQAAuthorLabel, type QAAuthorProfile } from "../q-and-a";
@@ -351,6 +353,42 @@ export async function openIsoConversation(input: {
   });
 }
 
+export async function openEventConversation(input: {
+  currentUserId: string;
+  currentUserEmail?: string | null;
+  eventId: string;
+}) {
+  const eventRecord = await getFirestoreDocument<EventRecord>(`events/${input.eventId}`);
+
+  if (!eventRecord) {
+    throw new Error("That event is unavailable.");
+  }
+
+  const ownerUid = eventRecord.createdByUid?.trim() || "";
+  if (!ownerUid || ownerUid === input.currentUserId) {
+    throw new Error("You cannot create an event thread with this POC.");
+  }
+
+  const [currentUserProfile, ownerProfile] = await Promise.all([
+    buildParticipantProfile(input.currentUserId, input.currentUserEmail || null),
+    buildParticipantProfile(ownerUid, eventRecord.createdByEmail || null),
+  ]);
+
+  return await createConversationIfMissing({
+    conversationId: buildEventConversationId(eventRecord.id, input.currentUserId, ownerUid),
+    type: "events",
+    participantProfiles: [currentUserProfile, ownerProfile],
+    relatedContext: {
+      type: "events",
+      targetId: eventRecord.id,
+      title: eventRecord.name,
+      previewImageUrl: eventRecord.photoUrl || null,
+      ownerUid,
+      targetPath: `/events/${eventRecord.id}`,
+    },
+  });
+}
+
 export async function getDirectMessageConversation(conversationId: string) {
   return await migrateLegacyConversationIfNeeded(conversationId);
 }
@@ -508,6 +546,8 @@ export async function sendDirectMessage(input: {
               ? "New Marketplace Message"
               : conversation.type === "iso"
                 ? "New ISO Message"
+                : conversation.type === "events"
+                  ? "New Event Message"
                 : "New Direct Message",
           body: `${senderProfile?.displayName || "Someone"}: ${buildMessagePreview(normalizedBody)}`,
           link: messageLink,

@@ -1,4 +1,4 @@
-export type DirectMessageBucket = "direct" | "marketplace" | "iso" | "system";
+export type DirectMessageBucket = "direct" | "marketplace" | "iso" | "events" | "system";
 
 export type DirectMessageConversationType = Exclude<DirectMessageBucket, "system">;
 
@@ -14,7 +14,7 @@ export type DirectMessageParticipantProfile = {
 };
 
 export type DirectMessageRelatedContext = {
-  type: "marketplace" | "iso";
+  type: "marketplace" | "iso" | "events";
   targetId: string;
   title: string;
   previewImageUrl?: string | null;
@@ -88,8 +88,12 @@ export function buildIsoConversationId(requestId: string, userA: string, userB: 
   return `iso__${requestId}__${buildParticipantKey([userA, userB])}`;
 }
 
+export function buildEventConversationId(eventId: string, userA: string, userB: string) {
+  return `events__${eventId}__${buildParticipantKey([userA, userB])}`;
+}
+
 export function getConversationBucket(type?: string | null): DirectMessageBucket {
-  if (type === "marketplace" || type === "iso" || type === "direct") {
+  if (type === "marketplace" || type === "iso" || type === "events" || type === "direct") {
     return type;
   }
 

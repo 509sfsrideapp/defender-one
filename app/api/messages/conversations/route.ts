@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseIdToken } from "../../../../lib/server/firebase-auth";
 import {
+  openEventConversation,
   listDirectMessageConversationsForUser,
   openDirectConversation,
   openIsoConversation,
@@ -29,7 +30,7 @@ type RequestBody =
       otherUserId?: string;
     }
   | {
-      type?: "marketplace" | "iso";
+      type?: "marketplace" | "iso" | "events";
       targetId?: string;
     };
 
@@ -105,6 +106,29 @@ export async function POST(request: NextRequest) {
         currentUserId: decoded.sub,
         currentUserEmail: decoded.email || null,
         requestId: targetId,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        conversation,
+        bucket: getConversationBucket(conversation.type),
+      });
+    }
+
+    if (body.type === "events") {
+      const targetId = body.targetId?.trim() || "";
+
+      if (!targetId) {
+        return NextResponse.json(
+          { error: "An event is required before messaging the POC." },
+          { status: 400 }
+        );
+      }
+
+      const conversation = await openEventConversation({
+        currentUserId: decoded.sub,
+        currentUserEmail: decoded.email || null,
+        eventId: targetId,
       });
 
       return NextResponse.json({
