@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v345",
+    title: "Realtime Database Setup",
+    summary: "Wired Firebase Realtime Database into the shared client config, added reusable server-side REST helpers for reading and writing RTDB paths, and added a locked default Realtime Database rules file plus Firebase config entry so the project is ready for future low-read messaging work.",
+  },
+  {
     commit: "v344",
     title: "Marketplace and Messages Re-Locked",
     summary: "Moved Marketplace, ISO, and Messages back behind developer access, removed their public homepage entry points, restored dev-session safe routing for those sections, blocked their APIs from serving normal-user requests, and swapped Marketplace/DM quota failures to cleaner unavailable states so hidden background fetches and raw Firestore dumps do not break the UI.",
