@@ -3,23 +3,27 @@ import {
   getFirestoreDocument,
   listFirestoreDocuments,
   listFirestoreDocumentsByFieldOperator,
-  patchFirestoreDocument,
 } from "./firestore-admin";
+import {
+  getRealtimeDatabaseValue,
+  pushRealtimeDatabaseValue,
+  setRealtimeDatabaseValue,
+} from "./realtime-database";
 import {
   buildDirectConversationId,
   buildIsoConversationId,
   buildMarketplaceConversationId,
   buildMessagePreview,
   buildParticipantKey,
-  type DirectMessageRecord,
   type DirectMessageConversationRecord,
   type DirectMessageConversationType,
   type DirectMessageParticipantProfile,
+  type DirectMessageRecord,
   type DirectMessageRelatedContext,
 } from "../direct-messages";
-import { buildQAAuthorLabel, type QAAuthorProfile } from "../q-and-a";
-import { type MarketplaceListingRecord } from "../marketplace";
 import { type IsoRequestRecord } from "../iso";
+import { type MarketplaceListingRecord } from "../marketplace";
+import { buildQAAuthorLabel, type QAAuthorProfile } from "../q-and-a";
 
 type UserProfileRecord = QAAuthorProfile & {
   email?: string | null;
@@ -28,6 +32,13 @@ type UserProfileRecord = QAAuthorProfile & {
   bio?: string | null;
   jobDescription?: string | null;
 };
+
+type StoredDirectMessageConversation = Omit<DirectMessageConversationRecord, "id">;
+type StoredDirectMessageRecord = Omit<DirectMessageRecord, "id">;
+
+const DM_CONVERSATIONS_PATH = "dmConversations";
+const DM_MESSAGES_PATH = "dmMessages";
+const DM_USER_CONVERSATIONS_PATH = "dmUserConversations";
 
 async function buildParticipantProfile(userId: string, fallbackEmail?: string | null) {
   const userProfile = await getFirestoreDocument<UserProfileRecord>(`users/${userId}`);
@@ -76,20 +87,158 @@ function buildInitialConversationRecord(input: {
   } satisfies DirectMessageConversationRecord;
 }
 
+function toStoredConversation(
+  conversation: DirectMessageConversationRecord
+): StoredDirectMessageConversation {
+  const { id, ...storedConversation } = conversation;
+  void id;
+  return storedConversation;
+}
+
+function fromStoredConversation(
+  conversationId: string,
+  conversation: StoredDirectMessageConversation | null
+) {
+  if (!conversation) {
+    return null;
+  }
+
+  return {
+    id: conversationId,
+    ...conversation,
+  } satisfies DirectMessageConversationRecord;
+}
+
+function fromStoredMessage(messageId: string, message: StoredDirectMessageRecord) {
+  return {
+    id: messageId,
+    ...message,
+  } satisfies DirectMessageRecord;
+}
+
+async function syncConversationSummary(conversation: DirectMessageConversationRecord) {
+  const storedConversation = toStoredConversation(conversation);
+
+  await setRealtimeDatabaseValue(`${DM_CONVERSATIONS_PATH}/${conversation.id}`, storedConversation);
+  await Promise.all(
+    conversation.participantIds.map((participantId) =>
+      setRealtimeDatabaseValue(
+        `${DM_USER_CONVERSATIONS_PATH}/${participantId}/${conversation.id}`,
+        storedConversation
+      )
+    )
+  );
+}
+
+async function getRealtimeConversation(conversationId: string) {
+  const conversation = await getRealtimeDatabaseValue<StoredDirectMessageConversation>(
+    `${DM_CONVERSATIONS_PATH}/${conversationId}`
+  );
+
+  return fromStoredConversation(conversationId, conversation);
+}
+
+async function listRealtimeConversationsForUser(userId: string) {
+  const conversations = await getRealtimeDatabaseValue<
+    Record<string, StoredDirectMessageConversation> | null
+  >(`${DM_USER_CONVERSATIONS_PATH}/${userId}`);
+
+  return Object.entries(conversations || {}).map(([conversationId, conversation]) =>
+    fromStoredConversation(conversationId, conversation)
+  ).filter((conversation): conversation is DirectMessageConversationRecord => Boolean(conversation));
+}
+
+async function listRealtimeMessagesForConversation(conversationId: string) {
+  const messages = await getRealtimeDatabaseValue<Record<string, StoredDirectMessageRecord> | null>(
+    `${DM_MESSAGES_PATH}/${conversationId}`
+  );
+
+  return Object.entries(messages || {})
+    .map(([messageId, message]) => fromStoredMessage(messageId, message))
+    .sort((left, right) => {
+      const leftTime =
+        typeof left.createdAt === "string"
+          ? Date.parse(left.createdAt)
+          : (left.createdAt?.seconds || 0) * 1000;
+      const rightTime =
+        typeof right.createdAt === "string"
+          ? Date.parse(right.createdAt)
+          : (right.createdAt?.seconds || 0) * 1000;
+
+      if (leftTime !== rightTime) {
+        return leftTime - rightTime;
+      }
+
+      return String(left.id || "").localeCompare(String(right.id || ""));
+    });
+}
+
+async function getLegacyFirestoreConversation(conversationId: string) {
+  return await getFirestoreDocument<DirectMessageConversationRecord>(
+    `${DM_CONVERSATIONS_PATH}/${conversationId}`
+  );
+}
+
+async function listLegacyFirestoreConversationsForUser(userId: string) {
+  return await listFirestoreDocumentsByFieldOperator<
+    Omit<DirectMessageConversationRecord, "id">
+  >(
+    DM_CONVERSATIONS_PATH,
+    "participantIds",
+    "ARRAY_CONTAINS",
+    userId
+  );
+}
+
+async function listLegacyFirestoreMessagesForConversation(conversationId: string) {
+  return (await listFirestoreDocuments(
+    `${DM_CONVERSATIONS_PATH}/${conversationId}/messages`
+  )) as DirectMessageRecord[];
+}
+
+async function migrateLegacyConversationIfNeeded(conversationId: string) {
+  const existingConversation = await getRealtimeConversation(conversationId);
+
+  if (existingConversation) {
+    return existingConversation;
+  }
+
+  const legacyConversation = await getLegacyFirestoreConversation(conversationId);
+
+  if (!legacyConversation) {
+    return null;
+  }
+
+  await syncConversationSummary(legacyConversation);
+
+  const legacyMessages = await listLegacyFirestoreMessagesForConversation(conversationId);
+  await Promise.all(
+    legacyMessages.map((message) => {
+      const { id, ...storedMessage } = message;
+      return setRealtimeDatabaseValue(
+        `${DM_MESSAGES_PATH}/${conversationId}/${id}`,
+        storedMessage
+      );
+    })
+  );
+
+  return legacyConversation;
+}
+
 async function createConversationIfMissing(input: {
   conversationId: string;
   type: DirectMessageConversationType;
   participantProfiles: DirectMessageParticipantProfile[];
   relatedContext?: DirectMessageRelatedContext | null;
 }) {
-  const existing = await getFirestoreDocument<DirectMessageConversationRecord>(`dmConversations/${input.conversationId}`);
+  const existingConversation = await migrateLegacyConversationIfNeeded(input.conversationId);
 
-  if (existing) {
-    return existing;
+  if (existingConversation) {
+    return existingConversation;
   }
 
   const nextConversation = buildInitialConversationRecord(input);
-  await createFirestoreDocument("dmConversations", nextConversation, input.conversationId);
+  await syncConversationSummary(nextConversation);
   return nextConversation;
 }
 
@@ -119,7 +268,9 @@ export async function openMarketplaceConversation(input: {
   currentUserEmail?: string | null;
   listingId: string;
 }) {
-  const listing = await getFirestoreDocument<MarketplaceListingRecord>(`marketplaceListings/${input.listingId}`);
+  const listing = await getFirestoreDocument<MarketplaceListingRecord>(
+    `marketplaceListings/${input.listingId}`
+  );
 
   if (!listing) {
     throw new Error("That listing is unavailable.");
@@ -189,20 +340,27 @@ export async function openIsoConversation(input: {
 }
 
 export async function getDirectMessageConversation(conversationId: string) {
-  return await getFirestoreDocument<DirectMessageConversationRecord>(`dmConversations/${conversationId}`);
+  return await migrateLegacyConversationIfNeeded(conversationId);
 }
 
 export async function listDirectMessageConversationsForUser(userId: string) {
-  const conversations = await listFirestoreDocumentsByFieldOperator<
-    Omit<DirectMessageConversationRecord, "id">
-  >(
-    "dmConversations",
-    "participantIds",
-    "ARRAY_CONTAINS",
-    userId
+  const realtimeConversations = await listRealtimeConversationsForUser(userId);
+
+  if (realtimeConversations.length > 0) {
+    return realtimeConversations.filter((conversation) =>
+      conversation.participantIds?.includes(userId)
+    );
+  }
+
+  const legacyConversations = await listLegacyFirestoreConversationsForUser(userId);
+
+  await Promise.all(
+    legacyConversations
+      .filter((conversation) => conversation.participantIds?.includes(userId))
+      .map((conversation) => syncConversationSummary(conversation))
   );
 
-  return conversations.filter((conversation) => conversation.participantIds?.includes(userId));
+  return legacyConversations.filter((conversation) => conversation.participantIds?.includes(userId));
 }
 
 export async function listDirectMessagesForConversation(input: {
@@ -219,11 +377,27 @@ export async function listDirectMessagesForConversation(input: {
     throw new Error("You do not have access to that conversation.");
   }
 
-  const messages = (await listFirestoreDocuments(
-    `dmConversations/${input.conversationId}/messages`
-  )) as DirectMessageRecord[];
+  const realtimeMessages = await listRealtimeMessagesForConversation(input.conversationId);
 
-  return messages.sort((left, right) => {
+  if (realtimeMessages.length > 0) {
+    return realtimeMessages;
+  }
+
+  const legacyMessages = await listLegacyFirestoreMessagesForConversation(input.conversationId);
+
+  if (legacyMessages.length > 0) {
+    await Promise.all(
+      legacyMessages.map((message) => {
+        const { id, ...storedMessage } = message;
+        return setRealtimeDatabaseValue(
+          `${DM_MESSAGES_PATH}/${input.conversationId}/${id}`,
+          storedMessage
+        );
+      })
+    );
+  }
+
+  return legacyMessages.sort((left, right) => {
     const leftTime =
       typeof left.createdAt === "string"
         ? Date.parse(left.createdAt)
@@ -263,8 +437,10 @@ export async function sendDirectMessage(input: {
     throw new Error("Message text is required.");
   }
 
-  const createdAt = new Date();
-  await createFirestoreDocument(`dmConversations/${input.conversationId}/messages`, {
+  const createdAt = new Date().toISOString();
+  const messageResponse = await pushRealtimeDatabaseValue<
+    StoredDirectMessageRecord
+  >(`${DM_MESSAGES_PATH}/${input.conversationId}`, {
     conversationId: input.conversationId,
     senderId: input.senderId,
     senderLabel: senderProfile?.displayName || "Unknown User",
@@ -274,8 +450,16 @@ export async function sendDirectMessage(input: {
     updatedAt: createdAt,
   });
 
+  if (!messageResponse.name) {
+    throw new Error("Could not create the direct message record.");
+  }
+
   const nextUnreadCounts = { ...(conversation.unreadCounts || {}) };
-  const nextLastReadAt = { ...(conversation.lastReadAt || {}), [input.senderId]: createdAt.toISOString() };
+  const nextLastReadAt = {
+    ...(conversation.lastReadAt || {}),
+    [input.senderId]: createdAt,
+  };
+
   conversation.participantIds.forEach((participantId) => {
     if (participantId === input.senderId) {
       nextUnreadCounts[participantId] = 0;
@@ -285,17 +469,23 @@ export async function sendDirectMessage(input: {
     nextUnreadCounts[participantId] = (Number(nextUnreadCounts[participantId] || 0) || 0) + 1;
   });
 
-  await patchFirestoreDocument(`dmConversations/${input.conversationId}`, {
+  const nextConversation: DirectMessageConversationRecord = {
+    ...conversation,
     updatedAt: createdAt,
     lastMessageAt: createdAt,
     lastMessagePreview: buildMessagePreview(normalizedBody),
     lastMessageSenderId: input.senderId,
     unreadCounts: nextUnreadCounts,
     lastReadAt: nextLastReadAt,
-  });
+  };
+
+  await syncConversationSummary(nextConversation);
 }
 
-export async function markDirectConversationRead(input: { conversationId: string; userId: string }) {
+export async function markDirectConversationRead(input: {
+  conversationId: string;
+  userId: string;
+}) {
   const conversation = await getDirectMessageConversation(input.conversationId);
 
   if (!conversation) {
@@ -306,12 +496,64 @@ export async function markDirectConversationRead(input: { conversationId: string
     throw new Error("You do not have access to that conversation.");
   }
 
-  const nextUnreadCounts = { ...(conversation.unreadCounts || {}), [input.userId]: 0 };
-  const nextLastReadAt = { ...(conversation.lastReadAt || {}), [input.userId]: new Date().toISOString() };
+  const now = new Date().toISOString();
+  const nextConversation: DirectMessageConversationRecord = {
+    ...conversation,
+    unreadCounts: { ...(conversation.unreadCounts || {}), [input.userId]: 0 },
+    lastReadAt: { ...(conversation.lastReadAt || {}), [input.userId]: now },
+    updatedAt: now,
+  };
 
-  await patchFirestoreDocument(`dmConversations/${input.conversationId}`, {
-    unreadCounts: nextUnreadCounts,
-    lastReadAt: nextLastReadAt,
-    updatedAt: new Date(),
-  });
+  await syncConversationSummary(nextConversation);
+}
+
+export async function backfillDirectMessageConversationToRealtimeDatabase(
+  conversationId: string
+) {
+  const conversation = await getLegacyFirestoreConversation(conversationId);
+
+  if (!conversation) {
+    return null;
+  }
+
+  await syncConversationSummary(conversation);
+  const messages = await listLegacyFirestoreMessagesForConversation(conversationId);
+
+  await Promise.all(
+    messages.map((message) => {
+      const { id, ...storedMessage } = message;
+      return setRealtimeDatabaseValue(
+        `${DM_MESSAGES_PATH}/${conversationId}/${id}`,
+        storedMessage
+      );
+    })
+  );
+
+  return conversation;
+}
+
+export async function seedDirectConversationToFirestoreForRollback(
+  conversation: DirectMessageConversationRecord,
+  messages: DirectMessageRecord[]
+) {
+  const legacyConversation = await getLegacyFirestoreConversation(conversation.id);
+
+  if (!legacyConversation) {
+    await createFirestoreDocument(
+      DM_CONVERSATIONS_PATH,
+      conversation,
+      conversation.id
+    );
+  }
+
+  await Promise.all(
+    messages.map((message) => {
+      const { id, ...storedMessage } = message;
+      return createFirestoreDocument(
+        `${DM_CONVERSATIONS_PATH}/${conversation.id}/messages`,
+        storedMessage,
+        id
+      ).catch(() => undefined);
+    })
+  );
 }
