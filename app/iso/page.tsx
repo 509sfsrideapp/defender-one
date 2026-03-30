@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../components/AppLoadingState";
 import HomeIconLink from "../components/HomeIconLink";
 import { ReportableTarget } from "../components/MisconductReporting";
-import { auth, db } from "../../lib/firebase";
+import { auth } from "../../lib/firebase";
 import { buildMisconductPreviewText } from "../../lib/misconduct";
 import {
   formatIsoCategoryLabel,
@@ -99,11 +98,13 @@ const infoPillStyle: React.CSSProperties = {
 export default function ISOPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [boardLoading, setBoardLoading] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("open");
   const [requests, setRequests] = useState<IsoRequestRecord[]>([]);
   const [creatorDirectory, setCreatorDirectory] = useState<Record<string, IsoCreatorProfile>>({});
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -116,37 +117,59 @@ export default function ISOPage() {
 
   useEffect(() => {
     if (!user) {
+      setRequests([]);
+      setCreatorDirectory({});
       return;
     }
 
-    const unsubscribe = onSnapshot(collection(db, "isoRequests"), (snapshot) => {
-      const nextRequests = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<IsoRequestRecord, "id">),
-      }));
+    let cancelled = false;
 
-      setRequests(sortIsoRequests(nextRequests));
-    });
+    (async () => {
+      try {
+        setBoardLoading(true);
+        setStatusMessage("");
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/iso", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          cache: "no-store",
+        });
 
-    return () => unsubscribe();
-  }, [user]);
+        const payload = (await response.json().catch(() => ({}))) as {
+          requests?: IsoRequestRecord[];
+          creatorDirectory?: Record<string, IsoCreatorProfile>;
+          error?: string;
+        };
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
+        if (!response.ok) {
+          throw new Error(payload.error || "Could not load ISO requests.");
+        }
 
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const nextDirectory: Record<string, IsoCreatorProfile> = {};
+        if (cancelled) {
+          return;
+        }
 
-      snapshot.docs.forEach((docSnap) => {
-        nextDirectory[docSnap.id] = docSnap.data() as IsoCreatorProfile;
-      });
+        setRequests(sortIsoRequests(payload.requests || []));
+        setCreatorDirectory(payload.creatorDirectory || {});
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
 
-      setCreatorDirectory(nextDirectory);
-    });
+        setRequests([]);
+        setCreatorDirectory({});
+        setStatusMessage(error instanceof Error ? error.message : "Could not load ISO requests.");
+      } finally {
+        if (!cancelled) {
+          setBoardLoading(false);
+        }
+      }
+    })();
 
-    return () => unsubscribe();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const filteredRequests = useMemo(() => {
@@ -183,7 +206,7 @@ export default function ISOPage() {
 
   const hasActiveFilters = selectedCategory !== "all" || selectedStatus !== "open";
 
-  if (loading) {
+  if (loading || (user && boardLoading)) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading ISO" caption="Opening the item search board." /></main>;
   }
 
@@ -224,10 +247,15 @@ export default function ISOPage() {
             </div>
           </div>
 
-          <Link href="/iso/new" style={{ ...primaryButtonStyle, gap: 8 }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-            <span>Add ISO</span>
-          </Link>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/messages?tab=iso" style={secondaryButtonStyle}>
+              ISO Messages
+            </Link>
+            <Link href="/iso/new" style={{ ...primaryButtonStyle, gap: 8 }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+              <span>Add ISO</span>
+            </Link>
+          </div>
         </div>
 
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>
@@ -304,6 +332,12 @@ export default function ISOPage() {
             </div>
           </div>
         </section>
+
+        {statusMessage ? (
+          <section style={{ ...cardStyle, padding: "0.95rem 1rem" }}>
+            <p style={{ margin: 0, color: "#fca5a5", lineHeight: 1.55 }}>{statusMessage}</p>
+          </section>
+        ) : null}
 
         <section style={{ display: "grid", gap: 14 }}>
           {filteredRequests.length > 0 ? filteredRequests.map((request) => (

@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
+import ContextMessageButton from "../../components/ContextMessageButton";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
 import UserPreviewTrigger from "../../components/UserPreviewTrigger";
 import { isAdminEmail } from "../../../lib/admin";
-import { auth, db } from "../../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 import { openIsoConversation } from "../../../lib/direct-message-launch";
 import { buildMisconductPreviewText } from "../../../lib/misconduct";
 import {
@@ -77,12 +77,12 @@ export default function ISORequestDetailPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [requestRecord, setRequestRecord] = useState<IsoRequestRecord | null>(null);
   const [creatorProfile, setCreatorProfile] = useState<IsoCreatorProfile | null>(null);
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingRequest, setDeletingRequest] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -95,40 +95,68 @@ export default function ISORequestDetailPage() {
 
   useEffect(() => {
     if (!user || !params.requestId) {
+      setRequestRecord(null);
+      setCreatorProfile(null);
       return;
     }
 
-    const unsubscribe = onSnapshot(doc(db, "isoRequests", params.requestId), (snapshot) => {
-      if (!snapshot.exists()) {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        setDetailLoading(true);
+        setStatusMessage("");
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/iso/${params.requestId}`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          cache: "no-store",
+        });
+
+        const payload = (await response.json().catch(() => ({}))) as {
+          request?: IsoRequestRecord;
+          creatorProfile?: IsoCreatorProfile | null;
+          error?: string;
+        };
+
+        if (response.status === 404) {
+          if (!cancelled) {
+            setRequestRecord(null);
+            setCreatorProfile(null);
+          }
+          return;
+        }
+
+        if (!response.ok || !payload.request) {
+          throw new Error(payload.error || "Could not load ISO request.");
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setRequestRecord(payload.request);
+        setCreatorProfile(payload.creatorProfile || null);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
         setRequestRecord(null);
-        return;
-      }
-
-      setRequestRecord({
-        id: snapshot.id,
-        ...(snapshot.data() as Omit<IsoRequestRecord, "id">),
-      });
-    });
-
-    return () => unsubscribe();
-  }, [params.requestId, user]);
-
-  useEffect(() => {
-    if (!user || !requestRecord?.createdByUid) {
-      return;
-    }
-
-    const unsubscribe = onSnapshot(doc(db, "users", requestRecord.createdByUid), (snapshot) => {
-      if (!snapshot.exists()) {
         setCreatorProfile(null);
-        return;
+        setStatusMessage(error instanceof Error ? error.message : "Could not load ISO request.");
+      } finally {
+        if (!cancelled) {
+          setDetailLoading(false);
+        }
       }
+    })();
 
-      setCreatorProfile(snapshot.data() as IsoCreatorProfile);
-    });
-
-    return () => unsubscribe();
-  }, [requestRecord?.createdByUid, user]);
+    return () => {
+      cancelled = true;
+    };
+  }, [params.requestId, user]);
 
   const isAdminViewer = isAdminEmail(user?.email);
 
@@ -201,7 +229,7 @@ export default function ISORequestDetailPage() {
     }
   };
 
-  if (loading) {
+  if (loading || (user && detailLoading && !requestRecord)) {
     return <main style={{ padding: 20 }}><AppLoadingState title="Loading ISO Request" caption="Opening the full request details." /></main>;
   }
 
@@ -362,24 +390,12 @@ export default function ISORequestDetailPage() {
                 <span>{requesterLabel}</span>
               </UserPreviewTrigger>
               {requestRecord.createdByUid && requestRecord.createdByUid !== user.uid ? (
-                <button
-                  type="button"
-                  disabled={messageOpening}
-                  onClick={async () => {
-                    try {
-                      setMessageOpening(true);
-                      setStatusMessage("");
-                      await openIsoConversation(router, requestRecord.id);
-                    } catch (error) {
-                      setStatusMessage(error instanceof Error ? error.message : "Could not open the requester thread.");
-                    } finally {
-                      setMessageOpening(false);
-                    }
-                  }}
+                <ContextMessageButton
+                  label="Message Requester"
+                  onOpen={() => openIsoConversation(router, requestRecord.id)}
+                  onError={setStatusMessage}
                   style={primaryButtonStyle}
-                >
-                  {messageOpening ? "Opening..." : "Message Requester"}
-                </button>
+                />
               ) : null}
             </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatIsoLocationLabel(requestRecord.location)}</p>

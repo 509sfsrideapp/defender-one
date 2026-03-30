@@ -236,10 +236,15 @@ export default function EventsPage() {
             </div>
           </div>
 
-          <Link href="/events/new" style={{ ...primaryButtonStyle, gap: 8 }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-            <span>Add Event</span>
-          </Link>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <Link href="/messages?tab=events" style={secondaryButtonStyle}>
+              Event Messages
+            </Link>
+            <Link href="/events/new" style={{ ...primaryButtonStyle, gap: 8 }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+              <span>Add Event</span>
+            </Link>
+          </div>
         </div>
 
         <section style={{ ...cardStyle, padding: "1rem 1rem 1.05rem", display: "grid", gap: 14 }}>

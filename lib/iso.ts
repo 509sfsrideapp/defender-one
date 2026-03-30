@@ -42,6 +42,10 @@ export type IsoRequestDocument = {
   status: IsoStatus;
   createdByUid?: string | null;
   createdByEmail?: string | null;
+  createdByName?: string | null;
+  createdByFirstName?: string | null;
+  createdByLastName?: string | null;
+  createdByRank?: string | null;
   createdAt?: {
     seconds?: number;
     nanoseconds?: number;

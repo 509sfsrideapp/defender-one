@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { collection, deleteDoc, doc, getDoc, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
+import ContextMessageButton from "../../components/ContextMessageButton";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
@@ -123,7 +124,6 @@ export default function EventDetailPage() {
   const [attendanceStatus, setAttendanceStatus] = useState("");
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingEvent, setDeletingEvent] = useState(false);
-  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -607,24 +607,12 @@ export default function EventDetailPage() {
                 </span>
               )}
               {eventRecord.createdByUid && eventRecord.createdByUid !== user.uid ? (
-                <button
-                  type="button"
-                  disabled={messageOpening}
-                  onClick={async () => {
-                    try {
-                      setMessageOpening(true);
-                      setAttendanceStatus("");
-                      await openEventConversation(router, eventRecord.id);
-                    } catch (error) {
-                      setAttendanceStatus(error instanceof Error ? error.message : "Could not open the POC thread.");
-                    } finally {
-                      setMessageOpening(false);
-                    }
-                  }}
+                <ContextMessageButton
+                  label="Message POC"
+                  onOpen={() => openEventConversation(router, eventRecord.id)}
+                  onError={setAttendanceStatus}
                   style={primaryButtonStyle}
-                >
-                  {messageOpening ? "Opening..." : "Message POC"}
-                </button>
+                />
               ) : null}
             </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>{formatEventLocationLabel(eventRecord.location)}</p>

@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addDoc, collection } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import ImageCropField from "../../components/ImageCropField";
-import { auth, db } from "../../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 import { formatAddressPart, formatStructuredText } from "../../../lib/text-format";
 import {
   ISO_ITEM_CATEGORY_OPTIONS,
@@ -125,26 +124,40 @@ export default function NewISORequestPage() {
     try {
       setSaving(true);
       setStatusMessage("Saving ISO request...");
-
-      const createdRef = await addDoc(collection(db, "isoRequests"), {
-        title: formatStructuredText(title),
-        postType,
-        category,
-        location: formatStructuredText(location),
-        address: formatAddressPart(address) || null,
-        description: description.trim(),
-        photoUrl: photoUrls.map((photoUrl) => photoUrl.trim()).filter(Boolean)[0] || null,
-        photoUrls: photoUrls.map((photoUrl) => photoUrl.trim()).filter(Boolean).slice(0, 3),
-        quantityText: quantityText.trim() || null,
-        neededByDate: neededByDate.trim() || null,
-        urgency,
-        status: "open" satisfies IsoStatus,
-        createdByUid: user.uid,
-        createdByEmail: user.email || null,
-        createdAt: new Date(),
+      const idToken = await user.getIdToken();
+      const response = await fetch("/api/iso", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          title: formatStructuredText(title),
+          postType,
+          category,
+          location: formatStructuredText(location),
+          address: formatAddressPart(address) || null,
+          description: description.trim(),
+          photoUrl: photoUrls.map((photoUrl) => photoUrl.trim()).filter(Boolean)[0] || null,
+          photoUrls: photoUrls.map((photoUrl) => photoUrl.trim()).filter(Boolean).slice(0, 3),
+          quantityText: quantityText.trim() || null,
+          neededByDate: neededByDate.trim() || null,
+          urgency,
+          status: "open" satisfies IsoStatus,
+        }),
       });
 
-      router.push(`/iso/${createdRef.id}`);
+      const payload = (await response.json().catch(() => ({}))) as {
+        ok?: boolean;
+        requestId?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.requestId) {
+        throw new Error(payload.error || "Could not create the ISO request.");
+      }
+
+      router.push(`/iso/${payload.requestId}`);
     } catch (error) {
       console.error(error);
       setStatusMessage(error instanceof Error ? error.message : "Could not create the ISO request.");

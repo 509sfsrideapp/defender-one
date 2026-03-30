@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v367",
+    title: "Consistency and Reuse Pass",
+    summary: "Standardized the context-message action across Events, Marketplace, and ISO with a shared button, added matching board-level message shortcuts where those message buckets exist, and moved ISO onto the same server-backed create/list/detail pattern Marketplace already uses so those sections behave more like one unified product.",
+  },
+  {
     commit: "v366",
     title: "Mil-Tech Access Sequence and App PIN",
     summary: "Replaced the old startup splash with a secure terminal-style access sequence, added an optional four-digit App PIN launch lock in Account Settings, and added a digitized handoff into the homepage with staggered app-tile reveal after access is granted.",

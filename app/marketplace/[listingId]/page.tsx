@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
 import AppLoadingState from "../../components/AppLoadingState";
+import ContextMessageButton from "../../components/ContextMessageButton";
 import FullscreenImageViewer from "../../components/FullscreenImageViewer";
 import HomeIconLink from "../../components/HomeIconLink";
 import { ReportableTarget } from "../../components/MisconductReporting";
@@ -81,7 +82,6 @@ export default function MarketplaceDetailPage() {
   const [photoExpanded, setPhotoExpanded] = useState(false);
   const [deletingListing, setDeletingListing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [messageOpening, setMessageOpening] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -384,24 +384,12 @@ export default function MarketplaceDetailPage() {
                 <span>{sellerLabel}</span>
               </UserPreviewTrigger>
               {listingRecord.createdByUid && listingRecord.createdByUid !== user.uid ? (
-                <button
-                  type="button"
-                  disabled={messageOpening}
-                  onClick={async () => {
-                    try {
-                      setMessageOpening(true);
-                      setStatusMessage("");
-                      await openMarketplaceConversation(router, listingRecord.id);
-                    } catch (error) {
-                      setStatusMessage(error instanceof Error ? error.message : "Could not open the seller thread.");
-                    } finally {
-                      setMessageOpening(false);
-                    }
-                  }}
+                <ContextMessageButton
+                  label="Message Seller"
+                  onOpen={() => openMarketplaceConversation(router, listingRecord.id)}
+                  onError={setStatusMessage}
                   style={primaryButtonStyle}
-                >
-                  {messageOpening ? "Opening..." : "Message Seller"}
-                </button>
+                />
               ) : null}
             </div>
             <p style={{ margin: 0, color: "#cbd5e1", lineHeight: 1.55 }}>
