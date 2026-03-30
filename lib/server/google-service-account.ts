@@ -6,20 +6,28 @@ type AccessTokenResponse = {
   token_type: string;
 };
 
-let accessTokenCache:
-  | {
-      accessToken: string;
-      expiresAt: number;
-    }
-  | null = null;
+const accessTokenCache = new Map<
+  string,
+  {
+    accessToken: string;
+    expiresAt: number;
+  }
+>();
 
 function base64UrlEncode(input: string) {
   return Buffer.from(input).toString("base64url");
 }
 
-export async function getGoogleAccessToken() {
-  if (accessTokenCache && accessTokenCache.expiresAt > Date.now() + 60_000) {
-    return accessTokenCache.accessToken;
+export async function getGoogleAccessToken(
+  scopes: string | string[] = "https://www.googleapis.com/auth/cloud-platform"
+) {
+  const normalizedScopes = Array.isArray(scopes) ? scopes : [scopes];
+  const scopeValue = normalizedScopes.join(" ");
+  const cacheKey = normalizedScopes.slice().sort().join(" ");
+  const cachedToken = accessTokenCache.get(cacheKey);
+
+  if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
+    return cachedToken.accessToken;
   }
 
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -34,7 +42,7 @@ export async function getGoogleAccessToken() {
   const payload = base64UrlEncode(
     JSON.stringify({
       iss: clientEmail,
-      scope: "https://www.googleapis.com/auth/cloud-platform",
+      scope: scopeValue,
       aud: "https://oauth2.googleapis.com/token",
       exp: now + 3600,
       iat: now,
@@ -61,10 +69,10 @@ export async function getGoogleAccessToken() {
   }
 
   const data = (await response.json()) as AccessTokenResponse;
-  accessTokenCache = {
+  accessTokenCache.set(cacheKey, {
     accessToken: data.access_token,
     expiresAt: Date.now() + data.expires_in * 1000,
-  };
+  });
 
   return data.access_token;
 }

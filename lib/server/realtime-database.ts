@@ -3,6 +3,10 @@ import { getGoogleAccessToken } from "./google-service-account";
 const realtimeDatabaseUrl =
   process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL ||
   "https://ride-app-dd741-default-rtdb.firebaseio.com/";
+const REALTIME_DATABASE_SCOPES = [
+  "https://www.googleapis.com/auth/firebase.database",
+  "https://www.googleapis.com/auth/userinfo.email",
+] as const;
 
 function buildRealtimeDatabaseUrl(path: string) {
   const trimmedBase = realtimeDatabaseUrl.replace(/\/+$/, "");
@@ -19,12 +23,14 @@ async function performRealtimeDatabaseRequest<T>(
   path: string,
   init: RequestInit & { body?: string }
 ) {
-  const accessToken = await getGoogleAccessToken();
-  const response = await fetch(buildRealtimeDatabaseUrl(path), {
+  const accessToken = await getGoogleAccessToken([...REALTIME_DATABASE_SCOPES]);
+  const requestUrl = new URL(buildRealtimeDatabaseUrl(path));
+  requestUrl.searchParams.set("access_token", accessToken);
+
+  const response = await fetch(requestUrl.toString(), {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
       ...(init.headers || {}),
     },
     cache: "no-store",
