@@ -203,7 +203,7 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
           window as Window & { [APP_STARTUP_RUNTIME_KEY]?: boolean }
         )[APP_STARTUP_RUNTIME_KEY] = true;
         window.sessionStorage.setItem(APP_STARTUP_SESSION_KEY, "true");
-        window.sessionStorage.setItem(APP_HOMEPAGE_REVEAL_KEY, `${Date.now()}`);
+        window.sessionStorage.setItem(APP_HOMEPAGE_REVEAL_KEY, `${Date.now() + 180}`);
       }
       setPhase("hidden");
     }, 820);

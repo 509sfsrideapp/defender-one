@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v372",
+    title: "Startup-to-Homepage Handoff Timing Fix",
+    summary: "Adjusted the startup handoff so the homepage reconstruction sequence now waits until the secure access overlay has fully cleared before beginning its own typed-text and panel fade-in animation, instead of running underneath the overlay in the background.",
+  },
+  {
     commit: "v371",
     title: "Forum Archive and Review Bin",
     summary: "Added a public Forums Archive page for read-only preserved threads, an admin-only Forum Bin for user-deleted threads waiting on review, admin archive actions on forum threads, and inbox-based archive permission requests that record the user response back onto the deleted thread for admin review.",

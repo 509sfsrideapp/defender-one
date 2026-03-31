@@ -839,13 +839,25 @@ export default function HomePage() {
     }
 
     window.sessionStorage.removeItem(APP_HOMEPAGE_REVEAL_KEY);
-    setStartupRevealActive(true);
+    const revealStartAt = Number(revealToken);
+    const revealDelay = Number.isFinite(revealStartAt)
+      ? Math.max(0, revealStartAt - Date.now())
+      : 0;
 
-    const timer = window.setTimeout(() => {
-      setStartupRevealActive(false);
-    }, 2200);
+    let clearTimer: number | null = null;
+    const startTimer = window.setTimeout(() => {
+      setStartupRevealActive(true);
+      clearTimer = window.setTimeout(() => {
+        setStartupRevealActive(false);
+      }, 2200);
+    }, revealDelay);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(startTimer);
+      if (clearTimer) {
+        window.clearTimeout(clearTimer);
+      }
+    };
   }, []);
 
   useEffect(() => {
