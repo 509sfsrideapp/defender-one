@@ -25,6 +25,7 @@ export default function BottomUtilityNav() {
     >
       <ReportMisconductButton />
       <Link href="/report-bug" style={linkStyle}>Report Bug</Link>
+      <Link href="/developer" style={linkStyle}>Dev</Link>
       <Link href="/suggestions" style={linkStyle}>Suggestions</Link>
     </nav>
   );

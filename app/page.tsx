@@ -811,6 +811,7 @@ export default function HomePage() {
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [hasDeveloperAccess, setHasDeveloperAccess] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [authWarning, setAuthWarning] = useState("");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -857,6 +858,23 @@ export default function HomePage() {
       if (clearTimer) {
         window.clearTimeout(clearTimer);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const syncDeveloperAccess = () => {
+      setHasDeveloperAccess(document.cookie.includes("developer_access=granted"));
+    };
+
+    syncDeveloperAccess();
+    window.addEventListener("focus", syncDeveloperAccess);
+
+    return () => {
+      window.removeEventListener("focus", syncDeveloperAccess);
     };
   }, []);
 
@@ -1043,7 +1061,7 @@ export default function HomePage() {
   }, [user]);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !hasDeveloperAccess) {
       setMessageUnreadCount(0);
       return;
     }
@@ -1057,7 +1075,7 @@ export default function HomePage() {
         )
       );
     });
-  }, [user]);
+  }, [hasDeveloperAccess, user]);
 
   useEffect(() => {
     if (!user || !profile?.available || !canDrive(profile)) {
@@ -1114,8 +1132,8 @@ export default function HomePage() {
   const firstName = profile?.firstName?.trim() || "";
   const displayName = firstName || user?.email?.split("@")[0] || "Operator";
   const userRoleLabel = profile?.flight ? `${profile.rank || "Member"} • ${profile.flight}` : profile?.rank || "Member";
-  const showDevTile = Boolean(user);
-  const showAdminTile = Boolean(user && isAdminEmail(user.email));
+  const showDevTile = Boolean(user && hasDeveloperAccess);
+  const showAdminTile = Boolean(user && hasDeveloperAccess && isAdminEmail(user.email));
   const visibleAppTileCount = 6 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
   const appTilePlaceholderCount = Math.max(0, 9 - visibleAppTileCount);
   const totalOperationalApps = (driverReady ? 1 : 0) + 5 + (showDevTile ? 1 : 0) + (showAdminTile ? 1 : 0);
@@ -1851,6 +1869,7 @@ export default function HomePage() {
                       {emergencyRideBlockers.join(" ")}
                     </p>
                   ) : null}
+
                 </>
               ) : (
                 <div
@@ -1877,14 +1896,62 @@ export default function HomePage() {
                 </div>
               )}
 
-              <section
-                style={{
-                  ...homepageCardStyle,
-                  maxWidth: 840,
-                  padding: "1.1rem 1.15rem 1.2rem",
-                  ...getStartupRevealStyle(340),
-                }}
-              >
+              <div style={{ marginTop: 12, maxWidth: 680 }}>
+                {driverReady ? (
+                  <Link
+                    href="/driver"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: 48,
+                      padding: "12px 18px",
+                      borderRadius: 12,
+                      textDecoration: "none",
+                      background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
+                      color: "#f8fafc",
+                      border: "1px solid rgba(126, 142, 160, 0.24)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 28px rgba(17, 24, 39, 0.26)",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontSize: 12,
+                    }}
+                  >
+                    Driver Dashboard
+                  </Link>
+                ) : (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: 48,
+                      padding: "12px 18px",
+                      borderRadius: 12,
+                      background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
+                      color: "#cbd5e1",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontSize: 12,
+                      opacity: 0.84,
+                    }}
+                  >
+                    Driver Dashboard Unavailable
+                  </div>
+                )}
+              </div>
+
+              {hasDeveloperAccess ? (
+                <section
+                  style={{
+                    ...homepageCardStyle,
+                    maxWidth: 840,
+                    padding: "1.1rem 1.15rem 1.2rem",
+                    ...getStartupRevealStyle(340),
+                  }}
+                >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
                     <StartupTypedText
@@ -1986,19 +2053,21 @@ export default function HomePage() {
                     <PlaceholderTile key={index} revealActive={startupRevealActive} revealDelayMs={1000 + index * 70} />
                   ))}
                 </div>
-              </section>
-              <section
-                style={{
-                  maxWidth: 840,
-                  borderRadius: 16,
-                  border: "1px solid rgba(86, 122, 168, 0.26)",
-                  background:
-                    "linear-gradient(180deg, rgba(8, 16, 28, 0.98) 0%, rgba(4, 10, 18, 0.995) 100%)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(2, 6, 23, 0.3)",
-                  overflow: "hidden",
-                  ...getStartupRevealStyle(1040),
-                }}
-              >
+                </section>
+              ) : null}
+              {hasDeveloperAccess ? (
+                <section
+                  style={{
+                    maxWidth: 840,
+                    borderRadius: 16,
+                    border: "1px solid rgba(86, 122, 168, 0.26)",
+                    background:
+                      "linear-gradient(180deg, rgba(8, 16, 28, 0.98) 0%, rgba(4, 10, 18, 0.995) 100%)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(2, 6, 23, 0.3)",
+                    overflow: "hidden",
+                    ...getStartupRevealStyle(1040),
+                  }}
+                >
                 <div
                   style={{
                     display: "flex",
@@ -2086,7 +2155,8 @@ export default function HomePage() {
                     );
                   })}
                 </div>
-              </section>
+                </section>
+              ) : null}
             </div>
           ) : null}
 

@@ -102,10 +102,34 @@ export default async function DeveloperPage() {
         </div>
 
         <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Events</h2>
+          <p style={{ maxWidth: 320 }}>Open the Events feature from here while it stays behind developer access.</p>
+          <Link href="/events" prefetch={false} style={featureLinkStyle}>
+            Open Events
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Forums</h2>
+          <p style={{ maxWidth: 320 }}>Open the Forums feature from here while it stays behind developer access.</p>
+          <Link href="/q-and-a" prefetch={false} style={featureLinkStyle}>
+            Open Forums
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
           <h2 style={{ marginTop: 0 }}>Global Chat</h2>
           <p style={{ maxWidth: 320 }}>Open the live chat page while we keep refining the feature.</p>
           <Link href="/chat" style={featureLinkStyle}>
             Open Chat
+          </Link>
+        </div>
+
+        <div style={featureCardStyle}>
+          <h2 style={{ marginTop: 0 }}>Admin Dashboard</h2>
+          <p style={{ maxWidth: 320 }}>Open the admin tools from here while the app sections stay behind developer access.</p>
+          <Link href="/admin" prefetch={false} style={featureLinkStyle}>
+            Open Admin
           </Link>
         </div>
 

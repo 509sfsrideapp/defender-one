@@ -5,7 +5,13 @@ import { usePathname } from "next/navigation";
 
 const developerSafePrefixes = [
   "/developer",
+  "/events",
+  "/q-and-a",
+  "/messages",
+  "/marketplace",
+  "/iso",
   "/chat",
+  "/admin",
 ] as const;
 
 export default function DeveloperAccessCleaner() {
