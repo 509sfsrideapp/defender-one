@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v377",
+    title: "Full-Width Driver Dashboard CTA",
+    summary: "Expanded the public Driver Dashboard button on the homepage to the full ride-action width and added the small driver auth status line beneath the label so it reads more like a primary operational control.",
+  },
+  {
     commit: "v376",
     title: "Core Ride-Only Homepage Lockdown",
     summary: "Moved Events, Forums, Messages, Marketplace, ISO, Chat, and Admin behind developer access, hid the homepage applications/status sections for normal users, kept Driver Dashboard as the only public secondary action under the Emergency Ride button, and added a matching DEV link beside the bug-report controls at the bottom.",

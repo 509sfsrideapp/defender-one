@@ -1896,16 +1896,19 @@ export default function HomePage() {
                 </div>
               )}
 
-              <div style={{ marginTop: 12, maxWidth: 680 }}>
+              <div style={{ marginTop: 12, maxWidth: 680, width: "100%" }}>
                 {driverReady ? (
                   <Link
                     href="/driver"
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      minHeight: 48,
-                      padding: "12px 18px",
+                      gap: 6,
+                      width: "100%",
+                      minHeight: 68,
+                      padding: "14px 18px",
                       borderRadius: 12,
                       textDecoration: "none",
                       background: "linear-gradient(180deg, rgba(39, 50, 68, 0.96) 0%, rgba(19, 28, 40, 0.98) 100%)",
@@ -1917,17 +1920,31 @@ export default function HomePage() {
                       textTransform: "uppercase",
                       fontSize: 12,
                     }}
-                  >
-                    Driver Dashboard
+                    >
+                    <span>Driver Dashboard</span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        fontSize: 10,
+                        color: "#9cc2ee",
+                      }}
+                    >
+                      DRIVER_AUTH:TRUE//VIA:PFP_VEHCLDATA
+                    </span>
                   </Link>
                 ) : (
                   <div
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      minHeight: 48,
-                      padding: "12px 18px",
+                      gap: 6,
+                      width: "100%",
+                      minHeight: 68,
+                      padding: "14px 18px",
                       borderRadius: 12,
                       background: "linear-gradient(180deg, rgba(71, 85, 105, 0.92) 0%, rgba(51, 65, 85, 0.96) 100%)",
                       color: "#cbd5e1",
@@ -1937,8 +1954,20 @@ export default function HomePage() {
                       fontSize: 12,
                       opacity: 0.84,
                     }}
-                  >
-                    Driver Dashboard Unavailable
+                    >
+                    <span>Driver Dashboard Unavailable</span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        fontSize: 10,
+                        color: "#cbd5e1",
+                        opacity: 0.82,
+                      }}
+                    >
+                      DRIVER_AUTH:TRUE//VIA:PFP_VEHCLDATA
+                    </span>
                   </div>
                 )}
               </div>
