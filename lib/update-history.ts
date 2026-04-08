@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v386",
+    title: "Admin Access Entry Fix",
+    summary: "Removed the developer gate from the admin route shell so the real admin login page is reachable from the public login screen, and added a small ADMIN quick link in the bottom utility nav that appears only for the admin account.",
+  },
+  {
     commit: "v385",
     title: "Status Console Full Pool Restore",
     summary: "Restored the large randomized homepage App Status Console command and response pool so the tactical prompt rotation no longer gets stuck alternating between only a couple of lines.",
