@@ -192,12 +192,12 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
     const timers = currentBootLines.map((line, index) =>
       window.setTimeout(() => {
         setVisibleLines((current) => [...current, line]);
-      }, index * 220)
+      }, index * 140)
     );
 
     const grantedTimer = window.setTimeout(() => {
       setPhase("granted");
-    }, currentBootLines.length * 220 + 420);
+    }, currentBootLines.length * 140 + 220);
 
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
@@ -212,7 +212,7 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
 
     const closingTimer = window.setTimeout(() => {
       setPhase("closing");
-    }, 360);
+    }, 180);
 
     const finishTimer = window.setTimeout(() => {
       if (typeof window !== "undefined") {
@@ -220,10 +220,10 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
           window as Window & { [APP_STARTUP_RUNTIME_KEY]?: boolean }
         )[APP_STARTUP_RUNTIME_KEY] = true;
         window.sessionStorage.setItem(APP_STARTUP_SESSION_KEY, "true");
-        window.sessionStorage.setItem(APP_HOMEPAGE_REVEAL_KEY, `${Date.now() + 180}`);
+        window.sessionStorage.setItem(APP_HOMEPAGE_REVEAL_KEY, `${Date.now() + 40}`);
       }
       setPhase("hidden");
-    }, 820);
+    }, 540);
 
     return () => {
       window.clearTimeout(closingTimer);
