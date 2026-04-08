@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/notifications/driver-coverage",
-      "schedule": "0 * * * *"
-    }
-  ]
-}

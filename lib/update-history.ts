@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v384",
+    title: "Firebase-Scheduled Coverage Checks",
+    summary: "Replaced the blocked Vercel cron path for hourly driver coverage alerts with a Firebase scheduled function that calls the existing coverage-monitor route every hour using protected app credentials.",
+  },
+  {
     commit: "v383",
     title: "Hourly Driver Coverage Alerts",
     summary: "Added an hourly driver-coverage monitor that sends push notifications to valid off-duty drivers when squadron availability drops below five, reaches zero, or their own office has nobody clocked in, with scheduled and manual trigger support for testing.",
