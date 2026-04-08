@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v387",
+    title: "Firebase Scheduler Deploy Prep",
+    summary: "Finished the Firebase Functions package setup for the hourly driver coverage checker by fixing the function export format and generating a locked functions dependency tree, so the repo is ready once the remaining Google Cloud build-service permission issue is resolved.",
+  },
+  {
     commit: "v386",
     title: "Admin Access Entry Fix",
     summary: "Removed the developer gate from the admin route shell so the real admin login page is reachable from the public login screen, and added a small ADMIN quick link in the bottom utility nav that appears only for the admin account.",

@@ -5,7 +5,7 @@ import * as logger from "firebase-functions/logger";
 const appBaseUrl = defineSecret("APP_BASE_URL");
 const cronSecret = defineSecret("CRON_SECRET");
 
-exports.driverCoverageAlerts = onSchedule(
+export const driverCoverageAlerts = onSchedule(
   {
     schedule: "0 * * * *",
     timeZone: "America/Chicago",
