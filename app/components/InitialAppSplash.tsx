@@ -8,6 +8,7 @@ import {
   APP_HOMEPAGE_REVEAL_KEY,
   APP_STARTUP_RUNTIME_KEY,
   APP_STARTUP_SESSION_KEY,
+  APP_STARTUP_WINDOW_NAME_KEY,
 } from "../../lib/startup-access";
 
 type InitialAppSplashProps = {
@@ -51,6 +52,56 @@ const SIGNED_OUT_LINES = [
 ];
 
 let startupSequenceConsumedForRuntime = false;
+
+function shouldRunInitialAccessSequence() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (window.location.pathname !== "/") {
+    return false;
+  }
+
+  const existingWindowName = window.name || "";
+  if (existingWindowName.includes(APP_STARTUP_WINDOW_NAME_KEY)) {
+    return false;
+  }
+
+  const startupRuntimeSeen =
+    (window as Window & { [APP_STARTUP_RUNTIME_KEY]?: boolean })[
+      APP_STARTUP_RUNTIME_KEY
+    ] === true;
+  if (startupRuntimeSeen) {
+    return false;
+  }
+
+  const startupSessionSeen =
+    window.sessionStorage.getItem(APP_STARTUP_SESSION_KEY) === "true";
+  if (startupSessionSeen) {
+    return false;
+  }
+
+  const navigationEntry = window.performance
+    .getEntriesByType("navigation")
+    .find((entry): entry is PerformanceNavigationTiming => entry instanceof PerformanceNavigationTiming);
+
+  if (navigationEntry?.type === "reload" || navigationEntry?.type === "back_forward") {
+    return false;
+  }
+
+  if (document.referrer) {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.origin === window.location.origin) {
+        return false;
+      }
+    } catch {
+      // Ignore malformed referrers and allow the initial-launch checks above to decide.
+    }
+  }
+
+  return true;
+}
 
 function buildUserDisplayName(profile: UserAccessProfile | null, user: User | null) {
   const rank = profile?.rank?.trim() || "";
@@ -112,7 +163,7 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
       return;
     }
 
-    setShouldRun(forceReplay || window.location.pathname === "/");
+    setShouldRun(forceReplay || shouldRunInitialAccessSequence());
     setLaunchDecisionReady(true);
   }, [forceReplay]);
 
@@ -219,6 +270,9 @@ export default function InitialAppSplash({ forceReplay = false }: InitialAppSpla
         (
           window as Window & { [APP_STARTUP_RUNTIME_KEY]?: boolean }
         )[APP_STARTUP_RUNTIME_KEY] = true;
+        if (!window.name.includes(APP_STARTUP_WINDOW_NAME_KEY)) {
+          window.name = `${window.name}${window.name ? " " : ""}${APP_STARTUP_WINDOW_NAME_KEY}`;
+        }
         window.sessionStorage.setItem(APP_STARTUP_SESSION_KEY, "true");
         window.sessionStorage.setItem(APP_HOMEPAGE_REVEAL_KEY, `${Date.now() + 40}`);
       }

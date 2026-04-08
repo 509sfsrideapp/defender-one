@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v388",
+    title: "Startup Overlay Fresh-Launch Gate",
+    summary: "Tightened the app-opening access-sequence trigger so it now runs only on a true fresh app launch, while suppressing the overlay on homepage refreshes, login redirects, and other same-tab returns to home.",
+  },
+  {
     commit: "v387",
     title: "Firebase Scheduler Deploy Prep",
     summary: "Finished the Firebase Functions package setup for the hourly driver coverage checker by fixing the function export format and generating a locked functions dependency tree, so the repo is ready once the remaining Google Cloud build-service permission issue is resolved.",
