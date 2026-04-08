@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v385",
+    title: "Status Console Full Pool Restore",
+    summary: "Restored the large randomized homepage App Status Console command and response pool so the tactical prompt rotation no longer gets stuck alternating between only a couple of lines.",
+  },
+  {
     commit: "v384",
     title: "Firebase-Scheduled Coverage Checks",
     summary: "Replaced the blocked Vercel cron path for hourly driver coverage alerts with a Firebase scheduled function that calls the existing coverage-monitor route every hour using protected app credentials.",
