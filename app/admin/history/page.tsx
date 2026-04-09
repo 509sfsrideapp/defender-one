@@ -12,6 +12,7 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
 type Ride = {
   id: string;
+  isTestRide?: boolean;
   riderName?: string;
   riderPhone?: string;
   pickup?: string;
@@ -93,6 +94,10 @@ export default function AdminRideHistoryPage() {
     const endMillis = endDateTime ? new Date(endDateTime).getTime() : null;
 
     return rides.filter((ride) => {
+      if (ride.isTestRide) {
+        return false;
+      }
+
       if (statusFilter !== "all" && (ride.status || "") !== statusFilter) {
         return false;
       }

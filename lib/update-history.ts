@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v400",
+    title: "Hide Test Rides from Admin History",
+    summary: "Updated the admin ride history screen to filter out test rides so only real operational ride records appear in the history tab.",
+  },
+  {
     commit: "v399",
     title: "Secondary Admin Firestore Access",
     summary: "Updated the live Firestore admin rule and the remaining ride-request admin override so the approved secondary admin account can read the same accounts and ride data as the original admin account across the dashboard and admin tools.",
