@@ -8,7 +8,7 @@ import { ADMIN_EMAIL, isAdminEmail } from "../../../lib/admin";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState(ADMIN_EMAIL);
+  const [email, setEmail] = useState<string>(ADMIN_EMAIL);
   const [password, setPassword] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
   const [submitting, setSubmitting] = useState(false);

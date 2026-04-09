@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v397",
+    title: "Expanded Admin Account Access",
+    summary: "Extended the shared admin access helper so the additional approved account gabriel.cheney721@gmail.com now receives the same admin dashboard authorization and bottom ADMIN navigation link as the original admin account.",
+  },
+  {
     commit: "v396",
     title: "Inbox Read State Per Message",
     summary: "Fixed private inbox threads so opening one unread message no longer marks the rest of that thread as read, by switching unread tracking back to each message's own read state instead of a shared thread-wide cutoff.",
