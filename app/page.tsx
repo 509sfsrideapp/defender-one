@@ -858,6 +858,7 @@ export default function HomePage() {
   const [appStatusPhase, setAppStatusPhase] = useState<"command" | "response">("command");
   const [appStatusCharCount, setAppStatusCharCount] = useState(0);
   const [ridePreflightIssue, setRidePreflightIssue] = useState<string | null>(null);
+  const [promptingRidePreflightLocation, setPromptingRidePreflightLocation] = useState(false);
   const { riderActiveRide, driverActiveRide, loading: activeRideLoading } = useActiveRides(user);
 
   useEffect(() => {
@@ -1350,6 +1351,59 @@ export default function HomePage() {
     riderActiveRide,
     user,
   ]);
+
+  const handlePromptRideLocationAccess = async () => {
+    try {
+      setPromptingRidePreflightLocation(true);
+
+      if (typeof window === "undefined" || !("geolocation" in navigator)) {
+        setRidePreflightIssue(
+          "LIVE LOCATION CHECK FAILED. This device/browser is not exposing GPS to the app. Fix: open the app from your iPhone Home Screen, confirm device Location Services are on, then reload the app. If it still fails, request the ride anyway and send your pickup manually from Ride Status."
+        );
+        return;
+      }
+
+      const riderLocation = await new Promise<Coordinates | null>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) =>
+            resolve({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            }),
+          () => resolve(null),
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          }
+        );
+      });
+
+      if (!riderLocation) {
+        setRidePreflightIssue(
+          "LIVE LOCATION CHECK FAILED. The device still did not provide live GPS from the prompt action. Tap Prompt Device Location Access again, then if needed open Account Settings > App Permissions and use the same prompt there."
+        );
+        return;
+      }
+
+      await fetch("/api/geocode/reverse", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(riderLocation),
+      }).catch(() => null);
+
+      setRidePreflightIssue(null);
+    } catch (error) {
+      console.error("Manual ride location prompt failed", error);
+      setRidePreflightIssue(
+        "LIVE LOCATION CHECK FAILED. The manual location prompt did not complete successfully. Try again, or open Account Settings > App Permissions and run the location prompt there."
+      );
+    } finally {
+      setPromptingRidePreflightLocation(false);
+    }
+  };
   const readinessCards = [
     !rideReady
       ? {
@@ -2122,7 +2176,35 @@ export default function HomePage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  {ridePreflightIssue}
+                  <div>{ridePreflightIssue}</div>
+                  <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    <button
+                      type="button"
+                      onClick={() => void handlePromptRideLocationAccess()}
+                      disabled={promptingRidePreflightLocation}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(245, 158, 11, 0.32)",
+                        backgroundColor: "rgba(15, 23, 42, 0.72)",
+                        color: "#fef3c7",
+                        cursor: promptingRidePreflightLocation ? "wait" : "pointer",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {promptingRidePreflightLocation ? "Prompting..." : "Prompt Device Location Access"}
+                    </button>
+                    <Link
+                      href="/account/permissions"
+                      style={{
+                        color: "#fde68a",
+                        textDecoration: "underline",
+                        fontSize: 12,
+                      }}
+                    >
+                      Open App Permissions
+                    </Link>
+                  </div>
                 </div>
               ) : null}
 

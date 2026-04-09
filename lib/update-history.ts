@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v408",
+    title: "Explicit Device Location Prompt Buttons",
+    summary: "Added direct Prompt Device Location Access actions to both the homepage ride preflight warning and App Permissions so users have a clear user-gesture trigger for the native GPS permission request when live location still is not working.",
+  },
+  {
     commit: "v407",
     title: "Location Toggle Device Prompt Attempt",
     summary: "Updated Account Settings so turning Location Services back on now immediately performs a real GPS request from the same tap, giving iPhone the best chance to show the native location permission prompt instead of only flipping the app-side toggle.",

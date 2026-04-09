@@ -64,6 +64,7 @@ export default function AccountPermissionsPage() {
     useState<EmergencyRideDispatchMode>(DEFAULT_RIDE_DISPATCH_MODE);
   const [updatingNotifications, setUpdatingNotifications] = useState(false);
   const [updatingLocationServices, setUpdatingLocationServices] = useState(false);
+  const [promptingLocationServices, setPromptingLocationServices] = useState(false);
   const [notificationTokenCount, setNotificationTokenCount] = useState(0);
   const [notificationPermission, setNotificationPermission] = useState("unknown");
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(true);
@@ -250,6 +251,24 @@ export default function AccountPermissionsPage() {
         }
       );
     });
+  };
+
+  const handlePromptLocationServices = async () => {
+    try {
+      setPromptingLocationServices(true);
+      const requestedLocation = await captureCurrentLocation();
+
+      setStatusMessage(
+        requestedLocation
+          ? "Device location responded successfully. Emergency Ride should be able to use live GPS on this device now."
+          : "The device still did not provide live GPS. Tap this button again if needed, or open iPhone Settings > Privacy & Security > Location Services > Safari Websites and confirm While Using App plus Precise Location."
+      );
+    } catch (error) {
+      console.error(error);
+      setStatusMessage("We could not trigger the device location request right now.");
+    } finally {
+      setPromptingLocationServices(false);
+    }
   };
 
   const resolvePickupLocation = async (coordinates: Coordinates) => {
@@ -442,6 +461,15 @@ export default function AccountPermissionsPage() {
             >
               <span className="settings-switch-knob" />
             </button>
+          </div>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <button type="button" onClick={() => void handlePromptLocationServices()} disabled={promptingLocationServices}>
+              {promptingLocationServices ? "Prompting Location..." : "Prompt Device Location Access"}
+            </button>
+            <span style={{ color: "#94a3b8", fontSize: 13 }}>
+              Use this if GPS is still not working or iPhone did not show the native popup.
+            </span>
           </div>
         </div>
 
