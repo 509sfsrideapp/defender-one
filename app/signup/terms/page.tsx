@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import HomeIconLink from "../../components/HomeIconLink";
+import { auth } from "../../../lib/firebase";
 import { enablePushNotifications } from "../../../lib/push-notifications";
 import {
   finalizeSignupFromDraft,
@@ -134,6 +136,10 @@ export default function SignupTermsPage() {
         locationServicesEnabled: locationPermission !== "denied",
       });
 
+      if (!auth.currentUser) {
+        await signInWithEmailAndPassword(auth, draft.email.trim(), draft.password);
+      }
+
       if (notificationPermission === "granted") {
         try {
           await enablePushNotifications();
@@ -143,8 +149,8 @@ export default function SignupTermsPage() {
       }
 
       window.sessionStorage.removeItem(SIGNUP_DRAFT_STORAGE_KEY);
-      alert("Account created.");
-      window.location.href = "/";
+      setStatusMessage("Account created. Redirecting to homepage...");
+      router.replace("/");
     } catch (error) {
       console.error(error);
       setStatusMessage(getSignupErrorMessage(error));

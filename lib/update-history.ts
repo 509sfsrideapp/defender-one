@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v394",
+    title: "Post-Signup Auto Login Handoff",
+    summary: "Updated account creation so new users stay signed in immediately after signup and are sent straight to the homepage instead of being kicked back through the login flow.",
+  },
+  {
     commit: "v393",
     title: "Test Ride GPS Location Naming",
     summary: "Updated the App Permissions test ride so it now reverse-geocodes the rider's live GPS position and uses the same resolved pickup name and address behavior as a normal ride request, making the test flow a real location check instead of a placeholder label.",
