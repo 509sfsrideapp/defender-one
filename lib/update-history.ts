@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v398",
+    title: "Admin New-User Notifications",
+    summary: "Added an automatic admin notification on account creation so every authorized admin account now gets a New User alert with the new member's name as soon as signup completes.",
+  },
+  {
     commit: "v397",
     title: "Expanded Admin Account Access",
     summary: "Extended the shared admin access helper so the additional approved account gabriel.cheney721@gmail.com now receives the same admin dashboard authorization and bottom ADMIN navigation link as the original admin account.",

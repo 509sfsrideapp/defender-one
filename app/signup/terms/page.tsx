@@ -140,6 +140,20 @@ export default function SignupTermsPage() {
         await signInWithEmailAndPassword(auth, draft.email.trim(), draft.password);
       }
 
+      const idToken = await auth.currentUser?.getIdToken();
+
+      if (idToken) {
+        await fetch("/api/notifications/new-user", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          keepalive: true,
+        }).catch((error) => {
+          console.error("New user admin notification failed", error);
+        });
+      }
+
       if (notificationPermission === "granted") {
         try {
           await enablePushNotifications();
