@@ -201,6 +201,14 @@ export default function AccountPermissionsPage() {
 
     try {
       setUpdatingLocationServices(true);
+
+      let promptSucceeded = false;
+
+      if (nextValue) {
+        const requestedLocation = await captureCurrentLocation();
+        promptSucceeded = Boolean(requestedLocation);
+      }
+
       await updateDoc(doc(db, "users", user.uid), {
         locationServicesEnabled: nextValue,
         updatedAt: new Date(),
@@ -209,7 +217,9 @@ export default function AccountPermissionsPage() {
       setLocationServicesEnabled(nextValue);
       setStatusMessage(
         nextValue
-          ? "Location services turned on for this account."
+          ? promptSucceeded
+            ? "Location services turned on for this account and device GPS responded successfully."
+            : "Location services turned on for this account. If no iPhone popup appeared, open iPhone Settings > Privacy & Security > Location Services > Safari Websites and enable While Using App plus Precise Location."
           : "Location services turned off. The app will stop using GPS until you turn it back on."
       );
     } catch (error) {
@@ -418,7 +428,7 @@ export default function AccountPermissionsPage() {
               <p style={{ margin: "6px 0 0", color: "#94a3b8" }}>
                 {locationServicesEnabled
                   ? "GPS is enabled for ride requests and live ride location updates."
-                  : "GPS is off for this account until you turn it back on."}
+                  : "GPS is off for this account until you turn it back on. Turning it back on will try to trigger the device location prompt immediately."}
               </p>
             </div>
             <button

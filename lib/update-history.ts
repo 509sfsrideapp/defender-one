@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v407",
+    title: "Location Toggle Device Prompt Attempt",
+    summary: "Updated Account Settings so turning Location Services back on now immediately performs a real GPS request from the same tap, giving iPhone the best chance to show the native location permission prompt instead of only flipping the app-side toggle.",
+  },
+  {
     commit: "v406",
     title: "Stronger Pickup TBA Call Guidance",
     summary: "Updated the Pickup TBA rider and driver screens with stronger call-each-other guidance, simplified the rider pickup entry placeholder to Enter current location here, and added a direct Call Rider action on the driver side when live pickup coordinates are unavailable.",
