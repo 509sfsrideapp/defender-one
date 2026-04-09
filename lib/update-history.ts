@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v396",
+    title: "Inbox Read State Per Message",
+    summary: "Fixed private inbox threads so opening one unread message no longer marks the rest of that thread as read, by switching unread tracking back to each message's own read state instead of a shared thread-wide cutoff.",
+  },
+  {
     commit: "v395",
     title: "Silent Test Ride Cancel",
     summary: "Updated rider-side test ride cancellation so it skips the normal cancellation follow-up inbox prompt, keeping test runs from leaving behind the same required notification flow used for real rides.",

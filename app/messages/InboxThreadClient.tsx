@@ -207,9 +207,23 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
       }
 
       const responseTimestamp = toTimestampMs(post.createdAt);
-      markInboxThreadRead(thread.id, responseTimestamp);
-      if (responseTimestamp) {
-        setReadCutoff((current) => Math.max(current, responseTimestamp));
+      if (!post.isPrivatePost) {
+        markInboxThreadRead(thread.id, responseTimestamp);
+        if (responseTimestamp) {
+          setReadCutoff((current) => Math.max(current, responseTimestamp));
+        }
+      } else {
+        setPosts((current) =>
+          current.map((currentPost) =>
+            currentPost.id === post.id
+              ? {
+                  ...currentPost,
+                  readAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+                  responseSubmittedAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+                }
+              : currentPost
+          )
+        );
       }
       setResponseDrafts((current) => ({ ...current, [post.id]: "" }));
     } catch (error) {
@@ -257,7 +271,9 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
           {posts.length > 0 ? posts.map((post) => {
             const postCreatedAtMs = toTimestampMs(post.createdAt);
             const needsResponseUnread = Boolean(post.requiresResponse && !post.responseSubmittedAt);
-            const isUnread = needsResponseUnread || (postCreatedAtMs != null && postCreatedAtMs > readCutoff);
+            const isUnread = post.isPrivatePost
+              ? needsResponseUnread || !post.readAt
+              : needsResponseUnread || (postCreatedAtMs != null && postCreatedAtMs > readCutoff);
             const supportsOptionalComment = Boolean(!post.requiresResponse && post.responsePrompt?.trim());
             const responseBoxTitle = post.requiresResponse
               ? post.responseSubmittedAt
@@ -295,33 +311,43 @@ export default function InboxThreadClient({ threadId, userId }: { threadId: stri
                       const openedPostTimestamp = toTimestampMs(post.createdAt);
                       const canMarkReadOnOpen = !post.requiresResponse || Boolean(post.responseSubmittedAt);
 
-                      if (canMarkReadOnOpen) {
+                      if (canMarkReadOnOpen && !post.isPrivatePost) {
                         markInboxThreadRead(thread.id, openedPostTimestamp);
 
                         if (openedPostTimestamp) {
                           setReadCutoff((current) => Math.max(current, openedPostTimestamp));
                         }
+                      }
 
-                        if (post.isPrivatePost) {
-                          void (async () => {
-                            try {
-                              const idToken = await auth.currentUser?.getIdToken();
+                      if (canMarkReadOnOpen && post.isPrivatePost) {
+                        setPosts((current) =>
+                          current.map((currentPost) =>
+                            currentPost.id === post.id
+                              ? {
+                                  ...currentPost,
+                                  readAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 },
+                                }
+                              : currentPost
+                          )
+                        );
+                        void (async () => {
+                          try {
+                            const idToken = await auth.currentUser?.getIdToken();
 
-                              if (!idToken) {
-                                return;
-                              }
-
-                              await fetch(`/api/user-inbox-posts/${post.id}/read`, {
-                                method: "POST",
-                                headers: {
-                                  Authorization: `Bearer ${idToken}`,
-                                },
-                              });
-                            } catch (error) {
-                              console.error(error);
+                            if (!idToken) {
+                              return;
                             }
-                          })();
-                        }
+
+                            await fetch(`/api/user-inbox-posts/${post.id}/read`, {
+                              method: "POST",
+                              headers: {
+                                Authorization: `Bearer ${idToken}`,
+                              },
+                            });
+                          } catch (error) {
+                            console.error(error);
+                          }
+                        })();
                       }
                     }
                   }}

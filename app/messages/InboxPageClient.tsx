@@ -15,6 +15,8 @@ type InboxPost = {
   createdAt?: { seconds?: number; nanoseconds?: number } | null;
   requiresResponse?: boolean;
   responseSubmittedAt?: { seconds?: number; nanoseconds?: number } | null;
+  readAt?: { seconds?: number; nanoseconds?: number } | null;
+  isPrivatePost?: boolean;
 };
 
 function NotificationBadge({ count }: { count: number }) {
@@ -158,7 +160,7 @@ export default function InboxPageClient({ userId }: { userId: string }) {
       logFirestoreQueryResult("inbox.user-posts", { count: snapshot.size });
       setPrivatePosts(
         snapshot.docs
-          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<InboxPost, "id">) }))
+          .map((docSnap) => ({ id: docSnap.id, isPrivatePost: true, ...(docSnap.data() as Omit<InboxPost, "id">) }))
           .filter((post) => isMessageThreadId(post.threadId))
       );
     });

@@ -22,6 +22,8 @@ export type InboxUnreadPost = {
   createdAt?: InboxTimestampLike;
   requiresResponse?: boolean;
   responseSubmittedAt?: InboxTimestampLike;
+  readAt?: InboxTimestampLike;
+  isPrivatePost?: boolean;
 };
 
 export function loadInboxReadState(): InboxReadState {
@@ -100,9 +102,14 @@ export function getInboxUnreadCount(posts: InboxUnreadPost[], readState = loadIn
   return posts.reduce((count, post) => {
     const createdAtMs = toTimestampMs(post.createdAt);
     const responseSubmittedAtMs = toTimestampMs(post.responseSubmittedAt);
+    const readAtMs = toTimestampMs(post.readAt);
 
     if (post.requiresResponse && !responseSubmittedAtMs) {
       return count + 1;
+    }
+
+    if (post.isPrivatePost) {
+      return !readAtMs ? count + 1 : count;
     }
 
     if (!createdAtMs) {
@@ -118,9 +125,17 @@ export function getInboxUnreadCountsByThread(posts: InboxUnreadPost[], readState
   return posts.reduce((counts, post) => {
     const createdAtMs = toTimestampMs(post.createdAt);
     const responseSubmittedAtMs = toTimestampMs(post.responseSubmittedAt);
+    const readAtMs = toTimestampMs(post.readAt);
 
     if (post.requiresResponse && !responseSubmittedAtMs) {
       counts[post.threadId] = (counts[post.threadId] || 0) + 1;
+      return counts;
+    }
+
+    if (post.isPrivatePost) {
+      if (!readAtMs) {
+        counts[post.threadId] = (counts[post.threadId] || 0) + 1;
+      }
       return counts;
     }
 
