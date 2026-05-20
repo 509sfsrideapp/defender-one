@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v416",
+    title: "Removed Leftover Notification Category Settings",
+    summary: "Removed the old notification-category controls from App Permissions so the page only shows the ride-relevant settings that still matter for the current live app surface.",
+  },
+  {
     commit: "v415",
     title: "Loader Test Moved to On Hold Section",
     summary: "Moved the Initial Loader Test card out of the top developer tool group and into the bottom On Hold Features section so the main developer hub starts with the inbox and release-management tools first.",

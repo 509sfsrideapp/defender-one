@@ -6,11 +6,6 @@ import { useEffect, useState } from "react";
 import AppLoadingState from "../../components/AppLoadingState";
 import HomeIconLink from "../../components/HomeIconLink";
 import { auth, db } from "../../../lib/firebase";
-import {
-  normalizeUserNotificationPreferences,
-  USER_NOTIFICATION_PREFERENCE_OPTIONS,
-  type UserNotificationPreferences,
-} from "../../../lib/notification-preferences";
 import { disablePushNotifications, enablePushNotifications } from "../../../lib/push-notifications";
 import { normalizeOfficeValue } from "../../../lib/offices";
 import { getLatestActiveRideForRider } from "../../../lib/ride-state";
@@ -41,7 +36,6 @@ type UserProfile = {
   driverPhotoUrl?: string;
   emergencyRideAddressConsent?: boolean;
   locationServicesEnabled?: boolean;
-  notificationPreferences?: Partial<UserNotificationPreferences> | null;
 };
 
 export default function AccountPermissionsPage() {
@@ -59,9 +53,6 @@ export default function AccountPermissionsPage() {
   const [notificationTokenCount, setNotificationTokenCount] = useState(0);
   const [notificationPermission, setNotificationPermission] = useState("unknown");
   const [locationServicesEnabled, setLocationServicesEnabled] = useState(true);
-  const [notificationPreferences, setNotificationPreferences] = useState<UserNotificationPreferences>(
-    normalizeUserNotificationPreferences()
-  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -96,7 +87,6 @@ export default function AccountPermissionsPage() {
         setProfile(data ? { ...data, flight: normalizedOffice } : null);
         setEmergencyRideAddressConsent(Boolean(data?.emergencyRideAddressConsent));
         setLocationServicesEnabled(data?.locationServicesEnabled !== false);
-        setNotificationPreferences(normalizeUserNotificationPreferences(data?.notificationPreferences));
 
         if (data && (data.flight?.trim() || "") !== normalizedOffice) {
           await updateDoc(userRef, {
@@ -123,7 +113,6 @@ export default function AccountPermissionsPage() {
       setStatusMessage("Saving app permissions...");
       await updateDoc(doc(db, "users", user.uid), {
         emergencyRideAddressConsent,
-        notificationPreferences,
       });
       setStatusMessage("App permissions updated.");
     } catch (error) {
@@ -460,39 +449,6 @@ export default function AccountPermissionsPage() {
               Use this if GPS is still not working or iPhone did not show the native popup.
             </span>
           </div>
-        </div>
-
-        <div style={{ marginTop: 24, display: "grid", gap: 14 }}>
-          <div>
-            <h2 style={{ margin: 0 }}>Notification Categories</h2>
-            <p style={{ margin: "6px 0 0", color: "#94a3b8" }}>
-              Choose which types of alerts can notify you when push notifications are enabled on this device.
-            </p>
-          </div>
-
-          {USER_NOTIFICATION_PREFERENCE_OPTIONS.map((option) => (
-            <div key={option.key} className="settings-switch-row">
-              <div>
-                <h3 style={{ margin: 0, fontSize: 16 }}>{option.title}</h3>
-                <p style={{ margin: "6px 0 0", color: "#94a3b8" }}>{option.description}</p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={notificationPreferences[option.key]}
-                aria-label={`Toggle ${option.title}`}
-                onClick={() =>
-                  setNotificationPreferences((current) => ({
-                    ...current,
-                    [option.key]: !current[option.key],
-                  }))
-                }
-                className={`settings-switch${notificationPreferences[option.key] ? " settings-switch-on" : ""}`}
-              >
-                <span className="settings-switch-knob" />
-              </button>
-            </div>
-          ))}
         </div>
 
         <div style={{ marginTop: 24 }}>
