@@ -25,6 +25,133 @@ const featureLinkStyle: CSSProperties = {
   border: "1px solid rgba(96, 165, 250, 0.18)",
 };
 
+type FeatureCard = {
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+  prefetch?: boolean;
+};
+
+const activeTools: FeatureCard[] = [
+  {
+    title: "Bug Reports",
+    description: "Review bug reports submitted from the live report-bug page.",
+    href: "/developer/bugs",
+    cta: "Open Bug Reports",
+  },
+  {
+    title: "Suggestions",
+    description: "Review submitted suggestions and feedback from the live suggestions page.",
+    href: "/developer/suggestions",
+    cta: "Open Suggestions",
+  },
+  {
+    title: "Dev Inbox",
+    description: "Open the developer inbox tools to send updates, then review and manage sent posts from there.",
+    href: "/developer/inbox",
+    cta: "Open Dev Inbox",
+  },
+  {
+    title: "Update History",
+    description: "Read the full plain-language release log from the start of the project up to the newest shipped build.",
+    href: "/developer/updates",
+    cta: "Open Update History",
+  },
+  {
+    title: "Initial Loader Test",
+    description: "Replay the app's full loading screen, then jump straight back here when it finishes.",
+    href: "/developer/loading-test",
+    cta: "Run Loader Test",
+  },
+];
+
+const onHoldFeatures: FeatureCard[] = [
+  {
+    title: "Messages",
+    description: "Open the direct-message feature from here too while we keep building on top of it.",
+    href: "/messages/direct",
+    cta: "Open Messages",
+    prefetch: false,
+  },
+  {
+    title: "Marketplace",
+    description: "Open the Marketplace feature from here for quick testing and iteration.",
+    href: "/marketplace",
+    cta: "Open Marketplace",
+    prefetch: false,
+  },
+  {
+    title: "ISO",
+    description: "Open the ISO board from here for quick testing and iteration.",
+    href: "/iso",
+    cta: "Open ISO",
+    prefetch: false,
+  },
+  {
+    title: "Events",
+    description: "Open the Events feature from here while it stays behind developer access.",
+    href: "/events",
+    cta: "Open Events",
+    prefetch: false,
+  },
+  {
+    title: "Forums",
+    description: "Open the Forums feature from here while it stays behind developer access.",
+    href: "/q-and-a",
+    cta: "Open Forums",
+    prefetch: false,
+  },
+  {
+    title: "Global Chat",
+    description: "Open the live chat page while we keep refining the feature.",
+    href: "/chat",
+    cta: "Open Chat",
+  },
+  {
+    title: "Admin Dashboard",
+    description: "Open the admin tools from here while the app sections stay behind developer access.",
+    href: "/admin",
+    cta: "Open Admin",
+    prefetch: false,
+  },
+];
+
+function FeatureSection({
+  title,
+  description,
+  items,
+}: {
+  title: string;
+  description: string;
+  items: FeatureCard[];
+}) {
+  return (
+    <section style={{ marginTop: 24 }}>
+      <h2 style={{ marginBottom: 8 }}>{title}</h2>
+      <p style={{ maxWidth: 760, marginTop: 0, color: "#94a3b8" }}>{description}</p>
+      <div
+        style={{
+          marginTop: 18,
+          display: "grid",
+          gap: 18,
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        }}
+      >
+        {items.map((item) => (
+          <div key={item.title} style={featureCardStyle}>
+            <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+            <p style={{ maxWidth: 320 }}>{item.description}</p>
+            <Link href={item.href} prefetch={item.prefetch} style={featureLinkStyle}>
+              {item.cta}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function DeveloperPage() {
   const cookieStore = await cookies();
   const accessCookie = cookieStore.get(DEVELOPER_COOKIE_NAME);
@@ -45,111 +172,17 @@ export default async function DeveloperPage() {
         Temporary home for in-progress features so the main screen stays clean while we keep building.
       </p>
 
-      <div
-        style={{
-          marginTop: 22,
-          display: "grid",
-          gap: 18,
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-        }}
-      >
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Dev Inbox</h2>
-          <p style={{ maxWidth: 320 }}>Open the developer inbox tools to send updates, then review and manage sent posts from there.</p>
-          <Link href="/developer/inbox" style={featureLinkStyle}>
-            Open Dev Inbox
-          </Link>
-        </div>
+      <FeatureSection
+        title="Active Tools"
+        description="Primary developer workflows and review queues."
+        items={activeTools}
+      />
 
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Initial Loader Test</h2>
-          <p style={{ maxWidth: 320 }}>Replay the app’s full loading screen, then jump straight back here when it finishes.</p>
-          <Link href="/developer/loading-test" style={featureLinkStyle}>
-            Run Loader Test
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Update History</h2>
-          <p style={{ maxWidth: 320 }}>Read the full plain-language release log from the start of the project up to the newest shipped build.</p>
-          <Link href="/developer/updates" style={featureLinkStyle}>
-            Open Update History
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Messages</h2>
-          <p style={{ maxWidth: 320 }}>Open the direct-message feature from here too while we keep building on top of it.</p>
-          <Link href="/messages/direct" prefetch={false} style={featureLinkStyle}>
-            Open Messages
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Marketplace</h2>
-          <p style={{ maxWidth: 320 }}>Open the Marketplace feature from here for quick testing and iteration.</p>
-          <Link href="/marketplace" prefetch={false} style={featureLinkStyle}>
-            Open Marketplace
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>ISO</h2>
-          <p style={{ maxWidth: 320 }}>Open the ISO board from here for quick testing and iteration.</p>
-          <Link href="/iso" prefetch={false} style={featureLinkStyle}>
-            Open ISO
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Events</h2>
-          <p style={{ maxWidth: 320 }}>Open the Events feature from here while it stays behind developer access.</p>
-          <Link href="/events" prefetch={false} style={featureLinkStyle}>
-            Open Events
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Forums</h2>
-          <p style={{ maxWidth: 320 }}>Open the Forums feature from here while it stays behind developer access.</p>
-          <Link href="/q-and-a" prefetch={false} style={featureLinkStyle}>
-            Open Forums
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Global Chat</h2>
-          <p style={{ maxWidth: 320 }}>Open the live chat page while we keep refining the feature.</p>
-          <Link href="/chat" style={featureLinkStyle}>
-            Open Chat
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Admin Dashboard</h2>
-          <p style={{ maxWidth: 320 }}>Open the admin tools from here while the app sections stay behind developer access.</p>
-          <Link href="/admin" prefetch={false} style={featureLinkStyle}>
-            Open Admin
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Bug Reports</h2>
-          <p style={{ maxWidth: 320 }}>Review bug reports submitted from the live report-bug page.</p>
-          <Link href="/developer/bugs" style={featureLinkStyle}>
-            Open Bug Reports
-          </Link>
-        </div>
-
-        <div style={featureCardStyle}>
-          <h2 style={{ marginTop: 0 }}>Suggestions</h2>
-          <p style={{ maxWidth: 320 }}>Review submitted suggestions and feedback from the live suggestions page.</p>
-          <Link href="/developer/suggestions" style={featureLinkStyle}>
-            Open Suggestions
-          </Link>
-        </div>
-
-      </div>
+      <FeatureSection
+        title="On Hold Features"
+        description="Feature areas that are still parked here for testing and iteration."
+        items={onHoldFeatures}
+      />
     </main>
   );
 }
