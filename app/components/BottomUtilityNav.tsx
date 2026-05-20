@@ -15,6 +15,10 @@ const linkStyle: CSSProperties = {
   fontSize: 12,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
+  background: "transparent",
+  border: "none",
+  padding: 0,
+  cursor: "pointer",
 };
 
 export default function BottomUtilityNav() {
@@ -39,11 +43,12 @@ export default function BottomUtilityNav() {
         flexWrap: "wrap",
       }}
     >
-      <ReportMisconductButton />
+      <ReportMisconductButton style={linkStyle} />
       <Link href="/report-bug" style={linkStyle}>Report Bug</Link>
       <Link href="/developer" style={linkStyle}>Dev</Link>
       {showAdminLink ? <Link href="/admin" style={linkStyle}>Admin</Link> : null}
       <Link href="/suggestions" style={linkStyle}>Suggestions</Link>
+      <Link href="/contact" style={linkStyle}>Contact</Link>
     </nav>
   );
 }

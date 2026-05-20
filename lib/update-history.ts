@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v412",
+    title: "Bottom Contact Link and Unified Utility Nav Style",
+    summary: "Added a new Contact page with direct text and call actions for immediate issues, added Contact to the bottom utility nav, and standardized the bottom utility button styling so Report Misconduct, Report Bug, Dev, Admin, Suggestions, and Contact all render consistently.",
+  },
+  {
     commit: "v411",
     title: "Admin Dispatch Options Synced",
     summary: "Updated the admin account edit form and save path so the emergency ride dispatch dropdown now uses the same real routing options and normalization as the main user Account Settings page instead of the old stale labels.",

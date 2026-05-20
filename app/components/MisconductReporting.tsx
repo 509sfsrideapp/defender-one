@@ -97,7 +97,7 @@ export function useMisconductReportMode() {
   };
 }
 
-export function ReportMisconductButton() {
+export function ReportMisconductButton({ style }: { style?: CSSProperties } = {}) {
   const pathname = usePathname();
   const { active, setActive } = useMisconductReportMode();
 
@@ -124,6 +124,7 @@ export function ReportMisconductButton() {
         border: "none",
         padding: 0,
         cursor: "pointer",
+        ...style,
       }}
       aria-pressed={active}
       title={
