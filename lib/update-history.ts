@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v415",
+    title: "Loader Test Moved to On Hold Section",
+    summary: "Moved the Initial Loader Test card out of the top developer tool group and into the bottom On Hold Features section so the main developer hub starts with the inbox and release-management tools first.",
+  },
+  {
     commit: "v414",
     title: "Developer Hub Reorganized",
     summary: "Reworked the developer page into a cleaner two-column layout, moved Bug Reports and Suggestions to the top, placed Dev Inbox and Update History directly underneath them, and pushed the on-hold feature links into a separate bottom section.",

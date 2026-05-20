@@ -58,15 +58,15 @@ const activeTools: FeatureCard[] = [
     href: "/developer/updates",
     cta: "Open Update History",
   },
+];
+
+const onHoldFeatures: FeatureCard[] = [
   {
     title: "Initial Loader Test",
     description: "Replay the app's full loading screen, then jump straight back here when it finishes.",
     href: "/developer/loading-test",
     cta: "Run Loader Test",
   },
-];
-
-const onHoldFeatures: FeatureCard[] = [
   {
     title: "Messages",
     description: "Open the direct-message feature from here too while we keep building on top of it.",
