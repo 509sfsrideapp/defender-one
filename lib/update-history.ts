@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v411",
+    title: "Admin Dispatch Options Synced",
+    summary: "Updated the admin account edit form and save path so the emergency ride dispatch dropdown now uses the same real routing options and normalization as the main user Account Settings page instead of the old stale labels.",
+  },
+  {
     commit: "v410",
     title: "Dispatch Routing Moved to Main Settings",
     summary: "Moved the emergency ride driver routing selector out of App Permissions and into the main Account Settings page directly above Readiness Alerts so dispatch behavior lives with the rest of the user's core account configuration.",

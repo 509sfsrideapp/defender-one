@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminEmail } from "../../../../lib/admin";
 import { buildHomeAddress } from "../../../../lib/home-address";
 import { normalizeOfficeValue } from "../../../../lib/offices";
+import { DEFAULT_RIDE_DISPATCH_MODE, normalizeRideDispatchMode } from "../../../../lib/ride-dispatch";
 import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear } from "../../../../lib/text-format";
 import { isValidUsername, normalizeUsername } from "../../../../lib/username";
 import { verifyAdminRequest } from "../../../../lib/server/admin-access";
@@ -242,7 +243,7 @@ export async function POST(request: NextRequest) {
         carPlate: formatVehiclePlate(updates.carPlate || ""),
         locationServicesEnabled: updates.locationServicesEnabled !== false,
         emergencyRideAddressConsent: Boolean(updates.emergencyRideAddressConsent),
-        emergencyRideDispatchMode: updates.emergencyRideDispatchMode?.trim() || "closest_available",
+        emergencyRideDispatchMode: normalizeRideDispatchMode(updates.emergencyRideDispatchMode?.trim() || DEFAULT_RIDE_DISPATCH_MODE),
         available: Boolean(updates.available),
         updatedAt: new Date(),
       };

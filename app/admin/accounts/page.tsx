@@ -8,6 +8,11 @@ import { auth, db } from "../../../lib/firebase";
 import { ADMIN_EMAIL, isAdminEmail } from "../../../lib/admin";
 import { splitHomeAddress } from "../../../lib/home-address";
 import { OFFICE_OPTIONS, normalizeOfficeValue } from "../../../lib/offices";
+import {
+  RIDE_DISPATCH_OPTIONS,
+  normalizeRideDispatchMode,
+  type EmergencyRideDispatchMode,
+} from "../../../lib/ride-dispatch";
 import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear } from "../../../lib/text-format";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -40,7 +45,7 @@ type AppUser = {
   driverPhotoUrl?: string;
   locationServicesEnabled?: boolean;
   emergencyRideAddressConsent?: boolean;
-  emergencyRideDispatchMode?: string;
+  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
 };
 
 type AdminEditDraft = {
@@ -66,7 +71,7 @@ type AdminEditDraft = {
   carPlate: string;
   locationServicesEnabled: boolean;
   emergencyRideAddressConsent: boolean;
-  emergencyRideDispatchMode: string;
+  emergencyRideDispatchMode: EmergencyRideDispatchMode;
   available: boolean;
 };
 
@@ -98,7 +103,7 @@ function buildEditDraftFromUser(appUser: AppUser): AdminEditDraft {
     carPlate: appUser.carPlate || "",
     locationServicesEnabled: appUser.locationServicesEnabled !== false,
     emergencyRideAddressConsent: Boolean(appUser.emergencyRideAddressConsent),
-    emergencyRideDispatchMode: appUser.emergencyRideDispatchMode || "closest_available",
+    emergencyRideDispatchMode: normalizeRideDispatchMode(appUser.emergencyRideDispatchMode),
     available: Boolean(appUser.available),
   };
 }
@@ -907,10 +912,22 @@ export default function AdminAccountsPage() {
                           <input value={editDraft.carPlate} onChange={(event) => handleEditDraftChange(appUser.id, "carPlate", event.target.value)} placeholder="License Plate" disabled={busy} />
                           <input value={editDraft.riderPhotoUrl} onChange={(event) => handleEditDraftChange(appUser.id, "riderPhotoUrl", event.target.value)} placeholder="Rider Photo URL" disabled={busy} />
                           <input value={editDraft.driverPhotoUrl} onChange={(event) => handleEditDraftChange(appUser.id, "driverPhotoUrl", event.target.value)} placeholder="Driver Photo URL" disabled={busy} />
-                          <select value={editDraft.emergencyRideDispatchMode} onChange={(event) => handleEditDraftChange(appUser.id, "emergencyRideDispatchMode", event.target.value)} disabled={busy}>
-                            <option value="closest_available">Emergency Dispatch: Closest Available</option>
-                            <option value="same_flight_first">Emergency Dispatch: Same Office First</option>
-                            <option value="manual_admin_review">Emergency Dispatch: Manual Admin Review</option>
+                          <select
+                            value={editDraft.emergencyRideDispatchMode}
+                            onChange={(event) =>
+                              handleEditDraftChange(
+                                appUser.id,
+                                "emergencyRideDispatchMode",
+                                normalizeRideDispatchMode(event.target.value)
+                              )
+                            }
+                            disabled={busy}
+                          >
+                            {RIDE_DISPATCH_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
                           </select>
                         </div>
 
