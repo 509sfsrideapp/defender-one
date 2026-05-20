@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v410",
+    title: "Dispatch Routing Moved to Main Settings",
+    summary: "Moved the emergency ride driver routing selector out of App Permissions and into the main Account Settings page directly above Readiness Alerts so dispatch behavior lives with the rest of the user's core account configuration.",
+  },
+  {
     commit: "v409",
     title: "Admin Account Clock In and Clock Out Controls",
     summary: "Added dedicated Clock In Driver and Clock Out Driver actions to each expanded user card in Admin Accounts, backed by a separate admin availability API action and audit log entries so admins can manually set driver availability without opening the full edit form.",

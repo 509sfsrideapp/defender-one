@@ -13,12 +13,6 @@ import {
 } from "../../../lib/notification-preferences";
 import { disablePushNotifications, enablePushNotifications } from "../../../lib/push-notifications";
 import { normalizeOfficeValue } from "../../../lib/offices";
-import {
-  DEFAULT_RIDE_DISPATCH_MODE,
-  type EmergencyRideDispatchMode,
-  RIDE_DISPATCH_OPTIONS,
-  normalizeRideDispatchMode,
-} from "../../../lib/ride-dispatch";
 import { getLatestActiveRideForRider } from "../../../lib/ride-state";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
@@ -46,7 +40,6 @@ type UserProfile = {
   riderPhotoUrl?: string;
   driverPhotoUrl?: string;
   emergencyRideAddressConsent?: boolean;
-  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
   locationServicesEnabled?: boolean;
   notificationPreferences?: Partial<UserNotificationPreferences> | null;
 };
@@ -60,8 +53,6 @@ export default function AccountPermissionsPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [emergencyRideAddressConsent, setEmergencyRideAddressConsent] = useState(false);
-  const [emergencyRideDispatchMode, setEmergencyRideDispatchMode] =
-    useState<EmergencyRideDispatchMode>(DEFAULT_RIDE_DISPATCH_MODE);
   const [updatingNotifications, setUpdatingNotifications] = useState(false);
   const [updatingLocationServices, setUpdatingLocationServices] = useState(false);
   const [promptingLocationServices, setPromptingLocationServices] = useState(false);
@@ -104,7 +95,6 @@ export default function AccountPermissionsPage() {
 
         setProfile(data ? { ...data, flight: normalizedOffice } : null);
         setEmergencyRideAddressConsent(Boolean(data?.emergencyRideAddressConsent));
-        setEmergencyRideDispatchMode(normalizeRideDispatchMode(data?.emergencyRideDispatchMode));
         setLocationServicesEnabled(data?.locationServicesEnabled !== false);
         setNotificationPreferences(normalizeUserNotificationPreferences(data?.notificationPreferences));
 
@@ -133,7 +123,6 @@ export default function AccountPermissionsPage() {
       setStatusMessage("Saving app permissions...");
       await updateDoc(doc(db, "users", user.uid), {
         emergencyRideAddressConsent,
-        emergencyRideDispatchMode,
         notificationPreferences,
       });
       setStatusMessage("App permissions updated.");
@@ -504,32 +493,6 @@ export default function AccountPermissionsPage() {
               </button>
             </div>
           ))}
-        </div>
-
-        <div style={{ marginTop: 22 }}>
-          <h2 style={{ marginBottom: 8 }}>Emergency Ride Driver Routing</h2>
-          <p style={{ marginTop: 0, color: "#94a3b8" }}>
-            Choose who gets your emergency ride request first. If the first group does not accept within 5 minutes,
-            the request expands to the rest of the active driver pool.
-          </p>
-
-          <label style={{ display: "grid", gap: 8, maxWidth: 520 }}>
-            <span>Initial driver audience</span>
-            <select
-              value={emergencyRideDispatchMode}
-              onChange={(event) => setEmergencyRideDispatchMode(normalizeRideDispatchMode(event.target.value))}
-            >
-              {RIDE_DISPATCH_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <p style={{ marginTop: 10, color: "#94a3b8" }}>
-            {RIDE_DISPATCH_OPTIONS.find((option) => option.value === emergencyRideDispatchMode)?.description}
-          </p>
         </div>
 
         <div style={{ marginTop: 24 }}>

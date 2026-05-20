@@ -10,6 +10,12 @@ import { auth, db } from "../../lib/firebase";
 import { isAdminEmail } from "../../lib/admin";
 import { buildHomeAddress, splitHomeAddress } from "../../lib/home-address";
 import { OFFICE_OPTIONS, normalizeOfficeValue } from "../../lib/offices";
+import {
+  DEFAULT_RIDE_DISPATCH_MODE,
+  RIDE_DISPATCH_OPTIONS,
+  normalizeRideDispatchMode,
+  type EmergencyRideDispatchMode,
+} from "../../lib/ride-dispatch";
 import { formatAddressPart, formatStateCode, formatVehicleField, formatVehiclePlate, normalizeVehicleYear, shouldClearCorruptedVehicleYear } from "../../lib/text-format";
 import { useActiveRides } from "../../lib/use-active-rides";
 import { EmailAuthProvider, onAuthStateChanged, reauthenticateWithCredential, User } from "firebase/auth";
@@ -42,6 +48,7 @@ type UserProfile = {
   carPlate?: string;
   driverPhotoUrl?: string;
   emergencyRideAddressConsent?: boolean;
+  emergencyRideDispatchMode?: EmergencyRideDispatchMode;
 };
 
 export default function AccountPage() {
@@ -79,6 +86,7 @@ export default function AccountPage() {
     carModel: "",
     carColor: "",
     carPlate: "",
+    emergencyRideDispatchMode: DEFAULT_RIDE_DISPATCH_MODE as EmergencyRideDispatchMode,
   });
   const [deleteForm, setDeleteForm] = useState({
     vehicleYear: "",
@@ -149,6 +157,7 @@ export default function AccountPage() {
           carModel: data?.carModel || "",
           carColor: data?.carColor || "",
           carPlate: data?.carPlate || "",
+          emergencyRideDispatchMode: normalizeRideDispatchMode(data?.emergencyRideDispatchMode),
         });
         setOriginalUsername(data?.username || "");
 
@@ -331,6 +340,7 @@ export default function AccountPage() {
           carPlate: normalizedCarPlate,
           driverPhotoUrl: profilePhotoUrl,
           available: false,
+          emergencyRideDispatchMode: normalizeRideDispatchMode(form.emergencyRideDispatchMode),
           updatedAt: new Date(),
         },
         { merge: true }
@@ -615,6 +625,28 @@ export default function AccountPage() {
         <input value={form.carModel} onChange={(e) => handleChange("carModel", e.target.value)} placeholder="Car model (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carColor} onChange={(e) => handleChange("carColor", e.target.value)} placeholder="Car color (optional)" style={{ marginBottom: 10 }} />
         <input value={form.carPlate} onChange={(e) => handleChange("carPlate", e.target.value)} placeholder="License plate (optional)" style={{ marginBottom: 10 }} />
+
+        <h2 style={{ marginTop: 24 }}>Emergency Ride Driver Routing</h2>
+        <p style={{ marginTop: 0, marginBottom: 10, color: "#94a3b8" }}>
+          Choose who receives your emergency ride request first. If the first group does not accept within 5 minutes,
+          the request automatically expands to the rest of the active driver pool.
+        </p>
+        <label style={{ display: "grid", gap: 8, maxWidth: 520, marginBottom: 18 }}>
+          <span>Initial driver audience</span>
+          <select
+            value={form.emergencyRideDispatchMode}
+            onChange={(e) => handleChange("emergencyRideDispatchMode", normalizeRideDispatchMode(e.target.value))}
+          >
+            {RIDE_DISPATCH_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span style={{ color: "#94a3b8", fontSize: 13 }}>
+            {RIDE_DISPATCH_OPTIONS.find((option) => option.value === form.emergencyRideDispatchMode)?.description}
+          </span>
+        </label>
 
         <h2 style={{ marginTop: 24 }}>Readiness Alerts</h2>
         <div
