@@ -7,6 +7,11 @@ export type UpdateHistoryEntry = {
 // Newest first. Add each new shipped update to the top of this list.
 export const UPDATE_HISTORY: UpdateHistoryEntry[] = [
   {
+    commit: "v413",
+    title: "Removed Live Misconduct Entry and Added Contact Phone Fields",
+    summary: "Removed the visible Report Misconduct entry from the live bottom utility nav while keeping the underlying framework in place, and updated bug reports and suggestions so opting into phone contact now reveals a dedicated phone number input that gets submitted with the report.",
+  },
+  {
     commit: "v412",
     title: "Bottom Contact Link and Unified Utility Nav Style",
     summary: "Added a new Contact page with direct text and call actions for immediate issues, added Contact to the bottom utility nav, and standardized the bottom utility button styling so Report Misconduct, Report Bug, Dev, Admin, Suggestions, and Contact all render consistently.",

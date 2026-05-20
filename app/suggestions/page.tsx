@@ -21,6 +21,7 @@ export default function SuggestionsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [contactConsent, setContactConsent] = useState(false);
+  const [contactPhone, setContactPhone] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
@@ -48,6 +49,11 @@ export default function SuggestionsPage() {
       return;
     }
 
+    if (contactConsent && !contactPhone.trim()) {
+      setStatusMessage("Enter a phone number if you want to be contacted about this suggestion.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       setStatusMessage("Submitting suggestion...");
@@ -66,7 +72,7 @@ export default function SuggestionsPage() {
         contactConsentByPhone: contactConsent,
         reporterUid: user.uid,
         reporterName: fullName,
-        reporterPhone: profile?.phone || "",
+        reporterPhone: contactConsent ? contactPhone.trim() : "",
         reporterEmail: user.email || "",
         createdAt: serverTimestamp(),
       });
@@ -74,6 +80,7 @@ export default function SuggestionsPage() {
       setTitle("");
       setDescription("");
       setContactConsent(false);
+      setContactPhone("");
       setStatusMessage("Suggestion submitted.");
     } catch (error) {
       console.error(error);
@@ -155,13 +162,36 @@ export default function SuggestionsPage() {
           <input
             type="checkbox"
             checked={contactConsent}
-            onChange={(event) => setContactConsent(event.target.checked)}
+            onChange={(event) => {
+              const nextValue = event.target.checked;
+              setContactConsent(nextValue);
+              if (!nextValue) {
+                setContactPhone("");
+              }
+            }}
             style={{ marginTop: 3 }}
           />
           <span>
             I consent to being contacted by phone if further information is needed about this suggestion.
           </span>
         </label>
+
+        {contactConsent ? (
+          <input
+            value={contactPhone}
+            onChange={(event) => setContactPhone(event.target.value)}
+            placeholder="Phone number"
+            style={{
+              width: "100%",
+              marginTop: 12,
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: "rgba(15, 23, 42, 0.9)",
+              color: "white",
+              border: "1px solid rgba(148, 163, 184, 0.2)",
+            }}
+          />
+        ) : null}
 
         <button
           type="button"

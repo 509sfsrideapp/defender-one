@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import { isAdminEmail } from "../../lib/admin";
-import { ReportMisconductButton } from "./MisconductReporting";
 
 const linkStyle: CSSProperties = {
   display: "inline-block",
@@ -43,7 +42,6 @@ export default function BottomUtilityNav() {
         flexWrap: "wrap",
       }}
     >
-      <ReportMisconductButton style={linkStyle} />
       <Link href="/report-bug" style={linkStyle}>Report Bug</Link>
       <Link href="/developer" style={linkStyle}>Dev</Link>
       {showAdminLink ? <Link href="/admin" style={linkStyle}>Admin</Link> : null}
